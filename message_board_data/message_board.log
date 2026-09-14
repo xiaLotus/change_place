@@ -1,0 +1,274 @@
+2026-08-02 20:56:53  [INFO]  查詢未讀 [K18251]：{'acceptance': 0, 'purchase': 0, 'general': 3, 'budget': 0, 'urgent': 0}（合計 3）
+2026-08-02 21:15:59  [INFO]  查詢未讀 [K18251]：{'budget': 0, 'purchase': 0, 'general': 3, 'acceptance': 0, 'urgent': 0}（合計 3）
+2026-08-02 21:15:59  [INFO]  取得已讀記錄 [K18251]：{'purchase': 0, 'general': 1, 'acceptance': 0, 'budget': 0, 'urgent': 0}
+2026-08-02 21:15:59  [INFO]  取得訊息 [general]：共 4 則
+2026-08-02 21:16:00  [INFO]  標記已讀 [K18251] [general] → #4（原 #1）
+2026-08-02 21:16:00  [INFO]  標記已讀 [K18251] [general] → #4（原 #4）
+2026-08-02 21:16:01  [INFO]  Emoji ✅ [general] msg_id=2（作者：王柏翰）→ 共 1 次
+2026-08-02 21:16:02  [INFO]  取得訊息 [general]：共 4 則
+2026-08-02 21:16:03  [INFO]  取得訊息 [purchase]：共 0 則
+2026-08-02 21:16:03  [INFO]  取得訊息 [purchase]：共 0 則
+2026-08-02 21:16:03  [INFO]  取得訊息 [acceptance]：共 0 則
+2026-08-02 21:16:03  [INFO]  取得訊息 [acceptance]：共 0 則
+2026-08-02 21:16:03  [INFO]  取得訊息 [budget]：共 0 則
+2026-08-02 21:16:03  [INFO]  取得訊息 [budget]：共 0 則
+2026-08-02 21:16:04  [INFO]  取得訊息 [urgent]：共 0 則
+2026-08-02 21:16:04  [INFO]  取得訊息 [urgent]：共 0 則
+2026-08-02 21:16:04  [INFO]  取得訊息 [general]：共 4 則
+2026-08-02 21:16:04  [INFO]  取得訊息 [general]：共 4 則
+2026-08-02 21:16:05  [INFO]  取得訊息 [general]：共 4 則
+2026-08-02 21:16:07  [INFO]  查詢未讀 [K18251]：{'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0, 'urgent': 0}（合計 0）
+2026-08-02 21:16:10  [INFO]  查詢未讀 [K18251]：{'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0, 'urgent': 0}（合計 0）
+2026-08-02 21:17:40  [INFO]  查詢未讀 [K18251]：{'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0, 'urgent': 0}（合計 0）
+2026-08-15 09:06:12  [INFO]  查詢未讀 [K18251]：{'general': 0, 'acceptance': 0, 'budget': 0, 'purchase': 0, 'urgent': 0}（合計 0）
+2026-08-15 09:06:43  [INFO]  查詢未讀 [K18251]：{'general': 0, 'acceptance': 0, 'budget': 0, 'purchase': 0, 'urgent': 0}（合計 0）
+2026-09-06 19:00:12  [INFO]  查詢未讀 [K18251]：{'purchase': 0, 'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0}（合計 0）
+2026-09-08 18:40:21  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 18:41:22  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 18:42:22  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 18:43:22  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 18:44:22  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 18:45:22  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 18:46:22  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 18:47:22  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 18:48:23  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 18:49:24  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 18:50:25  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 18:51:26  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 18:52:27  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 18:53:28  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 18:54:29  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 18:55:30  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 18:56:31  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 18:57:32  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 18:58:33  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 18:59:34  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:00:35  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:01:36  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:02:37  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:03:38  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:04:39  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:05:40  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:06:41  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:07:42  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:08:43  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:09:44  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:10:45  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:11:46  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:12:47  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:13:48  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:14:49  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:15:50  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:16:51  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:17:52  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:18:53  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:19:54  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:20:55  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:21:56  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:22:57  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:23:58  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:24:59  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:26:00  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:27:01  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:28:02  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:29:03  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:30:04  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:31:05  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:32:06  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:32:39  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:33:22  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:34:23  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:35:24  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:36:25  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:37:26  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:38:27  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:39:28  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:40:29  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:41:30  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:42:31  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:43:32  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:44:33  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:45:34  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:46:35  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:47:36  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'general': 0, 'purchase': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:48:37  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'general': 0, 'purchase': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:49:38  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'general': 0, 'purchase': 0, 'acceptance': 0}（合計 0）
+2026-09-08 19:50:35  [INFO]  查詢未讀 [K18251]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-08 19:50:38  [INFO]  查詢未讀 [K18251]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-08 19:51:38  [INFO]  查詢未讀 [K18251]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-08 19:51:44  [INFO]  查詢未讀 [K18251]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-08 19:52:50  [INFO]  查詢未讀 [K18251]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-08 19:53:23  [INFO]  查詢未讀 [K18251]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-08 19:54:22  [INFO]  查詢未讀 [K18251]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-08 20:08:45  [INFO]  查詢未讀 [K18251]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-08 20:09:11  [INFO]  查詢未讀 [K18251]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-08 20:09:27  [INFO]  查詢未讀 [K18251]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-08 20:10:01  [INFO]  查詢未讀 [K18251]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-08 20:11:01  [INFO]  查詢未讀 [K18251]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-08 20:12:02  [INFO]  查詢未讀 [K18251]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-08 20:13:02  [INFO]  查詢未讀 [K18251]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-08 20:14:02  [INFO]  查詢未讀 [K18251]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-08 20:15:02  [INFO]  查詢未讀 [K18251]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-08 20:16:02  [INFO]  查詢未讀 [K18251]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-08 20:17:02  [INFO]  查詢未讀 [K18251]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-08 20:18:01  [INFO]  查詢未讀 [K18251]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-08 20:25:10  [INFO]  查詢未讀 [K18251]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-10 19:39:39  [INFO]  查詢未讀 [K18251]：{'general': 0, 'acceptance': 0, 'budget': 0, 'purchase': 0, 'urgent': 0}（合計 0）
+2026-09-10 19:40:39  [INFO]  查詢未讀 [K18251]：{'general': 0, 'acceptance': 0, 'budget': 0, 'purchase': 0, 'urgent': 0}（合計 0）
+2026-09-10 19:41:39  [INFO]  查詢未讀 [K18251]：{'general': 0, 'acceptance': 0, 'budget': 0, 'purchase': 0, 'urgent': 0}（合計 0）
+2026-09-10 19:42:39  [INFO]  查詢未讀 [K18251]：{'general': 0, 'acceptance': 0, 'budget': 0, 'purchase': 0, 'urgent': 0}（合計 0）
+2026-09-10 19:43:39  [INFO]  查詢未讀 [K18251]：{'general': 0, 'acceptance': 0, 'budget': 0, 'purchase': 0, 'urgent': 0}（合計 0）
+2026-09-10 19:44:39  [INFO]  查詢未讀 [K18251]：{'general': 0, 'acceptance': 0, 'budget': 0, 'purchase': 0, 'urgent': 0}（合計 0）
+2026-09-10 19:45:39  [INFO]  查詢未讀 [K18251]：{'general': 0, 'acceptance': 0, 'budget': 0, 'purchase': 0, 'urgent': 0}（合計 0）
+2026-09-10 19:46:39  [INFO]  查詢未讀 [K18251]：{'general': 0, 'acceptance': 0, 'budget': 0, 'purchase': 0, 'urgent': 0}（合計 0）
+2026-09-10 19:47:40  [INFO]  查詢未讀 [K18251]：{'general': 0, 'acceptance': 0, 'budget': 0, 'purchase': 0, 'urgent': 0}（合計 0）
+2026-09-10 19:48:41  [INFO]  查詢未讀 [K18251]：{'general': 0, 'acceptance': 0, 'budget': 0, 'purchase': 0, 'urgent': 0}（合計 0）
+2026-09-10 19:49:42  [INFO]  查詢未讀 [K18251]：{'general': 0, 'acceptance': 0, 'budget': 0, 'purchase': 0, 'urgent': 0}（合計 0）
+2026-09-10 19:50:43  [INFO]  查詢未讀 [K18251]：{'general': 0, 'acceptance': 0, 'budget': 0, 'purchase': 0, 'urgent': 0}（合計 0）
+2026-09-10 19:51:44  [INFO]  查詢未讀 [K18251]：{'general': 0, 'acceptance': 0, 'budget': 0, 'purchase': 0, 'urgent': 0}（合計 0）
+2026-09-10 19:52:45  [INFO]  查詢未讀 [K18251]：{'general': 0, 'acceptance': 0, 'budget': 0, 'purchase': 0, 'urgent': 0}（合計 0）
+2026-09-10 19:53:46  [INFO]  查詢未讀 [K18251]：{'general': 0, 'acceptance': 0, 'budget': 0, 'purchase': 0, 'urgent': 0}（合計 0）
+2026-09-10 19:54:47  [INFO]  查詢未讀 [K18251]：{'general': 0, 'acceptance': 0, 'budget': 0, 'purchase': 0, 'urgent': 0}（合計 0）
+2026-09-10 19:55:40  [INFO]  查詢未讀 [K18251]：{'general': 0, 'acceptance': 0, 'budget': 0, 'purchase': 0, 'urgent': 0}（合計 0）
+2026-09-10 19:56:40  [INFO]  查詢未讀 [K18251]：{'general': 0, 'acceptance': 0, 'budget': 0, 'purchase': 0, 'urgent': 0}（合計 0）
+2026-09-10 19:57:40  [INFO]  查詢未讀 [K18251]：{'general': 0, 'acceptance': 0, 'budget': 0, 'purchase': 0, 'urgent': 0}（合計 0）
+2026-09-10 19:58:40  [INFO]  查詢未讀 [K18251]：{'general': 0, 'acceptance': 0, 'budget': 0, 'purchase': 0, 'urgent': 0}（合計 0）
+2026-09-10 19:59:08  [INFO]  查詢未讀 [K18251]：{'general': 0, 'acceptance': 0, 'budget': 0, 'purchase': 0, 'urgent': 0}（合計 0）
+2026-09-10 20:00:08  [INFO]  查詢未讀 [K18251]：{'general': 0, 'acceptance': 0, 'budget': 0, 'purchase': 0, 'urgent': 0}（合計 0）
+2026-09-10 20:01:08  [INFO]  查詢未讀 [K18251]：{'general': 0, 'acceptance': 0, 'budget': 0, 'purchase': 0, 'urgent': 0}（合計 0）
+2026-09-14 19:15:52  [INFO]  初始化頻道檔案：message_board_data\channels\KH_purchase.json
+2026-09-14 19:15:52  [INFO]  初始化頻道檔案：message_board_data\channels\KH_budget.json
+2026-09-14 19:15:52  [INFO]  初始化頻道檔案：message_board_data\channels\KH_acceptance.json
+2026-09-14 19:15:52  [INFO]  初始化頻道檔案：message_board_data\channels\KH_general.json
+2026-09-14 19:15:52  [INFO]  初始化頻道檔案：message_board_data\channels\KH_urgent.json
+2026-09-14 19:19:21  [INFO]  查詢未讀 [K18251]：{'budget': 0, 'purchase': 0, 'urgent': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-14 19:20:21  [INFO]  查詢未讀 [K18251]：{'budget': 0, 'purchase': 0, 'urgent': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-14 19:21:21  [INFO]  查詢未讀 [K18251]：{'budget': 0, 'purchase': 0, 'urgent': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-14 19:22:04  [INFO]  查詢未讀 [K18251]：{'budget': 0, 'purchase': 0, 'urgent': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-14 19:22:32  [INFO]  查詢未讀 [K21423]：{'budget': 0, 'purchase': 0, 'urgent': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-14 19:22:58  [INFO]  查詢未讀 [K21423]：{'budget': 0, 'purchase': 0, 'urgent': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-14 19:23:17  [INFO]  查詢未讀 [K21423]：{'budget': 0, 'purchase': 0, 'urgent': 0, 'general': 0, 'acceptance': 0}（合計 0）
+2026-09-14 19:27:22  [INFO]  查詢未讀 [G9743]：{'urgent': 0, 'general': 0, 'acceptance': 0, 'purchase': 0, 'budget': 0}（合計 0）
+2026-09-14 19:28:23  [INFO]  查詢未讀 [G9743]：{'urgent': 0, 'general': 0, 'acceptance': 0, 'purchase': 0, 'budget': 0}（合計 0）
+2026-09-14 19:29:23  [INFO]  查詢未讀 [G9743]：{'urgent': 0, 'general': 0, 'acceptance': 0, 'purchase': 0, 'budget': 0}（合計 0）
+2026-09-14 19:30:23  [INFO]  查詢未讀 [G9743]：{'urgent': 0, 'general': 0, 'acceptance': 0, 'purchase': 0, 'budget': 0}（合計 0）
+2026-09-14 19:31:23  [INFO]  查詢未讀 [G9743]：{'urgent': 0, 'general': 0, 'acceptance': 0, 'purchase': 0, 'budget': 0}（合計 0）
+2026-09-14 19:32:23  [INFO]  查詢未讀 [G9743]：{'urgent': 0, 'general': 0, 'acceptance': 0, 'purchase': 0, 'budget': 0}（合計 0）
+2026-09-14 19:33:23  [INFO]  查詢未讀 [G9743]：{'urgent': 0, 'general': 0, 'acceptance': 0, 'purchase': 0, 'budget': 0}（合計 0）
+2026-09-14 19:34:23  [INFO]  查詢未讀 [G9743]：{'urgent': 0, 'general': 0, 'acceptance': 0, 'purchase': 0, 'budget': 0}（合計 0）
+2026-09-14 19:35:24  [INFO]  查詢未讀 [G9743]：{'urgent': 0, 'general': 0, 'acceptance': 0, 'purchase': 0, 'budget': 0}（合計 0）
+2026-09-14 19:36:25  [INFO]  查詢未讀 [G9743]：{'urgent': 0, 'general': 0, 'acceptance': 0, 'purchase': 0, 'budget': 0}（合計 0）
+2026-09-14 19:36:34  [INFO]  查詢未讀 [G9743]：{'urgent': 0, 'general': 0, 'acceptance': 0, 'purchase': 0, 'budget': 0}（合計 0）
+2026-09-14 19:36:47  [INFO]  查詢未讀 [G9743]：{'urgent': 0, 'general': 0, 'acceptance': 0, 'purchase': 0, 'budget': 0}（合計 0）
+2026-09-14 19:37:01  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'urgent': 0, 'general': 0, 'purchase': 0, 'acceptance': 0}（合計 0）
+2026-09-14 19:38:02  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'urgent': 0, 'general': 0, 'purchase': 0, 'acceptance': 0}（合計 0）
+2026-09-14 19:38:53  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'general': 0, 'urgent': 0, 'acceptance': 0, 'purchase': 0}（合計 0）
+2026-09-14 19:38:56  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'general': 0, 'urgent': 0, 'acceptance': 0, 'purchase': 0}（合計 0）
+2026-09-14 19:39:03  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'general': 0, 'urgent': 0, 'acceptance': 0, 'purchase': 0}（合計 0）
+2026-09-14 19:40:03  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'general': 0, 'urgent': 0, 'acceptance': 0, 'purchase': 0}（合計 0）
+2026-09-14 19:40:51  [INFO]  查詢未讀 [G9743]：{'purchase': 0, 'acceptance': 0, 'urgent': 0, 'budget': 0, 'general': 0}（合計 0）
+2026-09-14 19:41:30  [INFO]  查詢未讀 [G9743]：{'purchase': 0, 'acceptance': 0, 'urgent': 0, 'budget': 0, 'general': 0}（合計 0）
+2026-09-14 19:41:47  [INFO]  查詢未讀 [G9743]：{'purchase': 0, 'acceptance': 0, 'urgent': 0, 'budget': 0, 'general': 0}（合計 0）
+2026-09-14 19:42:29  [INFO]  查詢未讀 [G9743]：{'purchase': 0, 'acceptance': 0, 'urgent': 0, 'budget': 0, 'general': 0}（合計 0）
+2026-09-14 19:42:32  [INFO]  取得已讀記錄 [G9743]：{'purchase': 0, 'acceptance': 0, 'urgent': 0, 'budget': 0, 'general': 0}
+2026-09-14 19:42:32  [INFO]  取得訊息 [general]：共 0 則
+2026-09-14 19:42:35  [INFO]  取得訊息 [general]：共 0 則
+2026-09-14 19:42:37  [INFO]  查詢未讀 [G9743]：{'purchase': 0, 'acceptance': 0, 'urgent': 0, 'budget': 0, 'general': 0}（合計 0）
+2026-09-14 19:42:42  [INFO]  取得已讀記錄 [G9743]：{'purchase': 0, 'acceptance': 0, 'urgent': 0, 'budget': 0, 'general': 0}
+2026-09-14 19:42:42  [INFO]  取得訊息 [general]：共 0 則
+2026-09-14 19:42:44  [INFO]  新訊息 #1 [general] by 測試中：「41524」tag= replyTo=None
+2026-09-14 19:42:44  [INFO]  標記已讀 [G9743] [general] → #1（原 #0）
+2026-09-14 19:42:44  [INFO]  標記已讀 [G9743] [general] → #1（原 #1）
+2026-09-14 19:42:45  [INFO]  取得訊息 [general]：共 1 則
+2026-09-14 19:42:48  [INFO]  取得訊息 [general]：共 1 則
+2026-09-14 19:42:50  [INFO]  查詢未讀 [G9743]：{'purchase': 0, 'acceptance': 0, 'urgent': 0, 'budget': 0, 'general': 0}（合計 0）
+2026-09-14 19:43:50  [INFO]  查詢未讀 [G9743]：{'purchase': 0, 'acceptance': 0, 'urgent': 0, 'budget': 0, 'general': 0}（合計 0）
+2026-09-14 19:44:50  [INFO]  查詢未讀 [G9743]：{'purchase': 0, 'acceptance': 0, 'urgent': 0, 'budget': 0, 'general': 0}（合計 0）
+2026-09-14 19:45:50  [INFO]  查詢未讀 [G9743]：{'purchase': 0, 'acceptance': 0, 'urgent': 0, 'budget': 0, 'general': 0}（合計 0）
+2026-09-14 19:46:51  [INFO]  查詢未讀 [G9743]：{'purchase': 0, 'acceptance': 0, 'urgent': 0, 'budget': 0, 'general': 0}（合計 0）
+2026-09-14 19:47:20  [INFO]  查詢未讀 [G9743]：{'purchase': 0, 'acceptance': 0, 'urgent': 0, 'budget': 0, 'general': 0}（合計 0）
+2026-09-14 19:56:59  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0, 'urgent': 0}（合計 0）
+2026-09-14 19:57:59  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0, 'urgent': 0}（合計 0）
+2026-09-14 19:58:08  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0, 'urgent': 0}（合計 0）
+2026-09-14 19:59:08  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0, 'urgent': 0}（合計 0）
+2026-09-14 19:59:36  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0, 'urgent': 0}（合計 0）
+2026-09-14 19:59:49  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0, 'urgent': 0}（合計 0）
+2026-09-14 20:00:07  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'purchase': 0, 'general': 0, 'acceptance': 0, 'urgent': 0}（合計 0）
+2026-09-14 20:00:50  [INFO]  查詢未讀 [G9743]：{'general': 0, 'acceptance': 0, 'purchase': 0, 'budget': 0, 'urgent': 0}（合計 0）
+2026-09-14 20:01:51  [INFO]  查詢未讀 [G9743]：{'general': 0, 'acceptance': 0, 'purchase': 0, 'budget': 0, 'urgent': 0}（合計 0）
+2026-09-14 20:02:51  [INFO]  查詢未讀 [G9743]：{'general': 0, 'acceptance': 0, 'purchase': 0, 'budget': 0, 'urgent': 0}（合計 0）
+2026-09-14 20:03:51  [INFO]  查詢未讀 [G9743]：{'general': 0, 'acceptance': 0, 'purchase': 0, 'budget': 0, 'urgent': 0}（合計 0）
+2026-09-14 20:04:51  [INFO]  查詢未讀 [G9743]：{'general': 0, 'acceptance': 0, 'purchase': 0, 'budget': 0, 'urgent': 0}（合計 0）
+2026-09-14 20:05:51  [INFO]  查詢未讀 [G9743]：{'general': 0, 'acceptance': 0, 'purchase': 0, 'budget': 0, 'urgent': 0}（合計 0）
+2026-09-14 20:06:29  [INFO]  查詢未讀 [G9743]：{'general': 0, 'acceptance': 0, 'purchase': 0, 'budget': 0, 'urgent': 0}（合計 0）
+2026-09-14 20:07:29  [INFO]  查詢未讀 [G9743]：{'general': 0, 'acceptance': 0, 'purchase': 0, 'budget': 0, 'urgent': 0}（合計 0）
+2026-09-14 20:08:29  [INFO]  查詢未讀 [G9743]：{'general': 0, 'acceptance': 0, 'purchase': 0, 'budget': 0, 'urgent': 0}（合計 0）
+2026-09-14 20:09:29  [INFO]  查詢未讀 [G9743]：{'general': 0, 'acceptance': 0, 'purchase': 0, 'budget': 0, 'urgent': 0}（合計 0）
+2026-09-14 20:10:29  [INFO]  查詢未讀 [G9743]：{'general': 0, 'acceptance': 0, 'purchase': 0, 'budget': 0, 'urgent': 0}（合計 0）
+2026-09-14 20:11:26  [INFO]  查詢未讀 [G9743]：{'general': 0, 'acceptance': 0, 'purchase': 0, 'budget': 0, 'urgent': 0}（合計 0）
+2026-09-14 20:11:34  [INFO]  查詢未讀 [G9743]：{'general': 0, 'acceptance': 0, 'purchase': 0, 'budget': 0, 'urgent': 0}（合計 0）
+2026-09-14 20:33:03  [INFO]  查詢未讀 [G9743]：{'general': 0, 'acceptance': 0, 'purchase': 0, 'budget': 0, 'urgent': 0}（合計 0）
+2026-09-14 20:33:05  [INFO]  查詢未讀 [G9743]：{'general': 0, 'acceptance': 0, 'purchase': 0, 'budget': 0, 'urgent': 0}（合計 0）
+2026-09-14 20:33:23  [INFO]  查詢未讀 [G9743]：{'general': 0, 'acceptance': 0, 'purchase': 0, 'budget': 0, 'urgent': 0}（合計 0）
+2026-09-14 20:33:30  [INFO]  查詢未讀 [G9743]：{'general': 0, 'acceptance': 0, 'purchase': 0, 'budget': 0, 'urgent': 0}（合計 0）
+2026-09-14 20:34:30  [INFO]  查詢未讀 [G9743]：{'general': 0, 'acceptance': 0, 'purchase': 0, 'budget': 0, 'urgent': 0}（合計 0）
+2026-09-14 20:34:51  [INFO]  查詢未讀 [G9743]：{'acceptance': 0, 'budget': 0, 'urgent': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-14 20:35:51  [INFO]  查詢未讀 [G9743]：{'acceptance': 0, 'budget': 0, 'urgent': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-14 20:36:14  [INFO]  查詢未讀 [G9743]：{'acceptance': 0, 'budget': 0, 'purchase': 0, 'urgent': 0, 'general': 0}（合計 0）
+2026-09-14 20:37:14  [INFO]  查詢未讀 [G9743]：{'acceptance': 0, 'budget': 0, 'purchase': 0, 'urgent': 0, 'general': 0}（合計 0）
+2026-09-14 20:38:14  [INFO]  查詢未讀 [G9743]：{'acceptance': 0, 'budget': 0, 'purchase': 0, 'urgent': 0, 'general': 0}（合計 0）
+2026-09-14 20:39:14  [INFO]  查詢未讀 [G9743]：{'acceptance': 0, 'budget': 0, 'purchase': 0, 'urgent': 0, 'general': 0}（合計 0）
+2026-09-14 20:40:14  [INFO]  查詢未讀 [G9743]：{'acceptance': 0, 'budget': 0, 'purchase': 0, 'urgent': 0, 'general': 0}（合計 0）
+2026-09-14 20:41:14  [INFO]  查詢未讀 [G9743]：{'acceptance': 0, 'budget': 0, 'purchase': 0, 'urgent': 0, 'general': 0}（合計 0）
+2026-09-14 20:41:44  [INFO]  查詢未讀 [G9743]：{'urgent': 0, 'acceptance': 0, 'purchase': 0, 'budget': 0, 'general': 0}（合計 0）
+2026-09-14 20:57:17  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-14 20:57:40  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-14 20:59:18  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-14 21:00:18  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-14 21:01:18  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-14 21:02:18  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-14 21:03:18  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-14 21:04:18  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-14 21:05:18  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-14 21:06:18  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-14 21:07:19  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-14 21:08:18  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-14 21:09:19  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-14 21:10:20  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-14 21:11:21  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-14 21:12:22  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-14 21:13:23  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-14 21:14:24  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-14 21:15:25  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-14 21:16:26  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-14 21:17:27  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-14 21:18:28  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-14 21:19:29  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-14 21:20:30  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-14 21:21:31  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-14 21:22:32  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'urgent': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-14 21:23:32  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'acceptance': 0, 'urgent': 0, 'purchase': 0, 'general': 0}（合計 0）
+2026-09-14 21:24:32  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'acceptance': 0, 'urgent': 0, 'purchase': 0, 'general': 0}（合計 0）
+2026-09-14 21:25:32  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'acceptance': 0, 'urgent': 0, 'purchase': 0, 'general': 0}（合計 0）
+2026-09-14 21:26:32  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'acceptance': 0, 'urgent': 0, 'purchase': 0, 'general': 0}（合計 0）
+2026-09-14 21:27:32  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'acceptance': 0, 'urgent': 0, 'purchase': 0, 'general': 0}（合計 0）
+2026-09-14 21:28:32  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'acceptance': 0, 'urgent': 0, 'purchase': 0, 'general': 0}（合計 0）
+2026-09-14 21:29:32  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'acceptance': 0, 'urgent': 0, 'purchase': 0, 'general': 0}（合計 0）
+2026-09-14 21:30:32  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'acceptance': 0, 'urgent': 0, 'purchase': 0, 'general': 0}（合計 0）
+2026-09-14 21:31:32  [INFO]  查詢未讀 [G9743]：{'budget': 0, 'acceptance': 0, 'urgent': 0, 'purchase': 0, 'general': 0}（合計 0）
+2026-09-14 21:32:32  [INFO]  查詢未讀 [G9743]：{'urgent': 0, 'purchase': 0, 'general': 0, 'acceptance': 0, 'budget': 0}（合計 0）
+2026-09-14 21:33:32  [INFO]  查詢未讀 [G9743]：{'urgent': 0, 'purchase': 0, 'general': 0, 'acceptance': 0, 'budget': 0}（合計 0）
+2026-09-14 21:35:04  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-14 21:41:19  [INFO]  查詢未讀 [C9228]：{'urgent': 0, 'budget': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-14 21:41:30  [INFO]  查詢未讀 [C9228]：{'urgent': 0, 'budget': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-14 21:42:04  [INFO]  查詢未讀 [K18251]：{'urgent': 0, 'budget': 0, 'acceptance': 0, 'general': 0, 'purchase': 0}（合計 0）
+2026-09-14 21:44:40  [INFO]  查詢未讀 [K18251]：{'acceptance': 0, 'purchase': 0, 'budget': 0, 'general': 0, 'urgent': 0}（合計 0）
+2026-09-14 21:55:29  [INFO]  查詢未讀 [K18251]：{'acceptance': 0, 'general': 0, 'purchase': 0, 'budget': 0, 'urgent': 0}（合計 0）
+2026-09-14 21:55:37  [INFO]  查詢未讀 [C9228]：{'acceptance': 0, 'general': 0, 'purchase': 0, 'budget': 0, 'urgent': 0}（合計 0）
+2026-09-14 21:55:49  [INFO]  查詢未讀 [K55563]：{'acceptance': 0, 'general': 1, 'purchase': 0, 'budget': 0, 'urgent': 0}（合計 1）
+2026-09-14 22:02:39  [INFO]  查詢未讀 [K55563]：{'acceptance': 0, 'general': 1, 'purchase': 0, 'budget': 0, 'urgent': 0}（合計 1）
+2026-09-14 22:02:42  [INFO]  查詢未讀 [K55563]：{'acceptance': 0, 'general': 1, 'purchase': 0, 'budget': 0, 'urgent': 0}（合計 1）
+2026-09-14 22:02:55  [INFO]  查詢未讀 [K55563]：{'acceptance': 0, 'general': 1, 'purchase': 0, 'budget': 0, 'urgent': 0}（合計 1）
+2026-09-14 22:07:00  [INFO]  查詢未讀 [K55563]：{'acceptance': 0, 'general': 1, 'purchase': 0, 'budget': 0, 'urgent': 0}（合計 1）
+2026-09-14 22:07:03  [INFO]  查詢未讀 [K55563]：{'acceptance': 0, 'general': 1, 'purchase': 0, 'budget': 0, 'urgent': 0}（合計 1）
+2026-09-14 22:07:04  [INFO]  查詢未讀 [K55563]：{'acceptance': 0, 'general': 1, 'purchase': 0, 'budget': 0, 'urgent': 0}（合計 1）

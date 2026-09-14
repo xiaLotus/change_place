@@ -1,0 +1,15 @@
+[
+  {
+    "id": 1,
+    "channel": "general",
+    "author": "測試中",
+    "emp_id": "G9743",
+    "type": "message",
+    "content": "41524",
+    "timestamp": "2026-09-14T19:42:44.625599+08:00",
+    "tag": "",
+    "reactions": {},
+    "replyTo": null,
+    "pinned": false
+  }
+]

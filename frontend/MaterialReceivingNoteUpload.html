@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>物料收貨單上傳與RT金額自動更新系統</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div id="app" class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
+
+    <!-- 主內容 -->
+    <div class="w-full max-w-none px-6 py-8">
+      <div class="bg-white/90 backdrop-blur-sm rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
+        <div class="p-8">
+          
+        <!-- 標題列：返回 + 標題 + Rule 說明 -->
+        <h1 class="mb-6 flex items-center justify-center gap-4 text-gray-800 font-bold text-[20px] leading-none">
+          <!-- 返回按鈕 -->
+          <button
+            @click="goeRTDashboard"
+            class="flex items-center gap-1 px-3 py-1.5 h-9 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white text-sm font-semibold rounded-full shadow transition-transform hover:scale-105"
+            title="返回上一頁"
+          >
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            返回
+          </button>
+
+          <!-- 標題 + icon -->
+          <span class="flex items-center gap-2 leading-none">
+            <i class="fas fa-sync-alt text-lg"></i>
+            物料收貨單上傳與RT金額自動更新系統
+          </span>
+
+          <!-- Rule 說明按鈕 -->
+          <button 
+            @click="showRuleExplanation" 
+            class="px-3 py-1.5 h-9 bg-blue-500 hover:bg-blue-600 text-white text-sm rounded-full transition-colors flex items-center gap-1"
+            title="查看使用說明"
+          >
+            <i class="fas fa-info-circle"></i>
+            Rule 說明
+          </button>
+        </h1>
+
+          <!-- 拖曳 / 點擊上傳區 -->
+          <div
+            v-if="!currentResult"
+            @drop="handleDrop"
+            @dragover.prevent="isDragging = true"
+            @dragleave.prevent="isDragging = false"
+            @click="$refs.fileInput.click()"
+            :class="[
+              'relative border-3 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all duration-300',
+              isDragging
+                ? 'border-blue-400 bg-blue-100/50 scale-102'
+                : 'border-gray-300 bg-gray-50/50 hover:border-blue-400/70 hover:bg-blue-50/50'
+            ]"
+          >
+            <input
+              ref="fileInput"
+              type="file"
+              @change="handleFileSelect"
+              accept=".mhtml,.mht"
+              class="hidden"
+            />
+            <div class="space-y-4">
+              <div class="mx-auto w-20 h-20 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center animate-pulse">
+                <i class="fas fa-cloud-upload-alt text-3xl text-white"></i>
+              </div>
+              <div>
+                <p class="text-xl font-bold text-gray-800">拖曳 MHTML 檔案到這裡</p>
+                <p class="text-gray-600 mt-2">上傳後將自動與 eRT總表內的 PO NO. 比對</p>
+                <p class="text-sm text-gray-500 mt-2">只支援 .mhtml 格式</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 處理中狀態 -->
+          <div v-if="isProcessing" class="mt-8 text-center">
+            <i class="fas fa-spinner fa-spin text-4xl text-blue-500"></i>
+            <p class="text-gray-700 mt-4">正在處理檔案並進行比對...</p>
+          </div>
+
+          <!-- 解析結果與比對 -->
+          <div v-if="currentResult && !isProcessing" class="space-y-6">
+            
+            <!-- 如果沒有有效數據，顯示警告 -->
+            <div v-if="!hasValidData" class="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-yellow-400 mb-2">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    <strong>檔案解析異常</strong>
+                  </p>
+                  <p class="text-sm text-yellow-300">
+                    檔案已上傳但未找到有效的表格數據，建議清理並重新上傳正確的檔案。
+                  </p>
+                </div>
+                <button
+                  @click="forceCleanupAndReset"
+                  class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg text-sm transition flex items-center"
+                >
+                  <i class="fas fa-broom mr-2"></i>
+                  立即清理
+                </button>
+              </div>
+            </div>
+            
+            <!-- 檔案資訊 -->
+            <div class="bg-gray-100/80 rounded-lg p-4 border border-gray-200">
+              <div class="flex justify-between items-center">
+                <div>
+                  <h3 class="text-lg font-semibold text-gray-800">
+                    <i class="fas fa-file mr-2"></i>
+                    {{ currentResult.original_filename }}
+                  </h3>
+                  <p class="text-sm text-gray-600 mt-1">
+                    上傳時間: {{ new Date(currentResult.upload_time).toLocaleString() }}
+                  </p>
+                </div>
+                <div class="flex space-x-2">
+                  <button
+                    @click="forceCleanupAndReset"
+                    class="px-3 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm transition"
+                    title="清理數據"
+                  >
+                    <i class="fas fa-trash mr-1"></i>
+                    清理
+                  </button>
+                  <button
+                    @click="resetUpload"
+                    class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg text-sm transition"
+                  >
+                    <i class="fas fa-redo mr-2"></i>
+                    重新上傳
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 完整表格 -->
+            <div v-if="currentResult.gridview_data" class="bg-gray-100/80 rounded-lg p-6 border border-gray-200">
+              <h3 class="text-xl font-semibold text-gray-800 mb-4">
+                <i class="fas fa-table mr-2"></i>
+                表格資料
+              </h3>
+              
+              <!-- 表格 -->
+              <div class="overflow-x-auto bg-white rounded-lg border border-gray-200">
+                <table class="w-full text-sm table-auto min-w-max">
+                  <thead>
+                    <tr class="bg-blue-50 border-b border-gray-200">
+                      <th
+                        v-for="(header, idx) in currentResult.gridview_data.headers"
+                        :key="idx"
+                        class="text-left py-3 px-3 text-gray-700 font-medium whitespace-nowrap"
+                      >
+                        <div class="flex flex-col">
+                          <span>{{ header.zh || header.full }}</span>
+                          <span v-if="header.en" class="text-xs text-gray-500">{{ header.en }}</span>
+                        </div>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      v-for="(row, rowIdx) in currentResult.gridview_data.rows"
+                      :key="rowIdx"
+                      class="border-b border-gray-100 hover:bg-gray-50"
+                    >
+                      <td
+                        v-for="(cell, cellIdx) in row.raw_data"
+                        :key="cellIdx"
+                        class="py-2 px-3 text-gray-700 whitespace-nowrap"
+                      >
+                        {{ cell.value || '-' }}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+                          <!-- 比對結果 -->
+            <div v-if="currentResult.comparison_result && !currentResult.comparison_result.error" 
+                 class="bg-gray-100/80 rounded-lg p-6 border border-gray-200">
+              <h3 class="text-xl font-semibold text-gray-800 mb-4">
+                <i class="fas fa-check-double mr-2"></i>
+                比對結果
+              </h3>
+              
+              <!-- 部分匹配警告提示 -->
+              <div v-if="hasPartialMatch" class="bg-orange-100 border border-orange-300 rounded-lg p-4 mb-6">
+                <div class="flex items-start">
+                  <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-triangle text-orange-600 text-xl"></i>
+                  </div>
+                  <div class="ml-3 flex-1">
+                    <h4 class="text-orange-800 font-semibold mb-2">
+                      ⚠️ 發現 PO 號碼差異
+                    </h4>
+                    <div class="text-orange-700 text-sm space-y-1">
+                      <p><strong>匹配情況：</strong> {{ currentResult.comparison_result.summary.matched_count }} 筆匹配，{{ currentResult.comparison_result.summary.unmatched_count }} 筆未匹配</p>
+                      <p><strong>可能原因：</strong></p>
+                      <ul class="list-disc list-inside ml-4 space-y-1">
+                        <li>MHTML 中的 PO 號碼與 eRT總表 中的不完全一致</li>
+                        <li>部分 PO 可能已被修改或更新</li>
+                        <li>存在重複或相似的 PO 號碼</li>
+                      </ul>
+                      <div class="mt-3 p-3 bg-orange-50 rounded border border-orange-200">
+                        <p class="text-orange-800 font-medium">
+                          <i class="fas fa-lightbulb mr-1"></i>
+                          建議：請檢查未匹配的項目，確認 PO 號碼是否正確，或聯繫相關人員確認資料一致性。
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- 統計摘要 -->
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-blue-500/10 rounded-lg p-3 border border-blue-300">
+                  <p class="text-blue-600 text-sm">總項目數</p>
+                  <p class="text-xl font-bold text-gray-800">{{ currentResult.comparison_result.summary.total_items }}</p>
+                </div>
+                <div class="bg-green-500/10 rounded-lg p-3 border border-green-300">
+                  <p class="text-green-600 text-sm">eRT總表 PO NO. 匹配</p>
+                  <p class="text-xl font-bold text-gray-800">{{ currentResult.comparison_result.summary.matched_count }}</p>
+                </div>
+                <div class="bg-yellow-500/10 rounded-lg p-3 border border-yellow-300">
+                  <p class="text-yellow-600 text-sm">未匹配</p>
+                  <p class="text-xl font-bold text-gray-800">{{ currentResult.comparison_result.summary.unmatched_count }}</p>
+                </div>
+                <div class="bg-purple-500/10 rounded-lg p-3 border border-purple-300">
+                  <p class="text-purple-600 text-sm">總金額</p>
+                  <p class="text-xl font-bold text-gray-800">
+                    {{ formatCurrency(currentResult.comparison_result.summary.total_amount) }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- RT 金額計算表 -->
+              <div class="bg-white rounded-lg overflow-hidden mb-4 border border-gray-200">
+                <div class="overflow-x-auto">
+                  <table class="w-full text-sm">
+                    <thead>
+                      <tr class="bg-blue-50 border-b border-gray-200">
+                        <th class="text-left py-3 px-4 text-gray-700">PO No.</th>
+                        <th class="text-left py-3 px-4 text-gray-700">品名</th>
+                        <th class="text-center py-3 px-4 text-gray-700">驗收數量</th>
+                        <th class="text-right py-3 px-4 text-gray-700">總金額</th>
+                        <th class="text-right py-3 px-4 text-gray-700">RT金額<br><span class="text-xs">(總金額/驗收數量)</span></th>
+                        <th class="text-right py-3 px-4 text-gray-700">RT總金額</th>
+                        <th class="text-center py-3 px-4 text-gray-700">eRT總表 狀態</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr 
+                        v-for="(item, idx) in currentResult.comparison_result.items"
+                        :key="idx"
+                        class="border-b border-gray-100 hover:bg-gray-50"
+                      >
+                        <td class="py-2 px-4 text-gray-700">{{ item.po_no || '-' }}</td>
+                        <td class="py-2 px-4 text-gray-700">{{ item.description || '-' }}</td>
+                        <td class="text-center py-2 px-4 text-gray-700">{{ item.accept_qty || item.qty || '-' }}</td>
+                        <td class="text-right py-2 px-4 text-gray-700">{{ formatNumber(item.amount) }}</td>
+                        <td class="text-right py-2 px-4 text-orange-600 font-medium">
+                          {{ formatCurrency(item.rt_amount) }}
+                        </td>
+                        <td class="text-right py-2 px-4 text-green-600 font-medium">
+                          {{ formatCurrency(item.rt_total_amount) }}
+                        </td>
+                        <td class="text-center py-2 px-4">
+                          <span 
+                            :class="[
+                              'px-2 py-1 rounded text-xs',
+                              item.matched_in_buyer 
+                                ? 'bg-green-100 text-green-600'
+                                : 'bg-yellow-100 text-yellow-600'
+                            ]"
+                          >
+                            {{ item.matched_in_buyer ? '✓ 已存在' : '+ 新項目' }}
+                          </span>
+                        </td>
+                      </tr>
+                    </tbody>
+                    <tfoot>
+                      <tr class="bg-blue-50">
+                        <td colspan="4" class="py-3 px-4 text-right text-gray-800 font-semibold">總計：</td>
+                        <td class="py-3 px-4 text-right text-orange-600 font-bold">-</td>
+                        <td class="py-3 px-4 text-right text-green-600 font-bold">
+                          {{ formatCurrency(currentResult.comparison_result.summary.total_amount) }}
+                        </td>
+                        <td></td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+
+              <!-- 更新按鈕 -->
+              <div class="flex justify-end">
+                <button
+                  @click="updateBuyerCSV"
+                  :disabled="isUpdating"
+                  class="px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white rounded-lg font-semibold transition flex items-center disabled:opacity-50"
+                >
+                  <i class="fas fa-save mr-2" :class="{'animate-spin': isUpdating}"></i>
+                  {{ isUpdating ? '更新中...' : '更新 物料收貨單&更新RT金額' }}
+                </button>
+              </div>
+            </div>
+
+            <!-- 錯誤訊息 -->
+            <div v-if="currentResult.comparison_result && currentResult.comparison_result.error" 
+                 class="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+              <p class="text-red-400">
+                <i class="fas fa-exclamation-circle mr-2"></i>
+                {{ currentResult.comparison_result.error }}
+              </p>
+            </div>
+          </div>
+
+          <!-- 清理中狀態 -->
+          <div v-if="isCleaningUp" class="mt-8 text-center">
+            <i class="fas fa-broom fa-spin text-4xl text-green-500"></i>
+            <p class="text-gray-700 mt-4">正在清理暫存檔案並重置系統...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast 通知 -->
+    <div
+      v-if="toast.show"
+      :class="[
+        'fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg transition-all duration-300 transform z-50',
+        toast.type === 'success' ? 'bg-green-500' : 
+        toast.type === 'error' ? 'bg-red-500' : 'bg-blue-500',
+        toast.show ? 'translate-x-0' : 'translate-x-full'
+      ]"
+    >
+      <div class="flex items-center text-white">
+        <i :class="['fas mr-2', 
+          toast.type === 'success' ? 'fa-check-circle' : 
+          toast.type === 'error' ? 'fa-exclamation-circle' : 
+          'fa-info-circle']"></i>
+        {{ toast.message }}
+      </div>
+    </div>
+  </div>
+
+  <script>
+// ── 廠區 / 使用者：登入時由後端回傳並存於 localStorage，每次 API 請求都帶在 query string ──
+const SITE = localStorage.getItem('site') || '';
+const SITE_USER = localStorage.getItem('username') || '';
+const siteQuery = () => `site=${encodeURIComponent(SITE)}&username=${encodeURIComponent(SITE_USER)}`;
+
+    const { createApp } = Vue;
+    const API_BASE_URL = 'http://localhost:5000/api';
+
+    // 等待所有腳本載入完成
+    function waitForSwal() {
+      return new Promise((resolve) => {
+        const checkSwal = () => {
+          if (typeof Swal !== 'undefined') {
+            console.log('✅ SweetAlert2 已載入');
+            resolve(true);
+          } else {
+            console.log('⏳ 等待 SweetAlert2 載入...');
+            setTimeout(checkSwal, 100);
+          }
+        };
+        checkSwal();
+      });
+    }
+
+    // 安全的 SweetAlert2 包裝函數
+    async function showAlert(options) {
+      await waitForSwal();
+      
+      if (typeof Swal !== 'undefined') {
+        console.log('🎯 顯示 SweetAlert2 彈窗');
+        return await Swal.fire(options);
+      } else {
+        console.error('❌ SweetAlert2 載入失敗，使用備用方案');
+        // 備用方案：使用瀏覽器原生 alert
+        const message = options.text || options.html?.replace(/<[^>]*>/g, '') || options.title || '操作完成';
+        alert(message);
+        return { isConfirmed: true };
+      }
+    }
+
+    // 等待 DOM 和所有腳本載入完成
+    document.addEventListener('DOMContentLoaded', async () => {
+      await waitForSwal();
+      
+      createApp({
+      data() {
+        return {
+          username: '',
+          isDragging: false,
+          isProcessing: false,
+          isUpdating: false,
+          isCleaningUp: false,
+          currentResult: null,
+          toast: { show: false, message: '', type: 'success' }
+        }
+      },
+      async mounted(){
+          const username = localStorage.getItem('username');
+          this.username = username
+          console.log("👤 使用者名稱：", this.username);
+      },
+      computed: {
+        hasValidData() {
+          return this.currentResult && 
+                 this.currentResult.gridview_data && 
+                 this.currentResult.gridview_data.rows && 
+                 this.currentResult.gridview_data.rows.length > 0;
+        },
+        
+        hasPartialMatch() {
+          if (!this.currentResult || !this.currentResult.comparison_result) {
+            return false;
+          }
+          
+          const summary = this.currentResult.comparison_result.summary;
+          return summary.total_items > 0 && 
+                 summary.matched_count > 0 && 
+                 summary.unmatched_count > 0;
+        }
+      },
+      methods: {
+        handleDrop(e) {
+          e.preventDefault();
+          this.isDragging = false;
+          this.handleFiles(e.dataTransfer.files);
+        },
+        
+        handleFileSelect(e) {
+          this.handleFiles(e.target.files);
+        },
+        
+        handleFiles(fileList) {
+          const file = fileList[0];
+          if (!file) return;
+          
+          const name = file.name || '';
+          if (!/\.mht(ml)?$/i.test(name)) {
+            this.showToast(`${name} 不是有效的 MHTML 檔案`, 'error');
+            return;
+          }
+          if (file.size > 50 * 1024 * 1024) {
+            this.showToast('檔案大小超過 50MB 限制', 'error');
+            return;
+          }
+          this.uploadFile(file);
+        },
+        
+        async uploadFile(file) {
+          this.isProcessing = true;
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('newName', file.name);
+
+          try {
+            const res = await axios.post(`${API_BASE_URL}/upload-mhtml?${siteQuery()}`, formData);
+            if (res.data && res.data.success) {
+              this.currentResult = res.data.data;
+              
+              // 檢查是否有 GridView 數據和表格內容
+              const hasValidGridView = this.currentResult.gridview_data && 
+                                     this.currentResult.gridview_data.rows && 
+                                     this.currentResult.gridview_data.rows.length > 0;
+              
+              if (!hasValidGridView) {
+                // 解析成功但沒有表格數據，顯示錯誤並清理
+                await this.showFileInfoErrorAndCleanup('解析成功但未找到有效的表格資料');
+                return;
+              }
+              
+              // 檢查比對結果
+              if (res.data.data.comparison_result) {
+                if (res.data.data.comparison_result.error) {
+                  // 有錯誤訊息，直接清理並顯示錯誤
+                  await this.showNoMatchErrorAndCleanup(null, '找不到 eRT總表中有相同的資訊');
+                  return;
+                } else {
+                  // 檢查是否有任何匹配的項目
+                  const hasMatches = res.data.data.comparison_result.summary.matched_count > 0;
+                  
+                  if (!hasMatches) {
+                    // 沒有任何匹配，顯示查無資料並清理
+                    await this.showNoMatchErrorAndCleanup(res.data.data.comparison_result, null);
+                    return;
+                  } else {
+                    this.showToast('檔案解析並比對成功', 'success');
+                  }
+                }
+              } else {
+                this.showToast('檔案解析成功', 'success');
+              }
+              
+              // 設置一個延遲檢查，如果用戶看到了文件信息但沒有表格，可以手動觸發清理
+              setTimeout(() => {
+                this.checkForIncompleteData();
+              }, 2000);
+              
+            } else {
+              throw new Error(res.data?.error || '上傳失敗');
+            }
+          } catch (err) {
+            console.error(err);
+            
+            // 檢查是否為檔案資訊錯誤
+            if (err.response?.data?.file_info_error) {
+              await this.showFileInfoErrorAndCleanup(err.response.data.message, err.response.data.details);
+            } else {
+              // 其他類型的錯誤
+              await showAlert({
+                icon: 'error',
+                title: '上傳失敗',
+                html: `
+                  <div style="text-align: center;">
+                      <p style="font-size: 18px; color: #dc3545; font-weight: bold; margin: 20px 0;">
+                          檔案上傳過程發生錯誤
+                      </p>
+                      <div style="background: #fef2f2; padding: 15px; border-radius: 8px; border: 1px solid #fecaca;">
+                          <p style="color: #dc3545; font-family: monospace; font-size: 14px;">
+                              ${err.message}
+                          </p>
+                      </div>
+                      <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+                          <p style="margin: 0; color: #856404; text-align: left;">
+                              💡 <strong>建議處理方式：</strong><br>
+                              • 檢查網路連線是否正常<br>
+                              • 確認檔案大小未超過限制<br>
+                              • 重新嘗試上傳檔案<br>
+                              • 如問題持續請聯繫系統管理員
+                          </p>
+                      </div>
+                  </div>
+                `,
+                confirmButtonText: '確定',
+                confirmButtonColor: '#dc3545',
+                width: '600px'
+              });
+            }
+          } finally {
+            this.isProcessing = false;
+          }
+        },
+        
+        checkForIncompleteData() {
+          // 檢查是否存在只有文件信息但沒有表格的情況
+          if (this.currentResult && 
+              (!this.currentResult.gridview_data || 
+               !this.currentResult.gridview_data.rows || 
+               this.currentResult.gridview_data.rows.length === 0)) {
+            
+            console.warn('檢測到不完整的數據，準備清理');
+            // 自動觸發清理，因為數據不完整
+            this.showFileInfoErrorAndCleanup('檔案解析不完整，缺少表格資料');
+          }
+        },
+        
+        async showNoMatchErrorAndCleanup(comparisonResult, customMessage = null) {
+          // 取得第一個 PO 號碼作為範例
+          const firstPO = comparisonResult?.items?.[0]?.po_no || '無法取得';
+          const totalItems = comparisonResult?.summary?.total_items || 0;
+          
+          // 顯示查無資料錯誤提示
+          await showAlert({
+            icon: 'error',
+            title: '查無資料',
+            html: `
+              <div style="text-align: center;">
+                  <p style="font-size: 18px; color: #dc3545; font-weight: bold; margin: 20px 0;">
+                      eRT總表 表單無此項目
+                  </p>
+                  <div style="background: #fef2f2; padding: 15px; border-radius: 8px; border: 1px solid #fecaca; margin: 20px 0;">
+                      <p style="color: #666; margin-bottom: 10px;">檢查的 PO 編號：</p>
+                      <p style="color: #dc3545; font-weight: bold; font-family: monospace; font-size: 16px;">
+                          ${firstPO}
+                      </p>
+                      ${totalItems > 0 ? `
+                      <p style="color: #666; margin-top: 10px; font-size: 14px;">
+                          共檢查 ${totalItems} 筆資料，均無匹配
+                      </p>
+                      ` : ''}
+                      ${customMessage ? `
+                      <p style="color: #dc3545; margin-top: 10px; font-size: 14px;">
+                          ${customMessage}
+                      </p>
+                      ` : ''}
+                  </div>
+                  <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+                      <p style="margin: 0; color: #856404; text-align: left;">
+                          💡 <strong>可能原因：</strong><br>
+                          • PO 號碼輸入錯誤<br>
+                          • 此 PO 尚未建立在 eRT總表 中<br>
+                          • PO 已被刪除或修改<br>
+                          • eRT總表中有相同的資訊 檔案未經過廠商承諾交期介面過濾
+                      </p>
+                  </div>
+                  <div style="margin-top: 15px; padding: 10px; background: #e7f3ff; border-radius: 6px;">
+                      <p style="margin: 0; color: #0066cc; font-size: 14px;">
+                          📋 確定後將自動清理後台資訊並重置系統
+                      </p>
+                  </div>
+              </div>
+            `,
+            confirmButtonText: '確定，清理並重置',
+            confirmButtonColor: '#dc3545',
+            width: '600px',
+            allowOutsideClick: false
+          });
+          
+          // 自動清理後台資訊
+          await this.performCleanupAndReset();
+        },
+        
+        async showFileInfoErrorAndCleanup(message, details = null) {
+          // 顯示檔案資訊錯誤提示
+          await showAlert({
+            icon: 'error',
+            title: '檔案資訊錯誤',
+            html: `
+              <div style="text-align: center;">
+                  <p style="font-size: 18px; color: #dc3545; font-weight: bold; margin: 20px 0;">
+                      MHTML 檔案解析失敗
+                  </p>
+                  <div style="background: #fef2f2; padding: 15px; border-radius: 8px; border: 1px solid #fecaca; margin: 20px 0;">
+                      <p style="color: #666; margin-bottom: 10px;">錯誤訊息：</p>
+                      <p style="color: #dc3545; font-weight: bold; font-size: 14px;">
+                          ${message}
+                      </p>
+                  </div>
+                  <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+                      <p style="margin: 0; color: #856404; text-align: left;">
+                          💡 <strong>可能原因：</strong><br>
+                          • 檔案損壞或格式不正確<br>
+                          • 不是有效的 MHTML 檔案<br>
+                          • 檔案內容缺少必要的表格資料<br>
+                          • 檔案編碼問題<br>
+                          • 表格結構與預期不符
+                      </p>
+                  </div>
+                  <div style="margin-top: 15px; padding: 10px; background: #e7f3ff; border-radius: 6px;">
+                      <p style="margin: 0; color: #0066cc; font-size: 14px;">
+                          📋 確定後將自動清理後台資訊並重置系統
+                      </p>
+                  </div>
+              </div>
+            `,
+            confirmButtonText: '確定，清理並重置',
+            confirmButtonColor: '#dc3545',
+            width: '600px',
+            allowOutsideClick: false
+          });
+          
+          // 自動清理後台資訊
+          await this.performCleanupAndReset();
+        },
+        
+        async updateBuyerCSV() {
+          if (!this.currentResult || !this.currentResult.comparison_result) return;
+          
+          this.isUpdating = true;
+          
+          try {
+            // 只選擇匹配的項目進行更新
+            const matchedItems = this.currentResult.comparison_result.items
+              .filter(item => item.matched_in_buyer)
+              .map(item => ({
+                po_no: item.po_no,
+                description: item.description,
+                rt_amount: item.rt_amount,
+                rt_total_amount: item.rt_total_amount
+              }));
+            
+            const totalItems = this.currentResult.comparison_result.items.length;
+            const unmatchedCount = totalItems - matchedItems.length;
+            
+            console.log('準備更新 eRT總表');
+            console.log('總項目數:', totalItems);
+            console.log('匹配項目數:', matchedItems.length);
+            console.log('跳過未匹配項目數:', unmatchedCount);
+            
+            if (matchedItems.length === 0) {
+              // 沒有匹配項目可更新
+              await showAlert({
+                icon: 'warning',
+                title: '無可更新項目',
+                html: `
+                  <div style="text-align: center;">
+                      <p style="font-size: 18px; color: #856404; font-weight: bold; margin: 20px 0;">
+                          所有項目均無法匹配 eRT總表
+                      </p>
+                      <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border: 1px solid #ffeaa7; margin: 20px 0;">
+                          <p style="color: #856404; font-size: 14px;">
+                              共 ${totalItems} 筆資料，均無法在 eRT總表 中找到對應的 PO 號碼，因此無法進行更新。
+                          </p>
+                      </div>
+                      <div style="margin-top: 20px; padding: 15px; background: #e7f3ff; border-radius: 8px;">
+                          <p style="margin: 0; color: #0066cc; font-size: 14px;">
+                              💡 建議檢查 PO 號碼是否正確，或確認 eRT總表 是否為最新版本。
+                          </p>
+                      </div>
+                  </div>
+                `,
+                confirmButtonText: '確定',
+                confirmButtonColor: '#856404',
+                width: '500px'
+              });
+              return;
+            }
+            
+            const res = await axios.post(`${API_BASE_URL}/update-buyer-csv?${siteQuery()}`, {
+              items: matchedItems
+            });
+            
+            console.log('更新 CSV API 響應:', res.data);
+            
+            if (res.data && res.data.success) {
+              // 構建成功訊息
+              let successMessage = `✅ ${res.data.message}`;
+              
+              if (unmatchedCount > 0) {
+                successMessage += `<br><br>📊 <strong>處理統計：</strong><br>`;
+                successMessage += `• 成功更新：${matchedItems.length} 筆<br>`;
+                successMessage += `• 跳過未匹配：${unmatchedCount} 筆`;
+              }
+              
+              // 使用 SweetAlert2 顯示成功訊息
+              await showAlert({
+                icon: 'success',
+                title: '更新完成！',
+                html: `
+                  <div class="text-left">
+                    <p class="mb-2">${successMessage}</p>
+                    <p class="text-sm text-gray-600 mt-3">系統將自動清理暫存檔案並重置頁面</p>
+                  </div>
+                `,
+                confirmButtonText: '確定',
+                confirmButtonColor: '#10b981',
+                timer: unmatchedCount > 0 ? 5000 : 3000,  // 如果有跳過項目，延長顯示時間
+                timerProgressBar: true
+              });
+              
+              // 檢查後端是否指示需要清理（多個條件檢查）
+              const needsCleanup = res.data.should_cleanup || res.data.cleanup_required || res.data.updated_count > 0;
+              console.log('是否需要清理:', needsCleanup);
+              
+              if (needsCleanup) {
+                console.log('開始執行自動清理和重置...');
+                await this.performCleanupAndReset();
+              } else {
+                console.log('後端未指示需要清理，手動觸發重置');
+                // 即使後端沒有明確指示，成功更新後也應該清理
+                await this.performCleanupAndReset();
+              }
+            } else {
+              // 更新失敗 - 檢查是否為匹配失敗
+              const errorMessage = res.data?.error || '更新失敗';
+              
+              if (res.data?.updated_count === 0 || errorMessage.includes('沒有找到匹配') || errorMessage.includes('找不到')) {
+                // 匹配失敗的情況
+                await showAlert({
+                  icon: 'error',
+                  title: '查無資料',
+                  html: `
+                    <div style="text-align: center;">
+                        <p style="font-size: 18px; color: #dc3545; font-weight: bold; margin: 20px 0;">
+                            eRT總表 表單無此項目
+                        </p>
+                        <div style="background: #fef2f2; padding: 15px; border-radius: 8px; border: 1px solid #fecaca; margin: 20px 0;">
+                            <p style="color: #666; margin-bottom: 10px;">PO 編號：</p>
+                            <p style="color: #dc3545; font-weight: bold; font-family: monospace; font-size: 16px;">
+                                ${this.currentResult?.comparison_result?.items?.[0]?.po_no || '無法取得'}
+                            </p>
+                        </div>
+                        <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+                            <p style="margin: 0; color: #856404; text-align: left;">
+                                💡 <strong>可能原因：</strong><br>
+                                • PO 號碼輸入錯誤<br>
+                                • 此 PO 尚未建立在 eRT總表 中<br>
+                                • PO 已被刪除或修改<br>
+                                • eRT總表中有相同的資訊 檔案未經過廠商承諾交期過濾
+                            </p>
+                        </div>
+                    </div>
+                  `,
+                  confirmButtonText: '確定',
+                  confirmButtonColor: '#dc3545',
+                  width: '600px'
+                });
+              } else {
+                // 其他錯誤
+                await showAlert({
+                  icon: 'error',
+                  title: '更新失敗',
+                  html: `
+                    <div style="text-align: center;">
+                        <p style="font-size: 18px; color: #dc3545; font-weight: bold; margin: 20px 0;">
+                            系統處理發生錯誤
+                        </p>
+                        <div style="background: #fef2f2; padding: 15px; border-radius: 8px; border: 1px solid #fecaca;">
+                            <p style="color: #dc3545; font-family: monospace; font-size: 14px;">
+                                ${errorMessage}
+                            </p>
+                        </div>
+                    </div>
+                  `,
+                  confirmButtonText: '確定',
+                  confirmButtonColor: '#dc3545',
+                  width: '500px'
+                });
+              }
+            }
+          } catch (err) {
+            console.error('更新 CSV 錯誤:', err);
+            
+            // 網路錯誤或其他異常
+            await showAlert({
+              icon: 'error',
+              title: '系統錯誤',
+              html: `
+                <div style="text-align: center;">
+                    <p style="font-size: 18px; color: #dc3545; font-weight: bold; margin: 20px 0;">
+                        更新過程中發生系統錯誤
+                    </p>
+                    <div style="background: #fef2f2; padding: 15px; border-radius: 8px; border: 1px solid #fecaca;">
+                        <p style="color: #dc3545; font-family: monospace; font-size: 14px;">
+                            ${err.message}
+                        </p>
+                    </div>
+                    <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 8px; border-left: 4px solid #ffc107;">
+                        <p style="margin: 0; color: #856404; text-align: left;">
+                            💡 <strong>建議處理方式：</strong><br>
+                            • 檢查網路連線狀態<br>
+                            • 重新整理頁面後再試<br>
+                            • 確認後端服務正常運行<br>
+                            • 如問題持續發生請聯繫系統管理員
+                        </p>
+                    </div>
+                </div>
+              `,
+              confirmButtonText: '確定',
+              confirmButtonColor: '#dc3545',
+              width: '600px'
+            });
+          } finally {
+            this.isUpdating = false;
+          }
+        },
+        
+        async performCleanupAndReset() {
+          try {
+            this.isCleaningUp = true;
+            console.log('=== 開始清理流程 ===');
+            
+            // 顯示清理狀態
+            this.showToast('正在清理後台資訊...', 'info');
+            
+            // 延遲1.5秒讓用戶看到清理狀態
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            // 調用清理 API
+            console.log('調用清理 API...');
+            const cleanupRes = await axios.post(`${API_BASE_URL}/cleanup-processed?${siteQuery()}`);
+            console.log('清理 API 響應:', cleanupRes.data);
+            
+            if (cleanupRes.data && cleanupRes.data.success) {
+              console.log('✅ 清理成功:', cleanupRes.data.message);
+              console.log('📊 清理統計:', {
+                removed: cleanupRes.data.files_removed,
+                remaining_processed: cleanupRes.data.remaining_processed_files,
+                remaining_upload: cleanupRes.data.remaining_upload_files
+              });
+              
+              // 重置前端狀態到初始狀態
+              this.resetToInitialState();
+              
+              // 顯示詳細的完成訊息
+              this.showToast(`✅ 更新完成！已清理 ${cleanupRes.data.files_removed} 個暫存檔案`, 'success');
+              
+              // 額外延遲確保狀態完全重置
+              setTimeout(() => {
+                console.log('=== 清理流程完成，系統已重置 ===');
+              }, 500);
+              
+            } else {
+              console.warn('⚠️ 清理響應異常:', cleanupRes.data?.error || '清理時遇到問題');
+              // 即使清理失敗，仍然重置前端狀態
+              this.resetToInitialState();
+              this.showToast('✅ 更新完成！但清理時遇到問題', 'info');
+            }
+          } catch (error) {
+            console.error('❌ 清理過程發生錯誤:', error);
+            // 即使清理 API 失敗，仍然重置前端狀態
+            this.resetToInitialState();
+            this.showToast('✅ 更新完成！但後台清理失敗', 'error');
+          } finally {
+            this.isCleaningUp = false;
+            console.log('=== 清理流程結束 ===');
+          }
+        },
+        
+        resetToInitialState() {
+          console.log('🔄 重置系統狀態到初始值...');
+          
+          // 重置所有狀態到初始值
+          this.currentResult = null;
+          this.isDragging = false;
+          this.isProcessing = false;
+          this.isUpdating = false;
+          this.isCleaningUp = false;
+          
+          // 清空文件輸入
+          if (this.$refs.fileInput) {
+            this.$refs.fileInput.value = '';
+          }
+          
+          // 強制 Vue 重新渲染
+          this.$nextTick(() => {
+            console.log('✅ 系統已重置到初始狀態');
+            console.log('📊 當前狀態:', {
+              currentResult: this.currentResult,
+              isDragging: this.isDragging,
+              isProcessing: this.isProcessing,
+              isUpdating: this.isUpdating,
+              isCleaningUp: this.isCleaningUp
+            });
+          });
+        },
+        
+        resetUpload() {
+          this.resetToInitialState();
+          this.showToast('已重置到初始狀態', 'info');
+        },
+        
+        // 添加手動清理按鈕的功能（在文件信息區域）
+        async forceCleanupAndReset() {
+          const result = await showAlert({
+            icon: 'warning',
+            title: '確認清理操作',
+            html: `
+              <div style="text-align: center;">
+                  <p style="font-size: 18px; color: #856404; font-weight: bold; margin: 20px 0;">
+                      即將清理所有暫存資料
+                  </p>
+                  <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border: 1px solid #ffeaa7; margin: 20px 0;">
+                      <p style="color: #856404; font-size: 14px; margin: 0;">
+                          此操作將會：<br>
+                          • 清理已上傳的檔案<br>
+                          • 重置系統到初始狀態<br>
+                          • 清除所有解析結果
+                      </p>
+                  </div>
+                  <div style="margin-top: 15px; padding: 10px; background: #fee2e2; border-radius: 6px;">
+                      <p style="margin: 0; color: #dc2626; font-size: 14px; font-weight: bold;">
+                          ⚠️ 此操作無法復原，確定要繼續嗎？
+                      </p>
+                  </div>
+              </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: '確定清理',
+            cancelButtonText: '取消',
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6b7280',
+            width: '500px'
+          });
+          
+          if (result.isConfirmed) {
+            await this.performCleanupAndReset();
+          }
+        },
+        
+        formatCurrency(amount) {
+          if (!amount && amount !== 0) return '-';
+          return new Intl.NumberFormat('zh-TW', {
+            style: 'currency',
+            currency: 'TWD',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 2
+          }).format(amount);
+        },
+        
+        formatNumber(value) {
+          if (!value) return '-';
+          const num = parseFloat(String(value).replace(/[^0-9.-]/g, ''));
+          if (isNaN(num)) return value;
+          return num.toLocaleString('zh-TW');
+        },
+
+        goeRTDashboard(){
+          localStorage.setItem('username', this.username);
+          window.location.href = 'eRT_page.html'; 
+        },
+        
+        // Rule 說明功能
+        async showRuleExplanation() {
+          console.log('🧪 顯示 Rule 說明...');
+          await showAlert({
+            icon: 'info',
+            title: 'Rule 說明 - 物料收貨單處理流程',
+            html: `
+              <div style="text-align: left; max-height: 80vh; overflow-y: auto;">
+                  <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; border-left: 4px solid #007bff; margin-bottom: 25px;">
+                      <h4 style="color: #007bff; margin: 0 0 15px 0; font-size: 18px;">📋 系統功能說明</h4>
+                      <p style="margin: 0; color: #495057; line-height: 1.8; font-size: 15px;">
+                          本系統用於處理物料收貨單的 MHTML 檔案，自動解析表格資料並與 eRT總表中有相同的資訊 進行比對，
+                          計算 RT 金額並更新到系統中。
+                      </p>
+                  </div>
+                  
+                  <div style="background: #e8f5e8; padding: 20px; border-radius: 8px; border-left: 4px solid #28a745; margin-bottom: 25px;">
+                      <h4 style="color: #28a745; margin: 0 0 20px 0; font-size: 18px;">📁 步驟一：檔案準備</h4>
+                      <div style="display: flex; flex-direction: column; gap: 15px;">
+                          <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #d4edda; text-align: center;">
+                              <img src="../static/picture/html_page.png" 
+                                   alt="物料收貨單範例" 
+                                   style="max-width: 700px; height: auto; border-radius: 6px; border: 2px solid #28a745; cursor: pointer; display: block; margin: 0 auto;"
+                                   onclick="window.open('../static/picture/html_page.png', '_blank')">
+                              <p style="margin: 10px 0 0 0; font-size: 14px; color: #6c757d; text-align: center; font-weight: 500;">
+                                  📄 物料收貨單頁面範例（點擊圖片可放大查看）<br>
+                                  <span style="color: #28a745;">※ 需另存為 MHTML 格式</span>
+                              </p>
+                          </div>
+                      </div>
+                  </div>
+                  
+                  <div style="background: #fff3cd; padding: 20px; border-radius: 8px; border-left: 4px solid #ffc107; margin-bottom: 25px;">
+                      <h4 style="color: #856404; margin: 0 0 20px 0; font-size: 18px;">💾 步驟二：檔案儲存</h4>
+                      <div style="display: flex; flex-direction: column; gap: 15px;">
+                          <div style="background: white; padding: 15px; border-radius: 8px; border: 1px solid #ffeaa7; text-align: center; display: flex; flex-direction: column; align-items: center;">
+                              <img src="../static/picture/store_example.png" 
+                                   alt="另存為 MHTML" 
+                                   style="max-width: 700px; width: auto; height: auto; border-radius: 6px; border: 2px solid #ffc107; cursor: pointer; display: block;"
+                                   onclick="window.open('../static/picture/store_example.png', '_blank')">
+                              <p style="margin: 10px 0 0 0; font-size: 14px; color: #6c757d; text-align: center; font-weight: 500;">
+                                  💻 另存為 "網頁，單一檔案 (*.mhtml)" 格式（點擊圖片可放大查看）<br>
+                                  <span style="color: #856404;">※ 請選擇 "檔案類型" 為 MHTML 格式</span>
+                              </p>
+                          </div>
+                      </div>
+                  </div>
+                  
+                  <div style="background: #e7f3ff; padding: 20px; border-radius: 8px; border-left: 4px solid #17a2b8; margin-bottom: 25px;">
+                      <h4 style="color: #0c5460; margin: 0 0 15px 0; font-size: 18px;">⚙️ 處理流程</h4>
+                      <ol style="margin: 0; padding-left: 25px; color: #495057; line-height: 2; font-size: 15px;">
+                          <li><strong>上傳檔案：</strong>拖曳或點擊上傳 MHTML 檔案</li>
+                          <li><strong>自動解析：</strong>系統解析後表格資料</li>
+                          <li><strong>數據比對：</strong>根據 PO No. 與 eRT總表 比對</li>
+                          <li><strong>計算 RT：</strong>RT金額 = 總金額 ÷ 驗收數量</li>
+                          <li><strong>更新資料：</strong>將結果更新到 eRT總表中</li>
+                      </ol>
+                  </div>
+                  
+                  <div style="background: #f8d7da; padding: 20px; border-radius: 8px; border-left: 4px solid #dc3545;">
+                      <h4 style="color: #721c24; margin: 0 0 15px 0; font-size: 18px;">⚠️ 注意事項</h4>
+                      <ul style="margin: 0; padding-left: 25px; color: #495057; line-height: 2; font-size: 15px;">
+                          <li>檔案大小限制：50MB</li>
+                          <li>支援格式：.mhtml</li>
+                          <li>PO 號碼必須在ERT總表中且未出現<br></li>
+                          <li>處理完成後會自動清理暫存檔案</li>
+                      </ul>
+                  </div>
+              </div>
+            `,
+            confirmButtonText: '我知道了',
+            confirmButtonColor: '#007bff',
+            width: '950px',
+            customClass: {
+              popup: 'rule-explanation-popup'
+            }
+          });
+        },
+        
+        showToast(message, type = 'success') {
+          this.toast = { show: true, message, type };
+          setTimeout(() => (this.toast.show = false), 3000);
+        }
+      }
+    }).mount('#app');
+    
+    }); // DOMContentLoaded 結束
+  </script>
+</body>
+</html>

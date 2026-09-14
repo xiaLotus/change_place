@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>郵件發送 - 驗收發信管理系統</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <div id="app" class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-50">
+    
+    <!-- 主內容 -->
+    <div class="w-full max-w-none px-4 py-6">
+      <div class="bg-white/90 backdrop-blur-sm rounded-xl border border-gray-200 shadow-lg overflow-hidden">
+        
+        <!-- 標題列：返回 + 標題 -->
+        <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+          <div class="flex items-center gap-4 text-white">
+            <!-- 返回按鈕 -->
+            <button
+              @click="goBack"
+              class="flex items-center gap-2 px-3 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition-all"
+              title="返回上一頁"
+            >
+              <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+              </svg>
+              返回
+            </button>
+            
+            <!-- 標題 -->
+            <h1 class="text-xl font-bold">
+              <i class="fas fa-envelope mr-2"></i>
+              郵件發送管理
+            </h1>
+            
+            <!-- 操作按鈕 -->
+              <button
+                @click="openRemarkManager"
+                class="ml-auto px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg transition-all flex items-center gap-2"
+                title="新增 / 移除備註選項"
+              >
+                <i class="fas fa-list-check"></i>
+                管理備註選項
+              </button>
+              <button
+                @click="startSending"
+                class="px-5 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg shadow-lg transition-all flex items-center gap-2"
+                :disabled="isSending"
+              >
+                <i :class="isSending ? 'fas fa-spinner fa-spin' : 'fas fa-paper-plane'"></i>
+                {{ isSending ? '發送中...' : '開始發送' }}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 發送項目表格 -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <!-- 表頭 -->
+            <thead>
+              <tr class="bg-yellow-400 text-black font-bold">
+                <th class="text-center py-3 px-2 border border-gray-400 w-16">User</th>
+                <th class="text-center py-3 px-2 border border-gray-400 w-28">ePR No.</th>
+                <th class="text-center py-3 px-2 border border-gray-400 w-28">PO No.</th>
+                <th class="text-center py-3 px-2 border border-gray-400 w-16">Item</th>
+                <th class="text-center py-3 px-2 border border-gray-400 w-80">品項</th>
+                <th class="text-center py-3 px-2 border border-gray-400 w-16">數量</th>
+                <th class="text-center py-3 px-2 border border-gray-400 w-16">總數</th>
+                <th class="text-center py-3 px-2 border border-gray-400 w-24">收料日期</th>
+                <th class="text-center py-3 px-2 border border-gray-400 w-20">取件者</th>
+                <th class="text-center py-3 px-2 border border-gray-400 w-36">
+                  <div class="bg-gray-600 text-white px-2 py-1 rounded-t mb-1">領料驗收流程</div>
+                  <div class="grid grid-cols-3 gap-px">
+                    <div class="bg-yellow-200 text-black px-1 py-1 text-xs">未領料</div>
+                    <div class="bg-yellow-200 text-black px-1 py-1 text-xs">已領料</div>
+                    <div class="bg-yellow-200 text-black px-1 py-1 text-xs">照片<br>提供</div>
+                  </div>
+                </th>
+                <th class="text-center py-3 px-2 border border-gray-400 w-48">備註</th>
+              </tr>
+            </thead>
+            
+            <!-- 表格內容 -->
+            <tbody>
+              <tr 
+                v-for="(item, index) in selectedItems"
+                :key="item.id"
+                class="hover:bg-gray-50 transition-colors"
+              >
+                <!-- User -->
+                <td class="py-2 px-2 border border-gray-300 text-center text-sm">
+                  {{ item.user || '-' }}
+                </td>
+                
+                <!-- ePR No. (修正：顯示實際的 eprNo 資料) -->
+                <td class="py-2 px-2 border border-gray-300 text-center font-mono text-blue-600 text-sm">
+                  {{ item.eprNo || '-' }}
+                </td>
+                
+                
+                <!-- PO No. -->
+                <td class="py-2 px-2 border border-gray-300 text-center font-mono text-sm">
+                  {{ item.poNo || '-' }}
+                </td>
+                
+                <!-- Item (格式化後的 PO Item) -->
+                <td class="py-2 px-2 border border-gray-300 text-center font-mono text-sm">
+                  {{ formatPoItem(item.poItem) }}
+                </td>
+                
+                <!-- 品項 (40字內，不可編輯) -->
+                <td class="py-2 px-2 border border-gray-300 text-sm">
+                  <div class="truncate max-w-full" :title="item.description">
+                    {{ item.description || '-' }}
+                  </div>
+                </td>
+                
+                <!-- 數量 -->
+                <td class="py-2 px-2 border border-gray-300 text-center text-sm">
+                  {{ item.quantity || '-' }}
+                </td>
+                
+                <!-- 總數 -->
+                <td class="py-2 px-2 border border-gray-300 text-center text-sm">
+                  {{ item.totalQuantity || item.quantity || '-' }}
+                </td>
+                
+                <!-- 收料日期 -->
+                <td class="py-2 px-2 border border-gray-300 text-center text-sm">
+                  {{ item.issueDate || '-' }}
+                </td>
+                
+                <!-- 取件者 -->
+                <td class="py-2 px-2 border border-gray-300 text-center text-sm">
+                  {{ item.pickupPerson || '-' }}
+                </td>
+                
+                <!-- 領料驗收流程 (可點擊編輯) -->
+                <td class="py-2 px-2 border border-gray-300">
+                  <div class="grid grid-cols-3 gap-px border border-gray-400 h-8">
+                    <!-- 未領料 -->
+                    <div 
+                      :class="item.materialStatus === 'completed' ? 'bg-green-300' : 'bg-red-200'"
+                      class="flex items-center justify-center text-xs font-bold border-r border-gray-400 cursor-pointer hover:opacity-80 transition-opacity"
+                      @click="toggleStatus(item, 'materialStatus')"
+                    >
+                      {{ item.materialStatus === 'completed' ? 'V' : '' }}
+                    </div>
+                    
+                    <!-- 已領料 -->
+                    <div 
+                      :class="item.receivedStatus === 'completed' ? 'bg-green-300' : 'bg-red-200'"
+                      class="flex items-center justify-center text-xs font-bold border-r border-gray-400 cursor-pointer hover:opacity-80 transition-opacity"
+                      @click="toggleStatus(item, 'receivedStatus')"
+                    >
+                      {{ item.receivedStatus === 'completed' ? 'V' : '' }}
+                    </div>
+                    
+                    <!-- 照片提供 -->
+                    <div 
+                      :class="item.photoStatus === 'provided' ? 'bg-green-300' : 'bg-red-200'"
+                      class="flex items-center justify-center text-xs font-bold cursor-pointer hover:opacity-80 transition-opacity"
+                      @click="toggleStatus(item, 'photoStatus')"
+                    >
+                      {{ item.photoStatus === 'provided' ? 'V' : '' }}
+                    </div>
+                  </div>
+                </td>
+                
+                <!-- 備註 (可編輯) -->
+                <td class="py-2 px-2 border border-gray-300">
+                  <!-- 下拉選單 -->
+                  <select 
+                    v-if="!item.showTextarea"
+                    v-model="item.remarks"
+                    @change="onRemarksChange(item)"
+                    class="w-full px-2 py-1 border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-xs"
+                  >
+                    <option disabled value="">請選擇備註</option>
+                    <!-- 備註選項由後台 accMailData.json 提供 -->
+                    <option v-for="opt in remarkOptions" :key="opt" :value="opt">{{ opt }}</option>
+                    <option value="__custom__">✏️ 自行輸入</option>
+                  </select>
+
+                  <!-- 自訂輸入 textarea + 返回下拉按鈕 -->
+                  <div v-else class="flex items-start gap-1">
+                    <textarea 
+                      v-model="item.remarks"
+                      class="w-full px-2 py-1 border rounded focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none text-xs"
+                      rows="2"
+                      :placeholder="item.isCustomRemark ? '請輸入自訂備註內容' : '尚未領料： 最後領料日為：2025/09/10'"
+                    ></textarea>
+                    <div class="flex flex-col gap-1 shrink-0 mt-1">
+                      <button
+                        @click="backToRemarkSelect(item)"
+                        class="text-gray-400 hover:text-blue-500 text-xs"
+                        title="返回選單"
+                      >↩</button>
+                      <button
+                        v-if="item.isCustomRemark"
+                        @click="saveRemarkAsOption(item)"
+                        class="text-gray-400 hover:text-green-600 text-xs"
+                        title="將此內容新增為備註選項"
+                      ><i class="fas fa-plus"></i></button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- 如果沒有選中項目 -->
+        <div v-if="selectedItems.length === 0" class="p-12 text-center">
+          <i class="fas fa-inbox text-6xl text-gray-300 mb-4"></i>
+          <h3 class="text-xl font-semibold text-gray-600 mb-2">沒有選中的項目</h3>
+          <p class="text-gray-500">請返回列表頁面選擇要發送的項目</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script src="../static/js/func/accMail.js"></script>
+</body>
+</html>

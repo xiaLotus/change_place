@@ -1,0 +1,52 @@
+2026-08-15 09:06:05 INFO [werkzeug]: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2026-08-15 09:06:05 INFO [werkzeug]: [33mPress CTRL+C to quit[0m
+2026-08-15 09:06:05 INFO [werkzeug]:  * Restarting with stat
+2026-08-15 09:06:06 WARNING [werkzeug]:  * Debugger is active!
+2026-08-15 09:06:06 INFO [werkzeug]:  * Debugger PIN: 111-221-585
+2026-08-15 09:06:11 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:11] "OPTIONS /api/getAllLoginer HTTP/1.1" 200 -
+2026-08-15 09:06:11 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:11] "POST /api/getAllLoginer HTTP/1.1" 200 -
+2026-08-15 09:06:11 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:11] "OPTIONS /api/login HTTP/1.1" 200 -
+2026-08-15 09:06:11 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:11] "POST /api/login HTTP/1.1" 200 -
+2026-08-15 09:06:12 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:12] "OPTIONS /api/get-username-info HTTP/1.1" 200 -
+2026-08-15 09:06:12 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:12] "POST /api/get-username-info HTTP/1.1" 200 -
+2026-08-15 09:06:12 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:12] "GET /data HTTP/1.1" 200 -
+2026-08-15 09:06:12 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:12] "GET /api/unordered-count HTTP/1.1" 200 -
+2026-08-15 09:06:12 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:12] "GET /api/requesters HTTP/1.1" 200 -
+2026-08-15 09:06:12 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:12] "GET /api/admins HTTP/1.1" 200 -
+2026-08-15 09:06:12 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:12] "GET /api/venders HTTP/1.1" 200 -
+2026-08-15 09:06:12 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:12] "GET /api/get-filters-json/K18251 HTTP/1.1" 200 -
+2026-08-15 09:06:12 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:12] "GET /api/getrestofmoney HTTP/1.1" 200 -
+2026-08-15 09:06:12 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:12] "GET /api/message-board/unread/K18251 HTTP/1.1" 200 -
+2026-08-15 09:06:13 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:13] "GET /api/get-filters-json/K18251 HTTP/1.1" 200 -
+2026-08-15 09:06:13 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:13] "OPTIONS /api/save-filters-json HTTP/1.1" 200 -
+2026-08-15 09:06:13 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:13] "POST /api/save-filters-json HTTP/1.1" 200 -
+2026-08-15 09:06:43 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:43] "OPTIONS /api/get-username-info HTTP/1.1" 200 -
+2026-08-15 09:06:43 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:43] "POST /api/get-username-info HTTP/1.1" 200 -
+2026-08-15 09:06:43 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:43] "GET /data HTTP/1.1" 200 -
+2026-08-15 09:06:43 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:43] "GET /api/unordered-count HTTP/1.1" 200 -
+2026-08-15 09:06:43 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:43] "GET /api/requesters HTTP/1.1" 200 -
+2026-08-15 09:06:43 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:43] "GET /api/admins HTTP/1.1" 200 -
+2026-08-15 09:06:43 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:43] "GET /api/venders HTTP/1.1" 200 -
+2026-08-15 09:06:43 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:43] "GET /api/get-filters-json/K18251 HTTP/1.1" 200 -
+2026-08-15 09:06:43 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:43] "GET /api/getrestofmoney HTTP/1.1" 200 -
+2026-08-15 09:06:43 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:43] "GET /api/message-board/unread/K18251 HTTP/1.1" 200 -
+2026-08-15 09:06:44 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:44] "GET /api/get-filters-json/K18251 HTTP/1.1" 200 -
+2026-08-15 09:06:44 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:44] "OPTIONS /api/save-filters-json HTTP/1.1" 200 -
+2026-08-15 09:06:44 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:44] "POST /api/save-filters-json HTTP/1.1" 200 -
+2026-08-15 09:06:45 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:45] "GET /api/get-filters-json/K18251 HTTP/1.1" 200 -
+2026-08-15 09:06:45 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:45] "GET /api/admins HTTP/1.1" 200 -
+2026-08-15 09:06:45 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:45] "GET /api/buyer_detail HTTP/1.1" 200 -
+2026-08-15 09:06:45 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:45] "GET /api/get_unaccounted_amount HTTP/1.1" 200 -
+2026-08-15 09:06:46 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:46] "GET /api/accounting_summary HTTP/1.1" 200 -
+2026-08-15 09:06:46 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:46] "GET /api/monthly_actual_accounting HTTP/1.1" 200 -
+2026-08-15 09:06:46 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:46] "GET /api/getrestofmoney HTTP/1.1" 200 -
+2026-08-15 09:06:46 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:46] "GET /api/next_month_amount HTTP/1.1" 200 -
+2026-08-15 09:06:56 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:56] "POST /api/upload-mhtml HTTP/1.1" 200 -
+2026-08-15 09:06:57 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:57] "OPTIONS /api/update-buyer-csv HTTP/1.1" 200 -
+2026-08-15 09:06:57 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:06:57] "POST /api/update-buyer-csv HTTP/1.1" 200 -
+2026-08-15 09:07:02 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:07:02] "POST /api/cleanup-processed HTTP/1.1" 200 -
+2026-08-15 09:07:08 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:07:08] "POST /api/upload-mhtml HTTP/1.1" 200 -
+2026-08-15 09:07:09 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:07:09] "OPTIONS /api/update-buyer-csv HTTP/1.1" 200 -
+2026-08-15 09:07:09 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:07:09] "POST /api/update-buyer-csv HTTP/1.1" 200 -
+2026-08-15 09:07:12 INFO [werkzeug]: 127.0.0.1 - - [15/Aug/2026 09:07:12] "POST /api/cleanup-processed HTTP/1.1" 200 -

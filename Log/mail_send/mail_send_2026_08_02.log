@@ -1,0 +1,6 @@
+2026-08-02 21:17:13 INFO [mail_send.urgent]: 📧 準備發送【超急件】請購通知郵件
+2026-08-02 21:17:13 INFO [mail_send.urgent]:    收件人(To): RuiYing_Chan@aseglobal.com,Shugh_Lin@aseglobal.com
+2026-08-02 21:17:13 INFO [mail_send.urgent]:    副本(CC): RuiYing_Chan@aseglobal.com,Shugh_Lin@aseglobal.com
+2026-08-02 21:17:13 INFO [mail_send.urgent]:    主旨: << ePR單 - 2510020154 >> 等級：超急件 Honeywell HPA-5350WTWV1 空氣清淨機需求請購申請 To. Jackson Sir & Otis (Security C)
+2026-08-02 21:17:13 INFO [mail_send.urgent]:    內容: ePR No.=2510020154, 需求者=王柏翰, 請購項目=Honeywell HPA-5350WTWV1 空氣清淨機, 需求原因=因辦公室空氣品質不佳，導致員工出現過敏症狀，影響工作舒適度與健康。為改善室內空氣品質，減少過敏情況，提升員工健康及工作效率，故添購空氣清淨機。, 總金額=41000, 需求日=20250930, ePR狀態=退件, 簽核中關卡=USER修改資料, 備註=C9228 於2025/10/02 送出
+2026-08-02 21:17:34 ERROR [mail_send.urgent]: ❌ 郵件發送失敗 (ePR No.=2510020154): [WinError 10060] 連線嘗試失敗，因為連線對象有一段時間並未正確回應，或是連線建立失敗，因為連線的主機無法回應。

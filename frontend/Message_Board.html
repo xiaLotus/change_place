@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>留言版 - 採購管理系統</title>
+    <script src="../static/js/vue.global.prod.js"></script>
+    <link href="../static/css/tailwind.min.css" rel="stylesheet">
+    <script src="../static/js/tailwinds.js"></script>
+    <script src="../static/js/axios.min.js"></script>
+    <script src="../static/js/sweetalert2@11.js"></script>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            background-color: #EEEEEE;
+            font-family: sans-serif;
+            overflow: hidden;
+        }
+
+        /* ── 訊息氣泡 ── */
+        .msg-self {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border-radius: 18px 18px 4px 18px;
+        }
+        .msg-other {
+            background: white;
+            color: #374151;
+            border-radius: 18px 18px 18px 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        }
+        .msg-system {
+            background: #f3f4f6;
+            color: #6b7280;
+            border-radius: 12px;
+        }
+
+        /* ── 新訊息高亮 ── */
+        .msg-new-glow .msg-self  { box-shadow: 0 0 0 2px #a78bfa, 0 4px 12px rgba(99,102,241,0.25); }
+        .msg-new-glow .msg-other { box-shadow: 0 0 0 2px #a78bfa, 0 4px 12px rgba(99,102,241,0.15); }
+
+        /* ── 回覆引用區塊 ── */
+        .reply-quote-self {
+            background: rgba(0,0,0,0.22);
+            border-left: 3px solid rgba(255,255,255,0.9);
+            border-radius: 8px;
+            padding: 6px 10px;
+            margin-bottom: 6px;
+            font-size: 0.78rem;
+            line-height: 1.45;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .reply-quote-self:hover { background: rgba(0,0,0,0.32); }
+        .reply-quote-self .quote-author { color: #fff; font-weight: 700; margin-bottom: 2px; }
+        .reply-quote-self .quote-body   { color: rgba(255,255,255,0.95); white-space: pre-wrap; word-break: break-word; }
+
+        .reply-quote-other {
+            background: #f0f0f8;
+            border-left: 3px solid #6366f1;
+            border-radius: 8px;
+            padding: 6px 10px;
+            margin-bottom: 6px;
+            font-size: 0.78rem;
+            line-height: 1.45;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .reply-quote-other:hover { background: #e8e8f5; }
+
+        /* 被點擊跳轉的訊息高亮 */
+        @keyframes msg-flash {
+            0%   { background: #c7d2fe; }
+            50%  { background: #818cf8; }
+            100% { background: transparent; }
+        }
+        .msg-highlight {
+            animation: msg-flash 1.2s ease-out;
+            border-radius: 12px;
+        }
+        .reply-quote-other .quote-author { color: #6366f1; font-weight: 700; margin-bottom: 2px; }
+        .reply-quote-other .quote-body   { color: #4b5563; white-space: pre-wrap; word-break: break-word; }
+
+        /* ── 輸入區回覆預覽 ── */
+        .input-reply-box {
+            background: #f5f3ff;
+            border-left: 3px solid #8b5cf6;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.8rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-break: break-word;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        /* ── 標籤 ── */
+        .tag-chip {
+            display: inline-block;
+            padding: 1px 8px;
+            border-radius: 9999px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        /* ── 新訊息 badge ── */
+        .new-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0px 6px;
+            border-radius: 9999px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            background: #6366f1;
+            color: white;
+            letter-spacing: 0.03em;
+            vertical-align: middle;
+        }
+
+        /* ── 動畫 ── */
+        .msg-enter-active { animation: msgFadeIn 0.22s ease; }
+        @keyframes msgFadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .pinned-slide-enter-active, .pinned-slide-leave-active {
+            transition: all 0.2s ease;
+            overflow: hidden;
+        }
+        .pinned-slide-enter-from, .pinned-slide-leave-to { max-height: 0; opacity: 0; }
+        .pinned-slide-enter-to, .pinned-slide-leave-from { max-height: 800px; opacity: 1; }
+
+        /* ── 雜項 ── */
+        textarea:focus { outline: none; box-shadow: 0 0 0 2px #a78bfa; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+
+        .reaction-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 2px;
+            padding: 1px 7px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            background: white;
+            border: 1px solid #e5e7eb;
+            cursor: pointer;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .reaction-badge:hover { background: #f3f4f6; }
+
+        .channel-tab {
+            position: relative;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.15s;
+        }
+        .channel-tab.active { background: #ede9fe; color: #6d28d9; }
+        .channel-tab:not(.active) { color: #6b7280; }
+        .channel-tab:not(.active):hover { background: #f3f4f6; }
+
+        /* 頻道紅點 */
+        .channel-dot {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 8px;
+            height: 8px;
+            border-radius: 9999px;
+            background: #ef4444;
+            border: 1.5px solid white;
+        }
+
+        /* 釘選按鈕 hover */
+        .pin-btn { opacity: 0; transition: opacity 0.15s; }
+        .msg-actions:hover .pin-btn { opacity: 1; }
+
+        /* 載入中 */
+        .loading-spin {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        /* 未讀訊息浮動提示（LINE 風格） */
+        .unread-banner {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(99, 102, 241, 0.92);
+            color: white;
+            border-radius: 9999px;
+            padding: 6px 16px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            z-index: 30;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 12px rgba(99,102,241,0.35);
+            white-space: nowrap;
+            user-select: none;
+        }
+        .unread-banner:hover { background: rgba(79, 82, 221, 0.95); }
+        .unread-banner:active { transform: translateX(-50%) scale(0.96); }
+
+        /* 滑到最下方按鈕 */
+        .scroll-bottom-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border-radius: 9999px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            z-index: 20;
+            color: #6366f1;
+        }
+        .scroll-bottom-btn:hover {
+            background: #ede9fe;
+            border-color: #a78bfa;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(99,102,241,0.2);
+        }
+        .scroll-bottom-btn:active { transform: scale(0.92); }
+        .fade-enter-active, .fade-leave-active { transition: opacity 0.2s, transform 0.2s; }
+        .fade-enter-from, .fade-leave-to { opacity: 0; transform: translateY(8px); }
+    </style>
+</head>
+<body>
+<div id="app" class="flex flex-col h-screen">
+
+    <!-- ══════════════════════════════════════
+         頂部導覽列
+    ══════════════════════════════════════ -->
+    <div class="bg-white shadow-sm px-5 py-3 flex items-center justify-between shrink-0 z-10">
+        <div class="flex items-center gap-3">
+            <button @click="goBack"
+                class="text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-full px-3 py-1.5 text-sm transition flex items-center gap-1">
+                ← 返回看板
+            </button>
+            <div class="w-px h-6 bg-gray-200"></div>
+            <span class="text-xl">💬</span>
+            <div>
+                <h1 class="text-lg font-bold text-gray-800 leading-tight">採購留言版</h1>
+                <p class="text-xs text-gray-400">Procurement Message Board</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+
+            <!-- 搜尋 -->
+            <div class="flex items-center gap-1 border border-gray-200 rounded-full px-2 py-1 bg-white focus-within:border-purple-400 transition" style="min-width:280px">
+                <!-- 模式切換 -->
+                <div class="flex items-center gap-0.5 shrink-0">
+                    <button v-for="m in searchModes" :key="m.key"
+                        @click="searchMode = m.key; searchQuery = ''"
+                        :class="searchMode === m.key
+                            ? 'bg-purple-500 text-white'
+                            : 'text-gray-400 hover:text-purple-500'"
+                        class="text-xs rounded-full px-2 py-0.5 transition font-medium">
+                        {{ m.label }}
+                    </button>
+                </div>
+                <div class="w-px h-4 bg-gray-200 mx-1 shrink-0"></div>
+                <!-- 輸入框 -->
+                <div class="relative flex-1">
+                    <input v-if="searchMode !== 'time'" v-model="searchQuery" type="text"
+                        :placeholder="searchMode === 'author' ? '輸入姓名...' : '輸入關鍵字...'"
+                        class="text-xs w-full focus:outline-none bg-transparent pr-4" />
+                    <!-- 時間模式：日期選擇 -->
+                    <div v-else class="flex items-center gap-1 text-xs text-gray-500">
+                        <input v-model="searchDateFrom" type="date"
+                            class="text-xs border-0 focus:outline-none bg-transparent w-28" />
+                        <span class="text-gray-300">～</span>
+                        <input v-model="searchDateTo" type="date"
+                            class="text-xs border-0 focus:outline-none bg-transparent w-28" />
+                    </div>
+                    <span v-if="searchQuery || searchDateFrom || searchDateTo"
+                        @click="searchQuery=''; searchDateFrom=''; searchDateTo=''"
+                        class="absolute right-0 top-0 text-gray-300 hover:text-gray-500 cursor-pointer text-xs">✕</span>
+                </div>
+            </div>
+            <!-- 使用者 -->
+            <div class="flex items-center gap-2 bg-purple-50 rounded-full px-3 py-1.5">
+                <div class="w-7 h-7 rounded-full bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center text-white text-xs font-bold">
+                    {{ usernameInitial }}
+                </div>
+                <div class="flex flex-col leading-tight">
+                    <span class="text-sm font-bold text-purple-700">{{ myChineseName || username }}</span>
+                    <span v-if="myChineseName" class="text-xs text-purple-400">{{ username }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         頻道標籤列
+    ══════════════════════════════════════ -->
+    <div class="bg-white border-b border-gray-100 px-5 py-2 flex items-center gap-1 overflow-x-auto shrink-0">
+        <div v-for="ch in channels" :key="ch.id"
+            class="channel-tab" :class="{ active: selectedChannel === ch.id }"
+            @click="switchChannel(ch.id)">
+            {{ ch.icon }} {{ ch.name }}
+            <!-- 新訊息紅點（非當前頻道才顯示） -->
+            <span v-if="ch.id !== selectedChannel && hasNewMessages(ch.id)" class="channel-dot"></span>
+        </div>
+        <div class="ml-auto text-xs text-gray-400 shrink-0 pl-3">
+            {{ filteredMessages.length }} 則訊息
+        </div>
+        <!-- 載入中轉圈 -->
+        <svg v-if="isLoading" class="loading-spin w-4 h-4 text-purple-400 ml-2 shrink-0" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+        </svg>
+    </div>
+
+    <!-- 頻道說明 -->
+    <div class="bg-gray-50 border-b border-gray-100 px-5 py-1.5 shrink-0">
+        <span class="text-xs text-gray-500">
+            {{ currentChannelObj.icon }}
+            <span class="font-semibold text-gray-600">{{ currentChannelObj.name }}</span>
+            　{{ currentChannelObj.description }}
+        </span>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         📌 釘選公告欄
+    ══════════════════════════════════════ -->
+    <div v-if="pinnedMessages.length > 0" class="shrink-0 border-b border-amber-200">
+        <div class="flex items-center gap-2 px-5 py-2 bg-amber-50 cursor-pointer select-none hover:bg-amber-100 transition"
+            @click="togglePinnedExpanded">
+            <span class="text-amber-500 text-sm">📌</span>
+            <span class="text-xs font-bold text-amber-700">釘選公告</span>
+            <span class="text-xs text-amber-500 bg-amber-100 rounded-full px-2 py-0.5 font-semibold">{{ pinnedMessages.length }}</span>
+            <div class="flex-1"></div>
+            <span class="text-amber-400 text-xs transition-transform duration-200"
+                :style="{ transform: isPinnedExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }">▼</span>
+        </div>
+        <transition name="pinned-slide">
+            <div v-if="isPinnedExpanded" class="bg-amber-50 px-5 pb-3 space-y-2">
+                <div v-for="pm in pinnedMessages" :key="pm.id"
+                    class="flex items-start gap-3 bg-white rounded-xl px-4 py-3 shadow-sm border border-amber-100 cursor-pointer hover:border-amber-300 transition"
+                    @click="scrollToPinned(pm.id)">
+                    <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0 mt-0.5"
+                        :style="{ background: getAuthorColor(pm.author) }">
+                        {{ getInitial(pm.author) }}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-xs font-bold text-gray-700">{{ pm.author }}</span>
+                            <span v-if="pm.tag" class="tag-chip" :class="tagClass(pm.tag)">{{ pm.tag }}</span>
+                            <span class="text-xs text-gray-400">
+                                釘選於 {{ formatTime(pm.pinned_at || pm.timestamp) }}
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap break-words">{{ pm.content }}</p>
+                    </div>
+                    <button @click.stop="togglePin(pm.id, pm.channel)"
+                        class="shrink-0 text-xs text-amber-400 hover:text-red-500 hover:bg-red-50 rounded px-2 py-1 transition">
+                        取消釘選
+                    </button>
+                </div>
+            </div>
+        </transition>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         訊息區域
+    ══════════════════════════════════════ -->
+    <!-- 訊息區域（relative 讓按鈕可以 absolute 定位）-->
+    <div class="flex-1 relative overflow-hidden">
+
+    <!-- LINE 風格未讀浮動提示 -->
+    <transition name="fade">
+        <div v-if="unreadBannerCount > 0 && !hasScrolledToUnread"
+            class="unread-banner"
+            @click="jumpToFirstUnread">
+            <span>↓</span>
+            <span>{{ unreadBannerCount }} 則新訊息</span>
+        </div>
+    </transition>
+
+    <div class="h-full overflow-y-auto px-5 py-4 space-y-3" id="messageContainer" @scroll="onScroll">
+
+        <!-- 空狀態 -->
+        <div v-if="filteredMessages.length === 0 && !isLoading"
+            class="flex flex-col items-center justify-center h-full text-gray-400 py-20">
+            <div class="text-5xl mb-3">💭</div>
+            <p class="text-base font-medium">目前還沒有訊息</p>
+            <p class="text-sm mt-1">成為第一個留言的人吧！</p>
+        </div>
+
+        <template v-for="(msg, index) in filteredMessages" :key="msg.id">
+
+            <!-- 日期分隔線 -->
+            <div v-if="showDateDivider(index)" class="flex items-center gap-3 py-1">
+                <div class="flex-1 h-px bg-gray-200"></div>
+                <span class="text-xs text-gray-400 px-2 shrink-0">{{ formatDateLabel(msg.timestamp) }}</span>
+                <div class="flex-1 h-px bg-gray-200"></div>
+            </div>
+
+            <!-- 「以下為新訊息」分隔線 + 錨點 -->
+            <div v-if="isNewMessage(msg) && (index === 0 || !isNewMessage(filteredMessages[index-1]))"
+                id="first-unread-anchor"
+                class="flex items-center gap-3 py-1">
+                <div class="flex-1 h-px bg-indigo-300"></div>
+                <span class="text-xs text-indigo-500 font-semibold px-3 bg-indigo-50 rounded-full py-0.5 shrink-0">
+                    ✨ 以下為新訊息
+                </span>
+                <div class="flex-1 h-px bg-indigo-300"></div>
+            </div>
+
+            <!-- 系統訊息 -->
+            <div v-if="msg.type === 'system'" class="flex justify-center">
+                <div class="msg-system text-xs px-4 py-1.5">{{ msg.content }}</div>
+            </div>
+
+            <!-- ── 自己的訊息（靠右） ── -->
+            <div v-else-if="msg.author === (myChineseName || username)"
+                class="flex justify-end items-end gap-2 msg-enter-active"
+                :class="{ 'msg-new-glow': isNewMessage(msg) }">
+                <div class="flex flex-col items-end max-w-md">
+                    <div class="msg-actions flex items-center gap-2 mb-1 flex-wrap justify-end">
+                        <button class="pin-btn text-xs rounded px-1.5 py-0.5 transition"
+                            :class="msg.pinned ? 'text-amber-500 bg-amber-50 opacity-100' : 'text-gray-400 hover:text-amber-500 hover:bg-amber-50'"
+                            @click="togglePin(msg.id, msg.channel)" :title="msg.pinned ? '取消釘選' : '釘選公告'">
+                            {{ msg.pinned ? '📌 已釘選' : '📌' }}
+                        </button>
+                        <span v-if="isNewMessage(msg)" class="new-badge">NEW</span>
+                        <span v-if="msg.tag" class="tag-chip" :class="tagClass(msg.tag)">{{ msg.tag }}</span>
+                        <span class="text-xs font-medium text-gray-500">{{ myChineseName || msg.author }}</span>
+                        <span class="text-xs text-gray-400">{{ formatTime(msg.timestamp) }}</span>
+                    </div>
+                    <div v-if="msg.replyTo" class="reply-quote-self w-full" @click="scrollToMessage(msg.replyTo)">
+                        <div class="quote-author">↩ {{ getMessageAuthor(msg.replyTo) }}</div>
+                        <div class="quote-body">{{ getMessageContent(msg.replyTo) }}</div>
+                    </div>
+                    <div class="msg-self px-4 py-2.5 text-sm leading-relaxed w-full"
+                        :id="'msg-' + msg.id" style="white-space: pre-wrap; word-break: break-word;">
+                        {{ msg.content }}
+                    </div>
+                    <div v-if="hasReactions(msg.reactions)" class="flex gap-1 mt-1 flex-wrap justify-end">
+                        <span v-for="(count, emoji) in msg.reactions" :key="emoji"
+                            class="reaction-badge" @click="addReaction(msg.id, emoji, msg.channel)">
+                            {{ emoji }} {{ count }}
+                        </span>
+                    </div>
+                    <div class="flex gap-1 mt-1">
+                        <button v-for="e in quickEmojis" :key="e" @click="addReaction(msg.id, e, msg.channel)"
+                            class="text-sm hover:bg-gray-100 rounded px-1 transition">{{ e }}</button>
+                        <button @click="setReply(msg)"
+                            class="text-xs text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded px-2 py-0.5 transition">回覆</button>
+                        <!-- 撤回按鈕：10分鐘內才顯示 -->
+                        <button v-if="canRecall(msg)"
+                            @click="recallMessage(msg)"
+                            class="text-xs text-red-400 hover:text-red-600 hover:bg-red-50 rounded px-2 py-0.5 transition">
+                            撤回
+                        </button>
+                    </div>
+                </div>
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
+                    {{ usernameInitial }}
+                </div>
+            </div>
+
+            <!-- ── 他人訊息（靠左） ── -->
+            <div v-else class="flex items-end gap-2 msg-enter-active"
+                :class="{ 'msg-new-glow': isNewMessage(msg) }">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
+                    :style="{ background: getAuthorColor(msg.author) }">
+                    {{ getInitial(msg.author) }}
+                </div>
+                <div class="flex flex-col max-w-md">
+                    <div class="msg-actions flex items-center gap-2 mb-1 flex-wrap">
+                        <span class="text-xs font-semibold text-gray-600">{{ msg.author }}</span>
+                        <span v-if="msg.tag" class="tag-chip" :class="tagClass(msg.tag)">{{ msg.tag }}</span>
+                        <span class="text-xs text-gray-400">{{ formatTime(msg.timestamp) }}</span>
+                        <span v-if="isNewMessage(msg)" class="new-badge">NEW</span>
+                        <button class="pin-btn text-xs rounded px-1.5 py-0.5 transition"
+                            :class="msg.pinned ? 'text-amber-500 bg-amber-50 opacity-100' : 'text-gray-400 hover:text-amber-500 hover:bg-amber-50'"
+                            @click="togglePin(msg.id, msg.channel)" :title="msg.pinned ? '取消釘選' : '釘選公告'">
+                            {{ msg.pinned ? '📌 已釘選' : '📌' }}
+                        </button>
+                    </div>
+                    <div v-if="msg.replyTo" class="reply-quote-other w-full" @click="scrollToMessage(msg.replyTo)">
+                        <div class="quote-author">↩ {{ getMessageAuthor(msg.replyTo) }}</div>
+                        <div class="quote-body">{{ getMessageContent(msg.replyTo) }}</div>
+                    </div>
+                    <div class="msg-other px-4 py-2.5 text-sm leading-relaxed"
+                        :id="'msg-' + msg.id" style="white-space: pre-wrap; word-break: break-word;">
+                        {{ msg.content }}
+                    </div>
+                    <div v-if="hasReactions(msg.reactions)" class="flex gap-1 mt-1 flex-wrap">
+                        <span v-for="(count, emoji) in msg.reactions" :key="emoji"
+                            class="reaction-badge" @click="addReaction(msg.id, emoji, msg.channel)">
+                            {{ emoji }} {{ count }}
+                        </span>
+                    </div>
+                    <div class="flex gap-1 mt-1">
+                        <button v-for="e in quickEmojis" :key="e" @click="addReaction(msg.id, e, msg.channel)"
+                            class="text-sm hover:bg-gray-100 rounded px-1 transition">{{ e }}</button>
+                        <button @click="setReply(msg)"
+                            class="text-xs text-gray-400 hover:text-purple-600 hover:bg-purple-50 rounded px-2 py-0.5 transition">回覆</button>
+                    </div>
+                </div>
+            </div>
+
+        </template>
+
+        <div id="bottomAnchor"></div>
+    </div>
+
+    <!-- 滑到最下方按鈕 -->
+    <transition name="fade">
+        <button v-if="showScrollBtn" class="scroll-bottom-btn" @click="scrollToBottom" title="滑到最下方">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+        </button>
+    </transition>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         回覆預覽列（完整內容）
+    ══════════════════════════════════════ -->
+    <div v-if="replyingTo" class="bg-purple-50 border-t border-purple-200 px-5 py-3 shrink-0">
+        <div class="flex items-start justify-between gap-3">
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-1.5 mb-1.5">
+                    <span class="text-purple-500 text-sm">↩</span>
+                    <span class="text-xs font-bold text-purple-700">回覆</span>
+                    <span class="text-xs font-bold text-indigo-600 bg-indigo-50 rounded-full px-2 py-0.5">{{ replyingTo.author }}</span>
+                    <span class="text-xs text-purple-400">的訊息</span>
+                </div>
+                <div class="input-reply-box text-gray-700">{{ replyingTo.content }}</div>
+            </div>
+            <button @click="replyingTo = null"
+                class="shrink-0 text-purple-400 hover:text-purple-700 hover:bg-purple-100 rounded-full w-6 h-6 flex items-center justify-center transition text-sm mt-0.5">✕</button>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════════
+         輸入區域
+    ══════════════════════════════════════ -->
+    <div class="bg-white border-t border-gray-200 px-5 py-3 shrink-0">
+        <div class="flex items-end gap-3">
+            <div class="flex flex-col gap-1 shrink-0">
+                <label class="text-xs text-gray-400">標籤</label>
+                <select v-model="selectedTag"
+                    class="text-xs border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-purple-400 bg-white cursor-pointer">
+                    <option value="">無標籤</option>
+                    <option v-for="t in tagOptions" :key="t" :value="t">{{ t }}</option>
+                </select>
+            </div>
+            <div class="flex-1 bg-gray-50 rounded-2xl border border-gray-200 px-4 py-2 focus-within:border-purple-400 focus-within:bg-white transition">
+                <textarea
+                    v-model="newMessage"
+                    @keydown.enter.exact.prevent="sendMessage"
+                    @keydown.shift.enter.exact="newMessage += '\n'"
+                    placeholder="輸入訊息...（Enter 送出，Shift+Enter 換行）"
+                    rows="2"
+                    class="w-full bg-transparent text-sm text-gray-700 resize-none focus:outline-none placeholder-gray-400 leading-relaxed"
+                ></textarea>
+            </div>
+            <button @click="sendMessage" :disabled="!newMessage.trim()"
+                class="shrink-0 w-11 h-11 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 text-white flex items-center justify-center shadow hover:shadow-md transition disabled:opacity-40 disabled:cursor-not-allowed hover:scale-105 active:scale-95">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                </svg>
+            </button>
+        </div>
+        <p class="text-xs text-gray-400 mt-1.5 pl-1">Enter 送出 · Shift+Enter 換行</p>
+    </div>
+
+</div>
+
+<script src="../static/js/func/Message_Board.js"></script>
+</body>
+</html>

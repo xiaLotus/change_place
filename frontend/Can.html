@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>請購單範本複製工具</title>
+    <script src="../static/js/vue.global.js"></script>
+    <script src="../static/js/tailwinds.js"></script>
+    <style>
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: scale(0.95); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .animate-fadeIn {
+            animation: fadeIn 0.25s ease-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div id="app" class="max-w-4xl mx-auto py-8 px-4">
+    
+        <!-- 標題 -->
+        <div class="bg-white shadow-md rounded-lg p-6 mb-6 text-center">
+            <h1 class="flex justify-center items-center gap-2 text-3xl font-bold text-gray-800">
+                <img src="../static/picture/can.png" class="h-8 w-auto">
+                罐頭訊息快速生成
+            </h1>
+            <p class="text-gray-500 mt-2">快速生成並複製罐頭訊息文字</p>
+        </div>
+
+        <!-- 供應商選擇區塊 -->
+        <div class="bg-white shadow-md rounded-lg p-6 space-y-4 mb-6">
+            <label class="block text-gray-700 font-medium mb-2">部分</label>
+            <select v-model="vendorType" class="border border-gray-300 rounded-lg p-2 w-full mb-4">
+                <option value="">請選擇部分</option>
+                <option value="none">無指定預設</option>
+                <option value="cooperate">合作廠商</option>
+                <option value="cooperate2">2nd合作開發</option>
+                <option value="parts">零件商</option>
+                <option value="suggestion">建議廠商</option>
+                <option value="equipment_vendor">設備原廠</option>
+            </select>
+
+            <!-- 搜尋框 (可點選) -->
+            <div class="relative dropdown-wrapper">
+                <input 
+                    v-model="vender"
+                    @focus="enableDropdown"
+                    @input="enableDropdown"
+                    :readonly="vendorType === 'none'"  
+                    :disabled="vendorType === ''"  
+                    :placeholder="vendorType === ''  ? '請先選擇供應商類型' 
+                    : (vendorType === 'none' ? '無指定廠商（不可輸入）' : '輸入關鍵字搜尋或選擇供應商')"
+                    class="w-full border border-gray-300 rounded-lg p-2 focus:ring focus:ring-blue-200 focus:border-blue-400 cursor-pointer"
+                >
+                
+                <!-- 下拉選單 -->
+                <div v-if="showDropdown && vendorType !== 'none' && vendorType !== ''" 
+                    class="absolute w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-20"
+                    @click.stop
+                    >
+                    <!-- 選單清單 -->
+                    <div class="max-h-48 overflow-y-auto">
+                        <div 
+                            v-for="(v, index) in filteredVenders" 
+                            :key="index"
+                            @click="selectVender(v)"
+                            class="px-3 py-2 hover:bg-blue-100 cursor-pointer"
+                            >
+                            {{ v }}
+                        </div>
+                        
+                        <!-- 搜尋不到 -->
+                        <div v-if="filteredVenders.length === 0" class="px-3 py-2 text-gray-400 text-sm">
+                            沒有符合的供應商
+                        </div>
+                    </div>
+
+                    <!-- 底部新增供應商 -->
+                    <div class="border-t bg-gradient-to-r from-purple-50 to-purple-100 p-3 text-center">
+                        <button 
+                            @click.stop="showAddVenderCard = true" 
+                            class="w-full flex items-center justify-center gap-2 bg-purple-500 hover:bg-purple-600 text-white font-medium rounded-lg py-2 shadow-md transition"
+                        >
+                            <!-- Icon -->
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4v16m8-8H4" />
+                            </svg>
+                            新增供應商
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 前購單單號 -->
+            <div>
+                <label class="block text-gray-700 font-medium mb-2 mt-4">前購單單號</label>
+                <input v-model="prevOrderNo" placeholder="輸入前購單單號"
+                    class="border border-gray-300 rounded-lg p-2 w-full focus:ring focus:ring-blue-200 focus:border-blue-400" />
+            </div>
+        </div>
+
+
+        <div v-if="showAddVenderCard" 
+            class="fixed inset-0 bg-black/40 backdrop-blur-sm flex justify-center items-center z-50 transition-opacity">
+        
+            <!-- Modal 卡片 -->
+            <div class="bg-white rounded-2xl shadow-2xl w-[28rem] p-6 relative animate-fadeIn">
+                
+                <!-- 標題區 -->
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-2xl font-bold text-purple-700 flex items-center gap-2">
+                        <svg class="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        新增供應商
+                    </h3>
+                    <!-- 關閉按鈕 -->
+                    <button @click="showAddVenderCard = false"
+                            class="text-gray-400 hover:text-gray-600 transition">
+                        ✕
+                    </button>
+                </div>
+
+                <!-- 說明文字 -->
+                <p class="text-gray-500 text-sm mb-4">
+                    請輸入新的供應商名稱，新增後會立即加入下拉選單
+                </p>
+
+                <!-- 輸入欄位 -->
+                <label class="block text-gray-700 text-sm font-medium mb-2">供應商名稱</label>
+                <input v-model="newVender"
+                    placeholder="請輸入供應商名稱"
+                    class="w-full border border-gray-300 rounded-lg p-3 focus:ring focus:ring-purple-200 focus:border-purple-400 mb-6" />
+
+                <!-- 按鈕區 -->
+                <div class="flex justify-end gap-3">
+                <button @click="showAddVenderCard = false"
+                        class="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 transition">
+                    取消
+                </button>
+                <button @click="confirmAddVender"
+                        class="px-5 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white shadow-md transition">
+                    ✅ 新增
+                </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 範本一 -->
+        <div class="bg-white shadow-md rounded-lg p-6 mb-6 relative min-h-72">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-xl font-semibold text-gray-800">✏️ 範本一  需求原因</h2>
+                <button @click="copyTemplate1"
+                    class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-1 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    複製
+                </button>
+            </div>
+            <textarea ref="template1"
+                class="w-full h-48 border border-gray-300 rounded-lg p-3 text-gray-800 resize-none focus:outline-none bg-gray-50"
+                :value="template1">
+            </textarea>
+            <div v-if="copied1" class="absolute top-0 right-8 text-green-600 text-sm">✅ 已複製</div>
+
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-xl font-semibold text-gray-800">✅ 範本二  簽核請求</h2>
+                <button @click="copyTemplate2"
+                    class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-1 transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    複製
+                </button>
+            </div>
+            <textarea ref="template2"
+                class="w-full h-48 border border-gray-300 rounded-lg p-3 text-gray-800 resize-none focus:outline-none bg-gray-50"
+                :value="template2">
+            </textarea>
+            <div v-if="copied2" class="absolute top-0 right-8 text-green-600 text-sm">✅ 已複製</div>
+            
+
+            <!-- 使用說明 -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6 mt-10">
+                <h3 class="text-lg font-semibold text-blue-800 mb-3">ℹ️ 使用說明</h3>
+                <ul class="list-disc pl-5 text-blue-700 text-sm space-y-1">
+                    <li>點擊「複製」按鈕即可將範本文字複製到剪貼簿</li>
+                    <li>複製後請自行確認變數：{請購順序}、{請購原因}、{需求者}、{分機}、{Vender}</li>
+                    <li>範本一用於說明需求原因</li>
+                    <li>範本二用於請求長官簽核</li>
+                    <li class="text-red-600">前購單單號依照需求輸入</li>
+                </ul>
+            </div>
+            <div class="flex justify-center gap-4 mt-6">
+                <button 
+                    @click="saveChanges"
+                    class="px-6 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg shadow-md transition flex items-center gap-2"
+                >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    💾 儲存修改
+                </button>
+                <button 
+                    @click="goBack"
+                    class="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg shadow-md transition"
+                >
+                    ⬅ 返回
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vue 邏輯 -->
+    <script src="../static/js/func/can.js"></script>
+</body>
+</html>

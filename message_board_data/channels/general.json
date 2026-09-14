@@ -1,0 +1,57 @@
+[
+  {
+    "id": 1,
+    "channel": "general",
+    "author": "詹睿穎",
+    "emp_id": "K18251",
+    "type": "message",
+    "content": "TEST",
+    "timestamp": "2026-03-04T09:46:48.110467+08:00",
+    "tag": "",
+    "reactions": {},
+    "replyTo": null,
+    "pinned": false
+  },
+  {
+    "id": 2,
+    "channel": "general",
+    "author": "王柏翰",
+    "emp_id": "C9228",
+    "type": "message",
+    "content": "55",
+    "timestamp": "2026-03-04T09:47:45.029174+08:00",
+    "tag": "📌 重要",
+    "reactions": {
+      "✅": 1
+    },
+    "replyTo": null,
+    "pinned": true,
+    "pinned_at": "2026-03-04T09:48:32.712241+08:00"
+  },
+  {
+    "id": 3,
+    "channel": "general",
+    "author": "王柏翰",
+    "emp_id": "C9228",
+    "type": "message",
+    "content": "232",
+    "timestamp": "2026-03-04T09:51:31.323889+08:00",
+    "tag": "",
+    "reactions": {},
+    "replyTo": null,
+    "pinned": false
+  },
+  {
+    "id": 4,
+    "channel": "general",
+    "author": "蔣杰軒",
+    "emp_id": "K22920",
+    "type": "message",
+    "content": "5",
+    "timestamp": "2026-03-04T09:51:47.908755+08:00",
+    "tag": "",
+    "reactions": {},
+    "replyTo": null,
+    "pinned": false
+  }
+]

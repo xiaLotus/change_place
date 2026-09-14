@@ -1,0 +1,253 @@
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 開始解析 MHTML 文件
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 使用選擇器 'table[id*="GridView1"]' 找到表格
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'Service Labor K25 Oven WIP=E7=95=B0=E5=B8=B8=E9=BB=
+=98=E5=81=9C-0902' -> 'Service Labor K25 Oven WIP異常默停-0902'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E9=BB=83=E9=83=81=E6=96=87' -> '黃郁文'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'ASE-AS114000342 =E7=83=A4=E7=AE=B1=E5=B1=A4=E6=9E=B6=' -> 'ASE-AS114000342 烤箱層架'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E5=91=A8=E5=BD=A5=E8=89=AF' -> '周彥良'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'DUKEPOS XD-8080=E6=A1=8C=E4=B8=8A=E5=BC=8F=E7=84=A1=
+=E7=B7=9A=E4=BA=8C=E7=B6=AD=E6=A2=9D=E7=A2=BC=E6=8E=83=E6=8F=8F=E5=99=A8' -> 'DUKEPOS XD-8080桌上式無線二維條碼掃描器'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E5=B0=8F=E7=B1=B3 XMSTFXQ01YM =E5=9B=9B=E5=90=88=E4=
+=B8=80=E9=9B=99=E9=A0=AD=E5=88=86=E7=B7=9A=E5=99=A8' -> '小米 XMSTFXQ01YM 四合一雙頭分線器'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'Panasonic PM-Y45 =E5=BE=AE=E5=9E=8B=E5=85=89=E9=9B=
+=BB=E6=84=9F=E6=B8=AC=E5=99=A8' -> 'Panasonic PM-Y45 微型光電感測器'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E7=8F=A0=E5=8F=8B WA-01055 =E5=BD=A9=E8=89=B2=E6=B0=
+=B4=E6=99=B6=E9=91=B0=E5=8C=99=E7=89=8C =E9=80=8F=E6=98=8E-8=E5=85=A5' -> '珠友 WA-01055 彩色水晶鑰匙牌 透明-8入'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'AB=E9=96=80' -> 'AB門'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E4=BF=9D=E8=AD=B7=E5=82=98 7=E5=88=876=E5=BA=A7PU-3=
+763S(2.7M)9=E5=B0=BA=E5=BB=B6=E9=95=B7=E7=B7=9A' -> '保護傘 7切6座PU-3763S(2.7M)9尺延長線'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E7=8E=8B=E6=9F=8F=E7=BF=B0' -> '王柏翰'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E4=BF=9D=E8=AD=B7=E5=82=98 7=E5=88=876=E5=BA=A7PU-3=
+763S(4.5M)15=E5=B0=BA=E5=BB=B6=E9=95=B7=E7=B7=9A' -> '保護傘 7切6座PU-3763S(4.5M)15尺延長線'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E7=8E=8B=E6=9F=8F=E7=BF=B0' -> '王柏翰'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'AirTAC DPSN1-10050 =E9=9B=BB=E5=AD=90=E5=BC=8F=E5=A3=
+=93=E5=8A=9B=E5=82=B3=E6=84=9F=E5=99=A8' -> 'AirTAC DPSN1-10050 電子式壓力傳感器'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'AirTAC TCM25x20S =E4=B8=89=E8=BB=B8=E6=B0=A3=E7=BC=
+=B8' -> 'AirTAC TCM25x20S 三軸氣缸'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'AOTTO =E5=85=8D=E5=AE=89=E8=A3=9D=E5=A4=9A=E5=8A=9F=
+=E8=83=BD=E5=8F=AF=E6=94=B6=E7=B4=8D=E6=8A=98=E7=96=8A=E6=A4=85' -> 'AOTTO 免安裝多功能可收納折疊椅'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E7=8E=8B=E6=9F=8F=E7=BF=B0' -> '王柏翰'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'LOGIS CZ152Z =E5=A1=91=E9=8B=BC=E8=90=AC=E7=94=A8=
+=E6=91=BA=E7=96=8A=E9=95=B7=E6=A1=8C152*76' -> 'LOGIS CZ152Z 塑鋼萬用摺疊長桌152*76'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E7=8E=8B=E6=9F=8F=E7=BF=B0' -> '王柏翰'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E4=BD=8E=E9=A1=8D' -> '低額'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'Sharp AQUOS Wish5=E5=BC=B7=E5=8C=96=E8=BB=8D=E8=A6=
+=8F=E9=98=B2=E6=91=94=E6=8A=97=E9=9C=87=E6=89=8B=E6=A9=9F=E6=AE=BC' -> 'Sharp AQUOS Wish5強化軍規防摔抗震手機殼'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E7=8E=8B=E6=9F=8F=E7=BF=B0' -> '王柏翰'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-06 19:01:35 INFO [acc_mail.parse]: 成功解析 13 筆資料
+2026-09-06 19:16:23 INFO [acc_mail.send]: 📧 準備發送驗收/領料通知郵件
+2026-09-06 19:16:23 INFO [acc_mail.send]:    收件人(To): AlanYW_Huang@aseglobal.com,YenLiang_Chou@aseglobal.com,Otis_Wang@aseglobal.com,Otis_Wang@aseglobal.com,Zilong_Chao@aseglobal.com
+2026-09-06 19:16:23 INFO [acc_mail.send]:    副本(CC): RuiYing_Chan@aseglobal.com,Otis_Wang@aseglobal.com,
+2026-09-06 19:16:23 INFO [acc_mail.send]:    主旨: <<驗收通知>> 照片請自行拍照上傳論壇，煩請 ERT 單附報告驗收 【PO No. 6100894186、6100894185、6100879053、6100894943、6100894944、6100894648、6100894549、6100894201】 To: AlanYW, Yao, Otis, YenLiang, Zilong
+2026-09-06 19:16:23 INFO [acc_mail.send]:    內容: 共 13 筆料件，PO No.: 6100894186、6100894185、6100879053、6100894943、6100894944、6100894648、6100894549、6100894201
+2026-09-06 19:16:23 INFO [acc_mail.send]:    [01] PO=6100894549, Item=0001, 品項=Service Labor K25 Oven WIP異常默停-0902, 數量=8, RT No.=6000324269, 需求者=黃郁文, ePR No.=2607200420, 領料人=黃郁文, 備註=測試喔
+2026-09-06 19:16:23 INFO [acc_mail.send]:    [02] PO=6100879053, Item=0001, 品項=ASE-AS114000342 烤箱層架, 數量=6, RT No.=6000324479, 需求者=周彥良, ePR No.=2604200143, 領料人=周彥良, 備註=設備修改類, 請 User 提供照片結案
+2026-09-06 19:16:23 INFO [acc_mail.send]:    [03] PO=6100894648, Item=0001, 品項=DUKEPOS XD-8080桌上式無線二維條碼掃描器, 數量=5, RT No.=6000328005, 需求者=董承堯, ePR No.=2607270121, 領料人=E1, 備註=設備修改類, 請 User 提供照片結案
+2026-09-06 19:16:23 INFO [acc_mail.send]:    [04] PO=6100894648, Item=0002, 品項=小米 XMSTFXQ01YM 四合一雙頭分線器, 數量=6, RT No.=6000328005, 需求者=董承堯, ePR No.=2607270121, 領料人=E1, 備註=設備修改類, 請 User 提供照片結案
+2026-09-06 19:16:23 INFO [acc_mail.send]:    [05] PO=6100894944, Item=0001, 品項=Panasonic PM-Y45 微型光電感測器, 數量=20, RT No.=6000330676, 需求者=王柏翰, ePR No.=2606300383, 領料人=D2, 備註=設備修改類, 請 User 提供照片結案
+2026-09-06 19:16:23 INFO [acc_mail.send]:    [06] PO=6100894648, Item=0001, 品項=珠友 WA-01055 彩色水晶鑰匙牌 透明-8入, 數量=80, RT No.=6000332616, 需求者=董承堯, ePR No.=2607270121, 領料人=AB門, 備註=設備修改類, 請 User 提供照片結案
+2026-09-06 19:16:23 INFO [acc_mail.send]:    [07] PO=6100894186, Item=0001, 品項=保護傘 7切6座PU-3763S(2.7M)9尺延長線, 數量=30, RT No.=6000335255, 需求者=王柏翰, ePR No.=2607100410, 領料人=王柏翰, 備註=設備修改類, 請 User 提供照片結案
+2026-09-06 19:16:23 INFO [acc_mail.send]:    [08] PO=6100894186, Item=0002, 品項=保護傘 7切6座PU-3763S(4.5M)15尺延長線, 數量=20, RT No.=6000335255, 需求者=王柏翰, ePR No.=2607100410, 領料人=王柏翰, 備註=設備修改類, 請 User 提供照片結案
+2026-09-06 19:16:23 INFO [acc_mail.send]:    [09] PO=6100894943, Item=0001, 品項=AirTAC DPSN1-10050 電子式壓力傳感器, 數量=10, RT No.=6000339144, 需求者=王柏翰, ePR No.=2606300383, 領料人=X2, 備註=設備修改類, 請 User 提供照片結案
+2026-09-06 19:16:23 INFO [acc_mail.send]:    [10] PO=6100894943, Item=0002, 品項=AirTAC TCM25x20S 三軸氣缸, 數量=10, RT No.=6000339144, 需求者=王柏翰, ePR No.=2606300383, 領料人=X2, 備註=設備修改類, 請 User 提供照片結案
+2026-09-06 19:16:23 INFO [acc_mail.send]:    [11] PO=6100894185, Item=0001, 品項=AOTTO 免安裝多功能可收納折疊椅, 數量=24, RT No.=6000339979, 需求者=王柏翰, ePR No.=2607100410, 領料人=王柏翰, 備註=設備修改類, 請 User 提供照片結案
+2026-09-06 19:16:23 INFO [acc_mail.send]:    [12] PO=6100894185, Item=0001, 品項=LOGIS CZ152Z 塑鋼萬用摺疊長桌152*76, 數量=6, RT No.=6000339980, 需求者=王柏翰, ePR No.=2607100410, 領料人=王柏翰, 備註=設備修改類, 請 User 提供照片結案
+2026-09-06 19:16:23 INFO [acc_mail.send]:    [13] PO=6100894201, Item=0001, 品項=Sharp AQUOS Wish5強化軍規防摔抗震手機殼, 數量=50, RT No.=6000342471, 需求者=趙祥富, ePR No.=2607200416, 領料人=王柏翰, 備註=設備修改類, 請 User 提供照片結案
+2026-09-06 19:16:44 ERROR [acc_mail.send]: ❌ 郵件發送失敗 (PO No.=6100894186、6100894185、6100879053、6100894943、6100894944、6100894648、6100894549、6100894201): [WinError 10060] 連線嘗試失敗，因為連線對象有一段時間並未正確回應，或是連線建立失敗，因為連線的主機無法回應。
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 開始解析 MHTML 文件
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 使用選擇器 'table[id*="GridView1"]' 找到表格
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'Service Labor K25 Oven WIP=E7=95=B0=E5=B8=B8=E9=BB=
+=98=E5=81=9C-0902' -> 'Service Labor K25 Oven WIP異常默停-0902'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E9=BB=83=E9=83=81=E6=96=87' -> '黃郁文'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'ASE-AS114000342 =E7=83=A4=E7=AE=B1=E5=B1=A4=E6=9E=B6=' -> 'ASE-AS114000342 烤箱層架'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E5=91=A8=E5=BD=A5=E8=89=AF' -> '周彥良'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'DUKEPOS XD-8080=E6=A1=8C=E4=B8=8A=E5=BC=8F=E7=84=A1=
+=E7=B7=9A=E4=BA=8C=E7=B6=AD=E6=A2=9D=E7=A2=BC=E6=8E=83=E6=8F=8F=E5=99=A8' -> 'DUKEPOS XD-8080桌上式無線二維條碼掃描器'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E5=B0=8F=E7=B1=B3 XMSTFXQ01YM =E5=9B=9B=E5=90=88=E4=
+=B8=80=E9=9B=99=E9=A0=AD=E5=88=86=E7=B7=9A=E5=99=A8' -> '小米 XMSTFXQ01YM 四合一雙頭分線器'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'Panasonic PM-Y45 =E5=BE=AE=E5=9E=8B=E5=85=89=E9=9B=
+=BB=E6=84=9F=E6=B8=AC=E5=99=A8' -> 'Panasonic PM-Y45 微型光電感測器'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E7=8F=A0=E5=8F=8B WA-01055 =E5=BD=A9=E8=89=B2=E6=B0=
+=B4=E6=99=B6=E9=91=B0=E5=8C=99=E7=89=8C =E9=80=8F=E6=98=8E-8=E5=85=A5' -> '珠友 WA-01055 彩色水晶鑰匙牌 透明-8入'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'AB=E9=96=80' -> 'AB門'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E4=BF=9D=E8=AD=B7=E5=82=98 7=E5=88=876=E5=BA=A7PU-3=
+763S(2.7M)9=E5=B0=BA=E5=BB=B6=E9=95=B7=E7=B7=9A' -> '保護傘 7切6座PU-3763S(2.7M)9尺延長線'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E7=8E=8B=E6=9F=8F=E7=BF=B0' -> '王柏翰'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E4=BF=9D=E8=AD=B7=E5=82=98 7=E5=88=876=E5=BA=A7PU-3=
+763S(4.5M)15=E5=B0=BA=E5=BB=B6=E9=95=B7=E7=B7=9A' -> '保護傘 7切6座PU-3763S(4.5M)15尺延長線'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E7=8E=8B=E6=9F=8F=E7=BF=B0' -> '王柏翰'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'AirTAC DPSN1-10050 =E9=9B=BB=E5=AD=90=E5=BC=8F=E5=A3=
+=93=E5=8A=9B=E5=82=B3=E6=84=9F=E5=99=A8' -> 'AirTAC DPSN1-10050 電子式壓力傳感器'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'AirTAC TCM25x20S =E4=B8=89=E8=BB=B8=E6=B0=A3=E7=BC=
+=B8' -> 'AirTAC TCM25x20S 三軸氣缸'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'AOTTO =E5=85=8D=E5=AE=89=E8=A3=9D=E5=A4=9A=E5=8A=9F=
+=E8=83=BD=E5=8F=AF=E6=94=B6=E7=B4=8D=E6=8A=98=E7=96=8A=E6=A4=85' -> 'AOTTO 免安裝多功能可收納折疊椅'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E7=8E=8B=E6=9F=8F=E7=BF=B0' -> '王柏翰'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'LOGIS CZ152Z =E5=A1=91=E9=8B=BC=E8=90=AC=E7=94=A8=
+=E6=91=BA=E7=96=8A=E9=95=B7=E6=A1=8C152*76' -> 'LOGIS CZ152Z 塑鋼萬用摺疊長桌152*76'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E7=8E=8B=E6=9F=8F=E7=BF=B0' -> '王柏翰'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E4=BD=8E=E9=A1=8D' -> '低額'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'Sharp AQUOS Wish5=E5=BC=B7=E5=8C=96=E8=BB=8D=E8=A6=
+=8F=E9=98=B2=E6=91=94=E6=8A=97=E9=9C=87=E6=89=8B=E6=A9=9F=E6=AE=BC' -> 'Sharp AQUOS Wish5強化軍規防摔抗震手機殼'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E7=8E=8B=E6=9F=8F=E7=BF=B0' -> '王柏翰'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-06 19:17:11 INFO [acc_mail.parse]: 成功解析 13 筆資料
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 開始解析 MHTML 文件
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 使用選擇器 'table[id*="GridView1"]' 找到表格
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'Service Labor K25 Oven WIP=E7=95=B0=E5=B8=B8=E9=BB=
+=98=E5=81=9C-0902' -> 'Service Labor K25 Oven WIP異常默停-0902'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E9=BB=83=E9=83=81=E6=96=87' -> '黃郁文'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'ASE-AS114000342 =E7=83=A4=E7=AE=B1=E5=B1=A4=E6=9E=B6=' -> 'ASE-AS114000342 烤箱層架'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E5=91=A8=E5=BD=A5=E8=89=AF' -> '周彥良'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'DUKEPOS XD-8080=E6=A1=8C=E4=B8=8A=E5=BC=8F=E7=84=A1=
+=E7=B7=9A=E4=BA=8C=E7=B6=AD=E6=A2=9D=E7=A2=BC=E6=8E=83=E6=8F=8F=E5=99=A8' -> 'DUKEPOS XD-8080桌上式無線二維條碼掃描器'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E5=B0=8F=E7=B1=B3 XMSTFXQ01YM =E5=9B=9B=E5=90=88=E4=
+=B8=80=E9=9B=99=E9=A0=AD=E5=88=86=E7=B7=9A=E5=99=A8' -> '小米 XMSTFXQ01YM 四合一雙頭分線器'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'Panasonic PM-Y45 =E5=BE=AE=E5=9E=8B=E5=85=89=E9=9B=
+=BB=E6=84=9F=E6=B8=AC=E5=99=A8' -> 'Panasonic PM-Y45 微型光電感測器'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E7=8F=A0=E5=8F=8B WA-01055 =E5=BD=A9=E8=89=B2=E6=B0=
+=B4=E6=99=B6=E9=91=B0=E5=8C=99=E7=89=8C =E9=80=8F=E6=98=8E-8=E5=85=A5' -> '珠友 WA-01055 彩色水晶鑰匙牌 透明-8入'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'AB=E9=96=80' -> 'AB門'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E4=BF=9D=E8=AD=B7=E5=82=98 7=E5=88=876=E5=BA=A7PU-3=
+763S(2.7M)9=E5=B0=BA=E5=BB=B6=E9=95=B7=E7=B7=9A' -> '保護傘 7切6座PU-3763S(2.7M)9尺延長線'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E7=8E=8B=E6=9F=8F=E7=BF=B0' -> '王柏翰'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E4=BF=9D=E8=AD=B7=E5=82=98 7=E5=88=876=E5=BA=A7PU-3=
+763S(4.5M)15=E5=B0=BA=E5=BB=B6=E9=95=B7=E7=B7=9A' -> '保護傘 7切6座PU-3763S(4.5M)15尺延長線'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E7=8E=8B=E6=9F=8F=E7=BF=B0' -> '王柏翰'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'AirTAC DPSN1-10050 =E9=9B=BB=E5=AD=90=E5=BC=8F=E5=A3=
+=93=E5=8A=9B=E5=82=B3=E6=84=9F=E5=99=A8' -> 'AirTAC DPSN1-10050 電子式壓力傳感器'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'AirTAC TCM25x20S =E4=B8=89=E8=BB=B8=E6=B0=A3=E7=BC=
+=B8' -> 'AirTAC TCM25x20S 三軸氣缸'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'AOTTO =E5=85=8D=E5=AE=89=E8=A3=9D=E5=A4=9A=E5=8A=9F=
+=E8=83=BD=E5=8F=AF=E6=94=B6=E7=B4=8D=E6=8A=98=E7=96=8A=E6=A4=85' -> 'AOTTO 免安裝多功能可收納折疊椅'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E7=8E=8B=E6=9F=8F=E7=BF=B0' -> '王柏翰'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'LOGIS CZ152Z =E5=A1=91=E9=8B=BC=E8=90=AC=E7=94=A8=
+=E6=91=BA=E7=96=8A=E9=95=B7=E6=A1=8C152*76' -> 'LOGIS CZ152Z 塑鋼萬用摺疊長桌152*76'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E7=8E=8B=E6=9F=8F=E7=BF=B0' -> '王柏翰'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E4=BD=8E=E9=A1=8D' -> '低額'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'Sharp AQUOS Wish5=E5=BC=B7=E5=8C=96=E8=BB=8D=E8=A6=
+=8F=E9=98=B2=E6=91=94=E6=8A=97=E9=9C=87=E6=89=8B=E6=A9=9F=E6=AE=BC' -> 'Sharp AQUOS Wish5強化軍規防摔抗震手機殼'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E7=8E=8B=E6=9F=8F=E7=BF=B0' -> '王柏翰'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-08 19:54:33 INFO [acc_mail.parse]: 成功解析 13 筆資料
+2026-09-08 19:55:00 INFO [acc_mail.send]: 📧 準備發送驗收/領料通知郵件
+2026-09-08 19:55:00 INFO [acc_mail.send]:    收件人(To): AlanYW_Huang@aseglobal.com,YenLiang_Chou@aseglobal.com,Otis_Wang@aseglobal.com,Otis_Wang@aseglobal.com,Zilong_Chao@aseglobal.com
+2026-09-08 19:55:00 INFO [acc_mail.send]:    副本(CC): RuiYing_Chan@aseglobal.com,Otis_Wang@aseglobal.com
+2026-09-08 19:55:00 INFO [acc_mail.send]:    主旨: <<驗收通知>> 照片請自行拍照上傳論壇，煩請 ERT 單附報告驗收 【PO No. 6100894944、6100894201、6100894943、6100894185、6100879053、6100894186、6100894648、6100894549】 To: Yao, Otis, Zilong, AlanYW, YenLiang
+2026-09-08 19:55:00 INFO [acc_mail.send]:    內容: 共 13 筆料件，PO No.: 6100894944、6100894201、6100894943、6100894185、6100879053、6100894186、6100894648、6100894549
+2026-09-08 19:55:00 INFO [acc_mail.send]:    [01] PO=6100894549, Item=0001, 品項=Service Labor K25 Oven WIP異常默停-0902, 數量=8, RT No.=6000324269, 需求者=黃郁文, ePR No.=2607200420, 領料人=黃郁文, 備註=肏適中
+2026-09-08 19:55:00 INFO [acc_mail.send]:    [02] PO=6100879053, Item=0001, 品項=ASE-AS114000342 烤箱層架, 數量=6, RT No.=6000324479, 需求者=周彥良, ePR No.=2604200143, 領料人=周彥良, 備註=設備修改類, 請 User 提供照片結案
+2026-09-08 19:55:00 INFO [acc_mail.send]:    [03] PO=6100894648, Item=0001, 品項=DUKEPOS XD-8080桌上式無線二維條碼掃描器, 數量=5, RT No.=6000328005, 需求者=董承堯, ePR No.=2607270121, 領料人=E1, 備註=設備修改類, 請 User 提供照片結案
+2026-09-08 19:55:00 INFO [acc_mail.send]:    [04] PO=6100894648, Item=0002, 品項=小米 XMSTFXQ01YM 四合一雙頭分線器, 數量=6, RT No.=6000328005, 需求者=董承堯, ePR No.=2607270121, 領料人=E1, 備註=設備修改類, 請 User 提供照片結案
+2026-09-08 19:55:00 INFO [acc_mail.send]:    [05] PO=6100894944, Item=0001, 品項=Panasonic PM-Y45 微型光電感測器, 數量=20, RT No.=6000330676, 需求者=王柏翰, ePR No.=2606300383, 領料人=D2, 備註=設備修改類, 請 User 提供照片結案
+2026-09-08 19:55:00 INFO [acc_mail.send]:    [06] PO=6100894648, Item=0001, 品項=珠友 WA-01055 彩色水晶鑰匙牌 透明-8入, 數量=80, RT No.=6000332616, 需求者=董承堯, ePR No.=2607270121, 領料人=AB門, 備註=設備修改類, 請 User 提供照片結案
+2026-09-08 19:55:00 INFO [acc_mail.send]:    [07] PO=6100894186, Item=0001, 品項=保護傘 7切6座PU-3763S(2.7M)9尺延長線, 數量=30, RT No.=6000335255, 需求者=王柏翰, ePR No.=2607100410, 領料人=王柏翰, 備註=設備修改類, 請 User 提供照片結案
+2026-09-08 19:55:00 INFO [acc_mail.send]:    [08] PO=6100894186, Item=0002, 品項=保護傘 7切6座PU-3763S(4.5M)15尺延長線, 數量=20, RT No.=6000335255, 需求者=王柏翰, ePR No.=2607100410, 領料人=王柏翰, 備註=設備修改類, 請 User 提供照片結案
+2026-09-08 19:55:00 INFO [acc_mail.send]:    [09] PO=6100894943, Item=0001, 品項=AirTAC DPSN1-10050 電子式壓力傳感器, 數量=10, RT No.=6000339144, 需求者=王柏翰, ePR No.=2606300383, 領料人=X2, 備註=設備修改類, 請 User 提供照片結案
+2026-09-08 19:55:00 INFO [acc_mail.send]:    [10] PO=6100894943, Item=0002, 品項=AirTAC TCM25x20S 三軸氣缸, 數量=10, RT No.=6000339144, 需求者=王柏翰, ePR No.=2606300383, 領料人=X2, 備註=設備修改類, 請 User 提供照片結案
+2026-09-08 19:55:00 INFO [acc_mail.send]:    [11] PO=6100894185, Item=0001, 品項=AOTTO 免安裝多功能可收納折疊椅, 數量=24, RT No.=6000339979, 需求者=王柏翰, ePR No.=2607100410, 領料人=王柏翰, 備註=設備修改類, 請 User 提供照片結案
+2026-09-08 19:55:00 INFO [acc_mail.send]:    [12] PO=6100894185, Item=0001, 品項=LOGIS CZ152Z 塑鋼萬用摺疊長桌152*76, 數量=6, RT No.=6000339980, 需求者=王柏翰, ePR No.=2607100410, 領料人=王柏翰, 備註=設備修改類, 請 User 提供照片結案
+2026-09-08 19:55:00 INFO [acc_mail.send]:    [13] PO=6100894201, Item=0001, 品項=Sharp AQUOS Wish5強化軍規防摔抗震手機殼, 數量=50, RT No.=6000342471, 需求者=趙祥富, ePR No.=2607200416, 領料人=王柏翰, 備註=設備修改類, 請 User 提供照片結案
+2026-09-08 19:55:21 ERROR [acc_mail.send]: ❌ 郵件發送失敗 (PO No.=6100894944、6100894201、6100894943、6100894185、6100879053、6100894186、6100894648、6100894549): [WinError 10060] 連線嘗試失敗，因為連線對象有一段時間並未正確回應，或是連線建立失敗，因為連線的主機無法回應。
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 開始解析 MHTML 文件
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 使用選擇器 'table[id*="GridView1"]' 找到表格
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'Service Labor K25 Oven WIP=E7=95=B0=E5=B8=B8=E9=BB=
+=98=E5=81=9C-0902' -> 'Service Labor K25 Oven WIP異常默停-0902'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E9=BB=83=E9=83=81=E6=96=87' -> '黃郁文'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'ASE-AS114000342 =E7=83=A4=E7=AE=B1=E5=B1=A4=E6=9E=B6=' -> 'ASE-AS114000342 烤箱層架'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E5=91=A8=E5=BD=A5=E8=89=AF' -> '周彥良'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'DUKEPOS XD-8080=E6=A1=8C=E4=B8=8A=E5=BC=8F=E7=84=A1=
+=E7=B7=9A=E4=BA=8C=E7=B6=AD=E6=A2=9D=E7=A2=BC=E6=8E=83=E6=8F=8F=E5=99=A8' -> 'DUKEPOS XD-8080桌上式無線二維條碼掃描器'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E5=B0=8F=E7=B1=B3 XMSTFXQ01YM =E5=9B=9B=E5=90=88=E4=
+=B8=80=E9=9B=99=E9=A0=AD=E5=88=86=E7=B7=9A=E5=99=A8' -> '小米 XMSTFXQ01YM 四合一雙頭分線器'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'Panasonic PM-Y45 =E5=BE=AE=E5=9E=8B=E5=85=89=E9=9B=
+=BB=E6=84=9F=E6=B8=AC=E5=99=A8' -> 'Panasonic PM-Y45 微型光電感測器'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E7=8F=A0=E5=8F=8B WA-01055 =E5=BD=A9=E8=89=B2=E6=B0=
+=B4=E6=99=B6=E9=91=B0=E5=8C=99=E7=89=8C =E9=80=8F=E6=98=8E-8=E5=85=A5' -> '珠友 WA-01055 彩色水晶鑰匙牌 透明-8入'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'AB=E9=96=80' -> 'AB門'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E4=BF=9D=E8=AD=B7=E5=82=98 7=E5=88=876=E5=BA=A7PU-3=
+763S(2.7M)9=E5=B0=BA=E5=BB=B6=E9=95=B7=E7=B7=9A' -> '保護傘 7切6座PU-3763S(2.7M)9尺延長線'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E7=8E=8B=E6=9F=8F=E7=BF=B0' -> '王柏翰'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E4=BF=9D=E8=AD=B7=E5=82=98 7=E5=88=876=E5=BA=A7PU-3=
+763S(4.5M)15=E5=B0=BA=E5=BB=B6=E9=95=B7=E7=B7=9A' -> '保護傘 7切6座PU-3763S(4.5M)15尺延長線'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E7=8E=8B=E6=9F=8F=E7=BF=B0' -> '王柏翰'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'AirTAC DPSN1-10050 =E9=9B=BB=E5=AD=90=E5=BC=8F=E5=A3=
+=93=E5=8A=9B=E5=82=B3=E6=84=9F=E5=99=A8' -> 'AirTAC DPSN1-10050 電子式壓力傳感器'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'AirTAC TCM25x20S =E4=B8=89=E8=BB=B8=E6=B0=A3=E7=BC=
+=B8' -> 'AirTAC TCM25x20S 三軸氣缸'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'AOTTO =E5=85=8D=E5=AE=89=E8=A3=9D=E5=A4=9A=E5=8A=9F=
+=E8=83=BD=E5=8F=AF=E6=94=B6=E7=B4=8D=E6=8A=98=E7=96=8A=E6=A4=85' -> 'AOTTO 免安裝多功能可收納折疊椅'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E7=8E=8B=E6=9F=8F=E7=BF=B0' -> '王柏翰'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'LOGIS CZ152Z =E5=A1=91=E9=8B=BC=E8=90=AC=E7=94=A8=
+=E6=91=BA=E7=96=8A=E9=95=B7=E6=A1=8C152*76' -> 'LOGIS CZ152Z 塑鋼萬用摺疊長桌152*76'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E7=8E=8B=E6=9F=8F=E7=BF=B0' -> '王柏翰'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E4=BD=8E=E9=A1=8D' -> '低額'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'Sharp AQUOS Wish5=E5=BC=B7=E5=8C=96=E8=BB=8D=E8=A6=
+=8F=E9=98=B2=E6=91=94=E6=8A=97=E9=9C=87=E6=89=8B=E6=A9=9F=E6=AE=BC' -> 'Sharp AQUOS Wish5強化軍規防摔抗震手機殼'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E7=8E=8B=E6=9F=8F=E7=BF=B0' -> '王柏翰'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-09-08 20:00:34 INFO [acc_mail.parse]: 成功解析 13 筆資料
+2026-09-08 20:08:03 INFO [acc_mail.send]: 📧 準備發送驗收/領料通知郵件
+2026-09-08 20:08:03 INFO [acc_mail.send]:    收件人(To): AlanYW_Huang@aseglobal.com,YenLiang_Chou@aseglobal.com,Otis_Wang@aseglobal.com,Otis_Wang@aseglobal.com,Zilong_Chao@aseglobal.com
+2026-09-08 20:08:03 INFO [acc_mail.send]:    副本(CC): RuiYing_Chan@aseglobal.com,Otis_Wang@aseglobal.com,WL_Huang@aseglobal.com
+2026-09-08 20:08:03 INFO [acc_mail.send]:    主旨: <<驗收通知>> 照片請自行拍照上傳論壇，煩請 ERT 單附報告驗收 【PO No. 6100894944、6100894201、6100894943、6100894185、6100879053、6100894186、6100894648、6100894549】 To: Yao, Otis, Zilong, AlanYW, YenLiang
+2026-09-08 20:08:03 INFO [acc_mail.send]:    內容: 共 13 筆料件，PO No.: 6100894944、6100894201、6100894943、6100894185、6100879053、6100894186、6100894648、6100894549
+2026-09-08 20:08:03 INFO [acc_mail.send]:    [01] PO=6100894549, Item=0001, 品項=Service Labor K25 Oven WIP異常默停-0902, 數量=8, RT No.=6000324269, 需求者=黃郁文, ePR No.=2607200420, 領料人=黃郁文, 備註=887:
+2026-09-08 20:08:03 INFO [acc_mail.send]:    [02] PO=6100879053, Item=0001, 品項=ASE-AS114000342 烤箱層架, 數量=6, RT No.=6000324479, 需求者=周彥良, ePR No.=2604200143, 領料人=周彥良, 備註=設備修改類, 請 User 提供照片結案
+2026-09-08 20:08:03 INFO [acc_mail.send]:    [03] PO=6100894648, Item=0001, 品項=DUKEPOS XD-8080桌上式無線二維條碼掃描器, 數量=5, RT No.=6000328005, 需求者=董承堯, ePR No.=2607270121, 領料人=E1, 備註=設備修改類, 請 User 提供照片結案
+2026-09-08 20:08:03 INFO [acc_mail.send]:    [04] PO=6100894648, Item=0002, 品項=小米 XMSTFXQ01YM 四合一雙頭分線器, 數量=6, RT No.=6000328005, 需求者=董承堯, ePR No.=2607270121, 領料人=E1, 備註=設備修改類, 請 User 提供照片結案
+2026-09-08 20:08:03 INFO [acc_mail.send]:    [05] PO=6100894944, Item=0001, 品項=Panasonic PM-Y45 微型光電感測器, 數量=20, RT No.=6000330676, 需求者=王柏翰, ePR No.=2606300383, 領料人=D2, 備註=設備修改類, 請 User 提供照片結案
+2026-09-08 20:08:03 INFO [acc_mail.send]:    [06] PO=6100894648, Item=0001, 品項=珠友 WA-01055 彩色水晶鑰匙牌 透明-8入, 數量=80, RT No.=6000332616, 需求者=董承堯, ePR No.=2607270121, 領料人=AB門, 備註=設備修改類, 請 User 提供照片結案
+2026-09-08 20:08:03 INFO [acc_mail.send]:    [07] PO=6100894186, Item=0001, 品項=保護傘 7切6座PU-3763S(2.7M)9尺延長線, 數量=30, RT No.=6000335255, 需求者=王柏翰, ePR No.=2607100410, 領料人=王柏翰, 備註=設備修改類, 請 User 提供照片結案
+2026-09-08 20:08:03 INFO [acc_mail.send]:    [08] PO=6100894186, Item=0002, 品項=保護傘 7切6座PU-3763S(4.5M)15尺延長線, 數量=20, RT No.=6000335255, 需求者=王柏翰, ePR No.=2607100410, 領料人=王柏翰, 備註=設備修改類, 請 User 提供照片結案
+2026-09-08 20:08:03 INFO [acc_mail.send]:    [09] PO=6100894943, Item=0001, 品項=AirTAC DPSN1-10050 電子式壓力傳感器, 數量=10, RT No.=6000339144, 需求者=王柏翰, ePR No.=2606300383, 領料人=X2, 備註=設備修改類, 請 User 提供照片結案
+2026-09-08 20:08:03 INFO [acc_mail.send]:    [10] PO=6100894943, Item=0002, 品項=AirTAC TCM25x20S 三軸氣缸, 數量=10, RT No.=6000339144, 需求者=王柏翰, ePR No.=2606300383, 領料人=X2, 備註=設備修改類, 請 User 提供照片結案
+2026-09-08 20:08:03 INFO [acc_mail.send]:    [11] PO=6100894185, Item=0001, 品項=AOTTO 免安裝多功能可收納折疊椅, 數量=24, RT No.=6000339979, 需求者=王柏翰, ePR No.=2607100410, 領料人=王柏翰, 備註=設備修改類, 請 User 提供照片結案
+2026-09-08 20:08:03 INFO [acc_mail.send]:    [12] PO=6100894185, Item=0001, 品項=LOGIS CZ152Z 塑鋼萬用摺疊長桌152*76, 數量=6, RT No.=6000339980, 需求者=王柏翰, ePR No.=2607100410, 領料人=王柏翰, 備註=設備修改類, 請 User 提供照片結案
+2026-09-08 20:08:03 INFO [acc_mail.send]:    [13] PO=6100894201, Item=0001, 品項=Sharp AQUOS Wish5強化軍規防摔抗震手機殼, 數量=50, RT No.=6000342471, 需求者=趙祥富, ePR No.=2607200416, 領料人=王柏翰, 備註=設備修改類, 請 User 提供照片結案
+2026-09-08 20:08:24 ERROR [acc_mail.send]: ❌ 郵件發送失敗 (PO No.=6100894944、6100894201、6100894943、6100894185、6100879053、6100894186、6100894648、6100894549): [WinError 10060] 連線嘗試失敗，因為連線對象有一段時間並未正確回應，或是連線建立失敗，因為連線的主機無法回應。

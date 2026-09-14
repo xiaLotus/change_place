@@ -1,0 +1,26 @@
+2026-08-15 09:06:04 INFO [app]: 🔄 Log 系統已啟動（設定檔：D:\網頁\預計請購_20220530-w03上版\config.ini，輪轉週期：7 天，保留 52 份）
+2026-08-15 09:06:05 INFO [app]: 🔄 Log 系統已啟動（設定檔：D:\網頁\預計請購_20220530-w03上版\config.ini，輪轉週期：7 天，保留 52 份）
+2026-08-15 09:06:46 INFO [app]: ✅ 計算金額欄位已建立
+2026-08-15 09:06:46 INFO [app]: 📅 下個月日期範圍: 2026-09-01 ~ 2026-09-30
+2026-08-15 09:06:46 INFO [app]: 🔢 整數格式: 20260901 ~ 20260930
+2026-08-15 09:06:46 INFO [app]: ✅ 符合條件的資料共 20 筆
+2026-08-15 09:06:46 INFO [app]: 💰 下個月預計入帳總金額: 781,960 元
+2026-08-15 09:06:46 INFO [app]: ✅ API 執行成功
+2026-08-15 09:06:56 INFO [app]: Processing file: 6100879053-ASE-AS114000342__65f3d5e5.mhtml
+2026-08-15 09:06:56 INFO [app]: GridView data saved to: 6100879053-ASE-AS114000342__65f3d5e5_gridview.json
+2026-08-15 09:06:56 INFO [app]: 開始與 Buyer_detail.csv 比對...
+2026-08-15 09:06:57 INFO [app]: 準備更新 1 筆資料
+2026-08-15 09:06:57 INFO [app]: Buyer CSV 原始欄位: ['Id', '開單狀態', '交貨驗證', 'User', 'ePR No.', 'PO No.', 'Item', '品項', '規格', '數量', '總數', '單價', '總價', '備註', '字數', 'isEditing', 'backup', '_alertedItemLimit', 'Delivery Date 廠商承諾交期', 'SOD Qty 廠商承諾數量', '驗收數量', '拒收數量', '發票月份', 'WBS', '需求日', 'RT金額', 'RT總金額', '驗收狀態']
+2026-08-15 09:06:57 INFO [app]: 嘗試更新: PO=6100879053, 品名=ASE-AS114000342 烤箱層架, RT金額=8950, RT總金額=53700
+2026-08-15 09:07:02 INFO [app]: 已刪除 processed 文件: 6100879053-ASE-AS114000342__65f3d5e5.mhtml
+2026-08-15 09:07:02 INFO [app]: 已刪除 processed 文件: 6100879053-ASE-AS114000342__65f3d5e5_gridview.json
+2026-08-15 09:07:02 INFO [app]: 清理完成: 刪除了 2 個文件
+2026-08-15 09:07:07 INFO [app]: Processing file: 6100894185-AOTTO__8035d0c1.mhtml
+2026-08-15 09:07:08 INFO [app]: GridView data saved to: 6100894185-AOTTO__8035d0c1_gridview.json
+2026-08-15 09:07:08 INFO [app]: 開始與 Buyer_detail.csv 比對...
+2026-08-15 09:07:09 INFO [app]: 準備更新 1 筆資料
+2026-08-15 09:07:09 INFO [app]: Buyer CSV 原始欄位: ['Id', '開單狀態', '交貨驗證', 'User', 'ePR No.', 'PO No.', 'Item', '品項', '規格', '數量', '總數', '單價', '總價', '備註', '字數', 'isEditing', 'backup', '_alertedItemLimit', 'Delivery Date 廠商承諾交期', 'SOD Qty 廠商承諾數量', '驗收數量', '拒收數量', '發票月份', 'WBS', '需求日', 'RT金額', 'RT總金額', '驗收狀態']
+2026-08-15 09:07:09 INFO [app]: 嘗試更新: PO=6100894185, 品名=AOTTO 免安裝多功能可收納折疊椅, RT金額=500, RT總金額=12000
+2026-08-15 09:07:12 INFO [app]: 已刪除 processed 文件: 6100894185-AOTTO__8035d0c1.mhtml
+2026-08-15 09:07:12 INFO [app]: 已刪除 processed 文件: 6100894185-AOTTO__8035d0c1_gridview.json
+2026-08-15 09:07:12 INFO [app]: 清理完成: 刪除了 2 個文件

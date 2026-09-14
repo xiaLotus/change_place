@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8" />
+    <title>合併確認 - 分批變回單筆</title>
+    <link href="../static/css/tailwind.min.css" rel="stylesheet" />
+    <script src="../static/js/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .compare-table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 14px;
+        }
+        .compare-table th,
+        .compare-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        .compare-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+        .old-data {
+            background-color: #fff3cd;
+        }
+        .new-data {
+            background-color: #d4edda;
+        }
+        .editable-cell {
+            position: relative;
+        }
+        .editable-cell input {
+            width: 100%;
+            padding: 4px 8px;
+            border: 2px solid #3b82f6;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen p-6 bg-gradient-to-br from-[#fffdf9] via-[#faf6f0] to-[#f3eee8]">
+    <div id="app" class="max-w-[1400px] mx-auto">
+        
+        <!-- 頂部標題 + 進度 + 操作按鈕 -->
+        <div class="bg-gradient-to-r from-blue-50 via-sky-50 to-indigo-50 
+                    rounded-2xl shadow-md border border-slate-200 
+                    px-6 py-5 mb-6">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-bold text-slate-800 leading-snug">
+                        <span class="inline-block align-middle mr-2">📄</span>
+                        <span class="align-middle">合併確認 - 分批變回單筆</span>
+                    </h1>
+                    <p class="text-slate-600 text-sm mt-2">
+                        以下項目從分批狀態變回單筆,請確認後合併
+                    </p>
+                </div>
+                <!-- ✅ 進度顯示移到右上角 -->
+                <div class="text-right">
+                    <div class="inline-block bg-white px-6 py-3 rounded-xl shadow-sm border-2" 
+                         :class="allProcessed ? 'border-green-500' : 'border-blue-500'">
+                        <p class="text-sm text-slate-600 mb-1">處理進度</p>
+                        <p class="text-2xl font-bold" 
+                           :class="allProcessed ? 'text-green-600' : 'text-blue-600'">
+                            {{ processedCount }} / {{ mergeItems.length }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 🔴🔴🔴 新增:頂部操作按鈕 -->
+            <div class="flex justify-end gap-3 pt-4 border-t border-slate-200">
+                <button
+                    @click="cancelAll"
+                    class="px-6 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg transition font-medium"
+                >
+                    ❌ 取消全部
+                </button>
+                <button
+                    v-if="!allProcessed"
+                    @click="confirmAllRemaining"
+                    :disabled="processingAll"
+                    class="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-lg transition disabled:opacity-50 font-medium"
+                >
+                    <span v-if="!processingAll">🚀 全部合併</span>
+                    <span v-else>⏳ 處理中...</span>
+                </button>
+                <!-- ✅ 只有全部完成才顯示返回按鈕 -->
+                <button
+                    v-if="allProcessed"
+                    @click="returnToMain"
+                    class="px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg transition font-medium"
+                >
+                    ✅ 返回主頁面
+                </button>
+            </div>
+        </div>
+
+        <!-- 載入中 -->
+        <div v-if="loading" class="text-center py-20">
+            <div class="inline-block animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600"></div>
+            <p class="mt-4 text-slate-600">載入中...</p>
+        </div>
+
+        <!-- 主要內容 -->
+        <div v-else-if="mergeItems.length > 0">
+            
+            <!-- 每個需要合併的項目 -->
+            <div 
+                v-for="(item, idx) in mergeItems" 
+                :key="idx"
+                class="bg-white rounded-2xl shadow-md border border-slate-200 p-6 mb-6"
+                :class="{ 'opacity-50': item.processed }"
+            >
+                <!-- 項目標題 -->
+                <div class="border-b border-slate-200 pb-4 mb-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-xl font-bold text-blue-700">
+                                📦 PO {{ item.po_no }} - Item {{ item.item }}
+                            </h2>
+                            <p class="text-sm text-slate-600 mt-1">
+                                目前有 <span class="font-bold text-red-600">{{ item.csv_count }} 筆分批資料</span>,
+                                新資料只有 <span class="font-bold text-green-600">{{ item.xls_count }} 筆</span>
+                            </p>
+                        </div>
+                        <!-- ✅ 處理狀態標記 -->
+                        <div v-if="item.processed" class="px-4 py-2 bg-green-100 text-green-700 rounded-lg font-bold">
+                            ✅ 已完成
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 對比表格 -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    
+                    <!-- 左側:目前的分批資料 -->
+                    <div>
+                        <h3 class="text-lg font-bold text-red-600 mb-3 flex items-center gap-2">
+                            <span>❌</span>
+                            <span>目前狀態 ({{ item.csv_count }} 筆分批)</span>
+                        </h3>
+                        <div class="overflow-auto max-h-[400px] border border-slate-200 rounded-lg">
+                            <table class="compare-table">
+                                <thead class="sticky top-0">
+                                    <tr class="old-data">
+                                        <th>筆次</th>
+                                        <th>品名</th>
+                                        <th>交期</th>
+                                        <th>數量</th>
+                                        <th>備註</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(row, i) in item.csv_data" :key="i">
+                                        <td class="text-center">{{ i + 1 }}</td>
+                                        <td>{{ row.description }}</td>
+                                        <td class="text-center">{{ row.delivery }}</td>
+                                        <td class="text-center font-bold">{{ row.sod_qty }}</td>
+                                        <td class="text-center">
+                                            <span class="px-2 py-1 bg-yellow-100 text-yellow-800 rounded text-xs">
+                                                {{ row.note }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- 右側:新的合併資料 (✅ 可編輯) -->
+                    <div>
+                        <h3 class="text-lg font-bold text-green-600 mb-3 flex items-center gap-2">
+                            <span>✅</span>
+                            <span>合併後 ({{ item.xls_count }} 筆)</span>
+                            <span v-if="item.editing" class="text-sm text-blue-600 ml-2">
+                                ✏️ 編輯模式
+                            </span>
+                        </h3>
+                        <div class="overflow-auto max-h-[400px] border border-slate-200 rounded-lg">
+                            <table class="compare-table">
+                                <thead class="sticky top-0">
+                                    <tr class="new-data">
+                                        <th>筆次</th>
+                                        <th>品名</th>
+                                        <th>交期</th>
+                                        <th>數量</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(row, i) in item.xls_data" :key="i">
+                                        <td class="text-center">{{ i + 1 }}</td>
+                                        <!-- ✅ 品名可編輯 -->
+                                        <td class="editable-cell">
+                                            <span v-if="!item.editing">{{ row.description }}</span>
+                                            <input v-else v-model="row.description" type="text" />
+                                        </td>
+                                        <!-- ✅ 交期可編輯 -->
+                                        <td class="text-center editable-cell">
+                                            <span v-if="!item.editing">{{ row.delivery }}</span>
+                                            <input v-else v-model="row.delivery" type="text" class="text-center" />
+                                        </td>
+                                        <!-- ✅ 數量可編輯 -->
+                                        <td class="text-center editable-cell">
+                                            <span v-if="!item.editing" class="font-bold text-green-600">{{ row.sod_qty }}</span>
+                                            <input v-else v-model="row.sod_qty" type="text" class="text-center font-bold" />
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 操作按鈕 -->
+                <div class="mt-6 flex justify-end gap-3">
+                    <!-- ✅ 編輯按鈕 -->
+                    <button
+                        v-if="!item.processed"
+                        @click="toggleEdit(item)"
+                        class="px-5 py-2 rounded-lg transition"
+                        :class="item.editing 
+                            ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                            : 'bg-yellow-400 hover:bg-yellow-500 text-slate-800'"
+                    >
+                        <span v-if="!item.editing">✏️ 編輯</span>
+                        <span v-else>💾 儲存編輯</span>
+                    </button>
+                    
+                    <!-- 確認合併按鈕 -->
+                    <button
+                        v-if="!item.processed"
+                        @click="confirmMergeItem(item, idx)"
+                        :disabled="item.processing || item.editing"
+                        class="px-5 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        <span v-if="!item.processing">✅ 確認合併</span>
+                        <span v-else>⏳ 處理中...</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 🔴 移除底部操作區域,已經移到頂部 -->
+        </div>
+
+        <!-- 無資料 -->
+        <div v-else class="text-center py-20">
+            <p class="text-slate-600 text-lg">找不到需要合併的項目</p>
+            <button
+                @click="returnToMain"
+                class="mt-4 px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition"
+            >
+                返回主頁面
+            </button>
+        </div>
+
+    </div>
+
+    <script src="../static/js/func/mergeConfirmation.js"></script>
+</body>
+</html>

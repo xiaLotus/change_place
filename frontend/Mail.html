@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>發送 Mail 簽核</title>
+  <link href="../static/css/tailwind.min.css" rel="stylesheet">
+  <script src="../static/js/vue.global.js"></script>
+</head>
+<body class="min-h-screen bg-gray-100"> 
+
+  <div id="app" class="w-full flex flex-col items-center pt-6 px-4">
+    <div class="bg-white rounded-xl shadow-xl border border-gray-300 p-6 space-y-6">
+ 
+      <!-- 收件人區塊 -->
+      <div class="w-full bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-300 rounded-lg shadow p-4 space-y-3">
+        
+        <!-- 收件人標題 -->
+        <div class="flex items-center gap-3">
+          <div class="flex items-center justify-center w-10 h-10 bg-blue-500 rounded-full">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M16 12H8m8 0a4 4 0 110-8 4 4 0 010 8zm0 0v4a4 4 0 11-8 0v-4" />
+            </svg>
+          </div>
+
+          <div>
+            <p class="text-sm text-gray-500">信件收件人</p>
+            <h2 class="text-lg font-bold text-gray-800">
+              To Jackson Sir, A3CIMAS<span v-if="recipient">, {{ recipient }}</span>
+            </h2>
+              <h2 class="text-lg font-bold text-gray-800">
+              Cc A3CIMAS</span>
+            </h2>
+          </div>
+        </div>
+
+        <!-- CC 輸入欄位 -->
+        <div>
+          <label class="block text-gray-700 font-medium mb-1">CC 名單 (這邊請完整輸入，ex: RuiYing Chan, Shugh Lin......內部會自動轉換成Mail格式)</label>
+          <input 
+            v-model="ccList"
+            type="text"
+            placeholder="輸入 CC 名單（用逗號分隔多個人）"
+            @keydown.enter.prevent="addCommaToCC"
+            class="w-full border border-gray-300 rounded-lg p-2 focus:ring focus:ring-blue-200 focus:border-blue-400"
+          >
+        </div>
+      </div>
+
+      <!-- SECTION 1 -->
+      <section class="space-y-2">
+        <h2 class="text-lg font-semibold text-gray-800">Dear Jackson Sir</h2>
+        <div v-if="important">
+          此為 <span class="text-red-600 font-bold">超急件</span>  {{this.reason}}
+        </div>
+        <p>ePR 單已送簽，避免造成後續累計過多，煩請經理撥空協助簽核，感謝。</p>
+        <div class="mt-2">
+          <span class="font-semibold tsext-gray-800">快速簽核 →</span>
+          <a href="https://khwfap.kh.asegroup.com/ePR/zh-TW/PRCheck/CheckIndexL0/?Cate=1&temp=1" class="ml-2 text-blue-600 underline font-bold">路徑</a>
+        </div>
+      </section>
+
+      <!-- SECTION 2 -->
+      <section class="space-y-2">
+        <div class="flex items-center space-x-2">
+          <label class="text-lg font-semibold text-gray-800">Dear</label>
+          <input v-model="recipient" class="border rounded px-2 py-1 text-lg font-semibold text-gray-800 w-48" placeholder="請輸入名稱" />
+        </div>
+        <p>已協助開立 ePR 單請購，待長官撥空協助簽核，謝謝</p>
+        <div class="mt-3 space-y-1">
+            <div class="flex space-x-4 font-semibold">
+            <span class="text-blue-600">請購申請相關附件報告</span>
+            <span class="text-red-600">採購新公告：品名命名區分</span>
+            </div>
+          <p><span class="text-blue-600 font-semibold">1. 合作開發：</span><span class="text-red-600">A. 原廠 P/N + 品名</span> 或 <span class="text-red-600">B. Upgrade + 型號 + 改善工程名稱</span></p>
+          <p><span class="text-blue-600 font-semibold">2. 建議廠商：</span><span class="text-red-600">C. 廠牌 + 型號 + 品名</span> 或 <span class="text-red-600">D. 圖號 + 品名 + 規格</span></p>
+        </div>
+      </section>
+
+      <!-- SECTION 3 -->
+      <section class="space-y-2">
+        <h2 class="text-lg font-semibold text-gray-800">【請購報告】</h2>
+        <p class="text-red-600 font-semibold">報告資料夾路徑</p>
+        <textarea v-model="reportFolderPath" rows="3" class="w-full resize-none border rounded px-3 py-2 text-sm font-mono text-blue-700 bg-gray-50"></textarea>
+
+        <p class="text-red-600 font-semibold mt-4">
+          【User Review】ePR 單簽核進度路徑 →
+          <a href="http://10.11.99.84:8090" class="underline text-blue-600 font-bold">Link</a>
+      </section>
+
+      <!-- SECTION 4 -->
+      <section class="space-y-3">
+        <p class="font-semibold">
+            &laquo; ePR單 -
+            <input v-model="eprNo" class="border rounded px-1 py-0.5 text-sm w-32" />
+            &raquo; 等級：
+            <input v-model="priority" class="border rounded px-1 py-0.5 text-sm w-16" />
+
+            <!-- ✅ 改這裡：div ➜ span 保持一行 -->
+            <span class="relative inline-block align-middle">
+            <!-- 自動調寬的輸入框 -->
+            <input
+                v-model="itemTitle"
+                ref="autoInput"
+                :style="{ width: inputWidth + 'px' }"
+                class="border rounded px-2 py-0.5 text-sm"
+            />
+
+            <!-- 隱藏的寬度測量器 -->
+            <span
+                ref="sizer"
+                class="invisible absolute top-0 left-0 whitespace-pre text-sm px-2 py-0.5 font-normal"
+                aria-hidden="true"
+            >{{ itemTitle || '輸入項目' }}</span>
+            </span>
+
+            需求請購申請（共花費詳如下方總價格）
+        </p>
+
+        <table class="w-full text-sm border border-gray-300">
+          <thead class="bg-gray-100 text-gray-800">
+            <tr>
+            <th v-for="(header, index) in tableHeaders"
+                :key="'header-' + index"
+                class="border px-2 py-1 text-center whitespace-nowrap align-middle">
+                {{ header }}
+            </th>
+            </tr>
+          <tbody>
+            <tr class="bg-white text-left">
+              <td v-for="(cell, index) in tableData"
+                  :key="'cell-' + index"
+                  class="border px-2 py-1 whitespace-pre-wrap break-words">
+                {{ cell }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="flex justify-end space-x-3 pt-4">
+          <button @click="handleBack" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded shadow text-sm">返回</button>
+          <button @click="handleSubmit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded shadow text-sm">送出</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script src="../static/js/func/mail.js"></script>
+</body>
+</html>

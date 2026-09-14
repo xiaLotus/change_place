@@ -1,0 +1,9 @@
+Flask
+Flask-Cors
+pandas
+numpy
+ldap3
+filelock
+beautifulsoup4
+openpyxl
+xlrd==1.2.0

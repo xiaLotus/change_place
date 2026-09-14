@@ -1,0 +1,16 @@
+{
+  "purchase": {
+    "to": [
+      "Jackson_Lo"
+    ],
+    "cc": [
+      "ASEK_ASSYIII_CIM_AS"
+    ]
+  },
+  "acceptance": {
+    "cc": [
+      "RuiYing_Chan",
+      "Otis_Wang"
+    ]
+  }
+}

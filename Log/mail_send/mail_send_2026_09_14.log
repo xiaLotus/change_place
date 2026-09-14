@@ -1,0 +1,6 @@
+2026-09-14 19:55:49 INFO [mail_send.normal]: 📧 準備發送【急件】請購通知郵件
+2026-09-14 19:55:49 INFO [mail_send.normal]:    收件人(To): Jackson_Lo@aseglobal.com,Test_Wang@aseglobal.com
+2026-09-14 19:55:49 INFO [mail_send.normal]:    副本(CC): ASEK_ASSYIII_CIM_AS@aseglobal.com
+2026-09-14 19:55:49 INFO [mail_send.normal]:    主旨: << ePR單 - 2505140122 >> 等級：急件 453453454需求請購申請 To. Jackson Sir & Test (Security C)
+2026-09-14 19:55:49 INFO [mail_send.normal]:    內容: ePR No.=2505140122, 需求者=測試中, 請購項目=453453454, 需求原因=5345345, 總金額=2007243, 需求日=20260914, ePR狀態=, 簽核中關卡=經理簽核中, 備註=453453
+2026-09-14 19:56:10 ERROR [mail_send.normal]: ❌ 郵件發送失敗 (ePR No.=2505140122): [WinError 10060] 連線嘗試失敗，因為連線對象有一段時間並未正確回應，或是連線建立失敗，因為連線的主機無法回應。

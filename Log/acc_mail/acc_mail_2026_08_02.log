@@ -1,0 +1,56 @@
+2026-08-02 21:13:52 INFO [acc_mail.parse]: 開始解析 MHTML 文件
+2026-08-02 21:13:52 INFO [acc_mail.parse]: 選擇最大的表格，共有 12 行
+2026-08-02 21:13:52 INFO [acc_mail.parse]: 成功解析 0 筆資料
+2026-08-02 21:14:02 INFO [acc_mail.parse]: 開始解析 MHTML 文件
+2026-08-02 21:14:02 INFO [acc_mail.parse]: 使用選擇器 'table[id*="GridView1"]' 找到表格
+2026-08-02 21:14:02 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'AB=E9=96=80' -> 'AB門'
+2026-08-02 21:14:02 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-08-02 21:14:02 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'ASE-AS114000308-1 =E6=99=82=E8=A6=8F=E7=9A=AE=E5=B8=
+=B6=E8=BC=AA(AL-SUS)' -> 'ASE-AS114000308-1 時規皮帶輪(AL-SUS)'
+2026-08-02 21:14:02 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E9=83=AD=E4=BB=BB?' -> '郭任?'
+2026-08-02 21:14:02 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-08-02 21:14:02 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'ASE-AS114000308-2 =E6=99=82=E8=A6=8F=E7=9A=AE=E5=B8=
+=B6=E8=BC=AA(AL-SUS)' -> 'ASE-AS114000308-2 時規皮帶輪(AL-SUS)'
+2026-08-02 21:14:02 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E9=83=AD=E4=BB=BB?' -> '郭任?'
+2026-08-02 21:14:02 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-08-02 21:14:02 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'ASE-AS11500054 =E6=99=82=E8=A6=8F=E7=9A=AE=E5=B8=B6=
+=E8=BC=AA(=E8=BB=B8=E6=89=BF)' -> 'ASE-AS11500054 時規皮帶輪(軸承)'
+2026-08-02 21:14:02 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E9=83=AD=E4=BB=BB?' -> '郭任?'
+2026-08-02 21:14:02 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-08-02 21:14:02 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'Keyence GL-S24FH =E5=AE=89=E5=85=A8=E5=85=89=E6=9F=
+=B5' -> 'Keyence GL-S24FH 安全光柵'
+2026-08-02 21:14:02 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-08-02 21:14:02 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'Keyence GL-SP5P =E5=AE=89=E5=85=A8=E5=85=89=E6=9F=B5=
+=E7=94=A8=E9=80=9A=E8=A8=8A=E7=BA=9C=E7=B7=9A' -> 'Keyence GL-SP5P 安全光柵用通訊纜線'
+2026-08-02 21:14:02 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-08-02 21:14:02 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'TBD-06-3450-1541 K11-8F-3450 =E9=A6=AC=E9=81=94=E8=
+=BB=B8=E5=BF=83' -> 'TBD-06-3450-1541 K11-8F-3450 馬達軸心'
+2026-08-02 21:14:02 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E9=83=AD=E4=BB=BB?' -> '郭任?'
+2026-08-02 21:14:02 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-08-02 21:14:02 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E5=91=A8=E5=BD=A5=E8=89=AF' -> '周彥良'
+2026-08-02 21:14:02 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-08-02 21:14:02 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'CIM VX113-1006 Timing belt =E6=99=82=E8=A6=8F=E7=9A=
+=AE=E5=B8=B6' -> 'CIM VX113-1006 Timing belt 時規皮帶'
+2026-08-02 21:14:02 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E5=91=A8=E5=BD=A5=E8=89=AF' -> '周彥良'
+2026-08-02 21:14:02 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-08-02 21:14:02 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: 'TBD-06-4110-1500 K11-8F 4110=E4=BA=94=E5=90=88=E4=B8=
+=80=E7=83=A4=E7=9B=A4' -> 'TBD-06-4110-1500 K11-8F 4110五合一烤盤'
+2026-08-02 21:14:02 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E6=9E=97=E5=BB=BA=E8=89=AF' -> '林建良'
+2026-08-02 21:14:02 INFO [acc_mail.parse]: 成功使用 utf-8 解碼: '=E8=B2=BB=E7=94=A8' -> '費用'
+2026-08-02 21:14:02 INFO [acc_mail.parse]: 成功解析 10 筆資料
+2026-08-02 21:14:13 INFO [acc_mail.send]: 📧 準備發送驗收/領料通知郵件
+2026-08-02 21:14:13 INFO [acc_mail.send]:    收件人(To): YenLiang_Chou@aseglobal.com,Erix_Kuo@aseglobal.com,Otis_Wang@aseglobal.com,ChungMing_Miao@aseglobal.com
+2026-08-02 21:14:13 INFO [acc_mail.send]:    副本(CC): RuiYing_Chan@aseglobal.com,Otis_Wang@aseglobal.com,
+2026-08-02 21:14:13 INFO [acc_mail.send]:    主旨: <<驗收通知>> 照片請自行拍照上傳論壇，煩請 ERT 單附報告驗收 【PO No. 6100879496、6100891106、6100881435、6100882178、6100882227、6100880421】 To: YenLiang, ChungMing, CY, Erix
+2026-08-02 21:14:13 INFO [acc_mail.send]:    內容: 共 10 筆料件，PO No.: 6100879496、6100891106、6100881435、6100882178、6100882227、6100880421
+2026-08-02 21:14:13 INFO [acc_mail.send]:    [01] PO=6100879496, Item=0001, 品項=CIM S-KMT68840SR CONTROL FRONT_S015/, 數量=5, RT No.=6000295435, 需求者=周彥良, ePR No.=2604300394, 領料人=AB門, 備註=設備修改類, 請 User 提供照片結案
+2026-08-02 21:14:13 INFO [acc_mail.send]:    [02] PO=6100880421, Item=0001, 品項=ASE-AS114000308-1 時規皮帶輪(AL-SUS), 數量=20, RT No.=6000297871, 需求者=郭任群, ePR No.=2605220363, 領料人=郭任群, 備註=555
+2026-08-02 21:14:13 INFO [acc_mail.send]:    [03] PO=6100880421, Item=0002, 品項=ASE-AS114000308-2 時規皮帶輪(AL-SUS), 數量=20, RT No.=6000297871, 需求者=郭任群, ePR No.=2605220363, 領料人=郭任群, 備註=設備修改類, 請 User 提供照片結案
+2026-08-02 21:14:13 INFO [acc_mail.send]:    [04] PO=6100880421, Item=0003, 品項=ASE-AS11500054 時規皮帶輪(軸承), 數量=20, RT No.=6000297871, 需求者=郭任群, ePR No.=2605220363, 領料人=郭任群, 備註=設備修改類, 請 User 提供照片結案
+2026-08-02 21:14:13 INFO [acc_mail.send]:    [05] PO=6100891106, Item=0001, 品項=Keyence GL-S24FH 安全光柵, 數量=2, RT No.=6000302036, 需求者=林景陽, ePR No.=2607060305, 領料人=X1, 備註=設備修改類, 請 User 提供照片結案
+2026-08-02 21:14:13 INFO [acc_mail.send]:    [06] PO=6100891106, Item=0002, 品項=Keyence GL-SP5P 安全光柵用通訊纜線, 數量=2, RT No.=6000302036, 需求者=林景陽, ePR No.=2607060305, 領料人=X1, 備註=設備修改類, 請 User 提供照片結案
+2026-08-02 21:14:13 INFO [acc_mail.send]:    [07] PO=6100881435, Item=0001, 品項=TBD-06-3450-1541 K11-8F-3450 馬達軸心, 數量=30, RT No.=6000302064, 需求者=郭任群, ePR No.=2606020606, 領料人=郭任群, 備註=設備修改類, 請 User 提供照片結案
+2026-08-02 21:14:13 INFO [acc_mail.send]:    [08] PO=6100882227, Item=0001, 品項=CIM VX113-1002 Heary-weight wheel, 數量=4, RT No.=6000303860, 需求者=周彥良, ePR No.=2605290303, 領料人=周彥良, 備註=設備修改類, 請 User 提供照片結案
+2026-08-02 21:14:13 INFO [acc_mail.send]:    [09] PO=6100882227, Item=0002, 品項=CIM VX113-1006 Timing belt 時規皮帶, 數量=4, RT No.=6000303860, 需求者=周彥良, ePR No.=2605290303, 領料人=周彥良, 備註=設備修改類, 請 User 提供照片結案
+2026-08-02 21:14:13 INFO [acc_mail.send]:    [10] PO=6100882178, Item=0001, 品項=TBD-06-4110-1500 K11-8F 4110五合一烤盤, 數量=9, RT No.=6000303861, 需求者=繆中明, ePR No.=2606020600, 領料人=林建良, 備註=設備修改類, 請 User 提供照片結案
+2026-08-02 21:14:34 ERROR [acc_mail.send]: ❌ 郵件發送失敗 (PO No.=6100879496、6100891106、6100881435、6100882178、6100882227、6100880421): [WinError 10060] 連線嘗試失敗，因為連線對象有一段時間並未正確回應，或是連線建立失敗，因為連線的主機無法回應。

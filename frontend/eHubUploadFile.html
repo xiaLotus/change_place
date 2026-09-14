@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="UTF-8" />
+    <title>e-Hub自動貼上與上傳資訊</title>
+    <link href="../static/css/tailwind.min.css" rel="stylesheet" />
+    <script src="../static/js/vue.global.js"></script>
+    <script src="../static/js/xlsx.full.min.js"></script>
+    <script src="../static/js/sweetalert2@11.js"></script>
+    <style>
+      /* 可編輯儲存格聚焦樣式 */
+      [contenteditable="true"]:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(59,130,246,.35);
+        background: rgba(59,130,246,.06);
+        border-radius: .5rem;
+      }
+      /* 捲軸微客製 */
+      .nice-scrollbar::-webkit-scrollbar { height: 10px; width: 10px; }
+      .nice-scrollbar::-webkit-scrollbar-thumb { background: #cfd8e3; border-radius: 9999px; }
+      .nice-scrollbar::-webkit-scrollbar-track { background: transparent; }
+      @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+      }
+
+      .animate-spin {
+          animation: spin 1s linear infinite;
+      }
+    </style>
+  </head>
+
+<body class="min-h-screen p-6 bg-gradient-to-br from-[#fffdf9] via-[#faf6f0] to-[#f3eee8]">
+    <div id="app" class="max-w-[1200px] mx-auto">
+
+        <!-- 頂部標題 -->
+        <div class="bg-gradient-to-r from-blue-50 via-sky-50 to-indigo-50 
+                    rounded-2xl shadow-md border border-slate-200 
+                    px-6 py-5 mb-6">
+        
+            <!-- 主標題 -->
+            <h1 class="text-2xl md:text-3xl font-bold text-slate-800 leading-snug">
+                <span class="inline-block align-middle mr-2">📑</span>
+                <span class="align-middle">
+                [eHUB ASEKH] E-HUB - 供應商承諾交期通知 / Delivery Schedule Notice 上傳資訊
+                </span>
+            </h1>
+            
+            <!-- 副標題 -->
+            <p class="text-slate-600 text-sm mt-2">
+                貼上資料、比對 PO、必要時就地修正並覆蓋
+            </p>
+
+            <!-- 檔案命名規則提示 -->
+            <div class="mt-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-md p-3">
+                <p class="text-sm text-yellow-800 leading-relaxed">
+                📌 <span class="font-semibold">Excel 檔名規範：</span>
+                檔名格式需為：
+                <span class="font-mono text-slate-800">
+                    sendMailforBadgeMailNoticeApproveESD_yyyymmdd(加上流水號六碼)_(Security C).xls
+                </span>
+                </p>
+            </div>
+        </div>
+
+      <!-- 貼上後的自由編輯表格 -->
+      <div v-if="tableData.length" class="mt-6">
+        <div class="bg-white rounded-2xl shadow border border-slate-200 p-4">
+          <div class="overflow-auto nice-scrollbar rounded-xl border border-slate-200">
+            <table class="min-w-full table-auto text-sm">
+              <thead class="sticky top-0 z-10 bg-slate-100/95 backdrop-blur">
+                <tr>
+                  <th
+                    v-for="(h, i) in headers"
+                    :key="i"
+                    class="px-3 py-2 text-center font-semibold text-slate-700 border-b border-slate-200"
+                    v-html="h"
+                  ></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="(row, rowIndex) in tableData"
+                  :key="rowIndex"
+                  class="odd:bg-slate-50/40"
+                >
+                  <td
+                    v-for="(cell, colIndex) in row"
+                    :key="colIndex"
+                    class="px-3 py-2 align-top whitespace-pre-wrap break-words border-b border-slate-200"
+                  >
+                    <div
+                      :ref="`cell-${rowIndex}-${colIndex}`"
+                      contenteditable="true"
+                      class="w-full min-h-[1.5em] outline-none rounded-lg"
+                      @focus="currentEditing = { rowIndex, colIndex }"
+                      @blur="saveCellContent(rowIndex, colIndex)"
+                    >{{ cell }}</div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="mt-4 text-right">
+            <button
+              class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl shadow hover:shadow-md transition"
+              @click="submitData"
+            >
+              <span class="text-lg">💾</span><span>儲存資料</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 📦 PO 比對結果區塊（與內部一致風格） -->
+<!-- 在 PO 比對結果區塊中修改 -->
+<div class="bg-white/90 backdrop-blur rounded-2xl shadow-md border border-slate-200 px-6 py-5 my-10">
+    <h2 class="text-xl md:text-2xl font-bold text-blue-800 leading-snug mb-2 text-center">
+        <span class="inline-block mr-2">📦</span>PO 比對結果
+    </h2>
+    
+    <!-- 一鍵覆蓋全部按鈕(只對正常項目) -->
+    <div v-if="allGroups.filter(g => g.type === 'normal').length > 0 && overriddenPoGroups < totalPoGroups" class="text-center mb-4">
+        <button
+            @click="overrideAllGroups"
+            :disabled="isOverridingAll"
+            class="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+            <span v-if="!isOverridingAll">
+                <span class="text-lg mr-2">🚀</span>
+                一鍵覆蓋全部正常項目 ({{ totalPoGroups - overriddenPoGroups }} 組)
+            </span>
+            <span v-else>
+                <span class="text-lg mr-2 animate-spin inline-block">⏳</span>
+                正在覆蓋中... ({{ overriddenPoGroups }}/{{ totalPoGroups }})
+            </span>
+        </button>
+    </div>
+
+    <!-- 依 PO No 分組 -->
+    <div v-if="allGroups.length">
+        <!-- 🆕 區分正常項目和分批項目 -->
+        <div
+            v-for="group in allGroups"
+            :key="group.po_no + '-' + (group.type || 'normal')"  
+            class="rounded-xl p-5 mb-6 shadow-md border"
+            :class="group.type === 'batch' 
+                ? 'border-orange-400 bg-gradient-to-r from-orange-50 to-yellow-50' 
+                : group.type === 'merge'
+                ? 'border-blue-400 bg-gradient-to-r from-blue-50 to-sky-50'  
+                : 'border-slate-200 bg-white/70 backdrop-blur-sm'"
+        >
+          <!-- 在顯示分批項目的部分 -->
+          <div v-if="group.type === 'batch'" style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+              <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                  <span style="font-size: 20px;">📄</span>
+                  <span style="font-weight: bold; color: #856404;">
+                      分批 (共 {{ group.items.length }} 個 Item 需要調整)
+                  </span>
+              </div>
+              
+              <!-- 顯示每個 Item 的摘要 -->
+              <div style="margin-left: 30px;">
+                  <div v-for="(item, idx) in group.items" :key="idx" style="margin-bottom: 8px;">
+                      <span style="color: #666;">
+                          • Item {{ item.item }}: XLS有 <strong style="color: #dc3545;">{{ item.xls_count }}</strong> 筆,
+                          但CSV只有 <strong style="color: #28a745;">{{ item.csv_count }}</strong> 筆
+                      </span>
+                  </div>
+              </div>
+              
+              <button @click="goToBatchAdjustment(group)" 
+                      style="margin-top: 10px; padding: 8px 16px; background: #ffc107; color: #000; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                  📝 調整分批
+              </button>
+          </div>
+
+            <!-- 🆕 新增:顯示合併項目 -->
+            <div v-else-if="group.type === 'merge'" 
+                style="background: #e7f3ff; padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                    <span style="font-size: 20px;">🔄</span>
+                    <span style="font-weight: bold; color: #0369a1;">
+                        合併 ({{ group.items.length }} 個 Item 需要處理)  <!-- 👈 這裡顯示 items 數量 -->
+                    </span>
+                </div>
+                
+                <!-- 顯示每個 Item 的摘要 -->
+                <div style="margin-left: 30px;">
+                    <div v-for="(item, idx) in group.items" :key="idx" 
+                        style="margin-bottom: 8px;">  <!-- 👈 這裡才是 v-for 遍歷 items -->
+                        <span style="color: #666;">
+                            • Item {{ item.item }}: CSV有 <strong style="color: #dc3545;">{{ item.csv_count }}</strong> 筆分批,
+                            XLS只有 <strong style="color: #28a745;">{{ item.xls_count }}</strong> 筆 → 需要合併
+                        </span>
+                    </div>
+                </div>
+                
+                <button @click="goToMergeConfirmation(group)" 
+                        style="margin-top: 10px; padding: 8px 16px; background: #0d6efd; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                    ✅ 確認合併
+                </button>
+            </div>
+
+            <!-- 🟢 正常項目的原有顯示 -->
+            <div v-else>
+                <h3 class="text-xl font-bold text-blue-700 mb-4">
+                    📄 PO No: {{ group.po_no }} (共 {{ group.rows.length }} 筆)
+                </h3>
+
+                <!-- 原有的表格顯示 -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm border border-gray-300 border-collapse">
+                        <!-- ... 原有的表格內容 ... -->
+                        <thead>
+                            <tr class="bg-blue-50 text-blue-800 text-center">
+                                <th class="border border-gray-300 px-2 py-1">狀態</th>
+                                <th class="border border-gray-300 px-2 py-1">Item</th>
+                                <th class="border border-gray-300 px-2 py-1">品名</th>
+                                <th class="border border-gray-300 px-2 py-1">交期</th>
+                                <th class="border border-gray-300 px-2 py-1">數量</th>
+                                <th class="border border-gray-300 px-2 py-1">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr
+                                v-for="(row, idx) in group.rows"
+                                :key="idx"
+                                class="odd:bg-slate-50 even:bg-white hover:bg-yellow-50 transition-colors"
+                            >
+                                <!-- 原有的表格行內容 -->
+                                <td class="border border-gray-300 px-2 py-1 text-center font-bold align-middle"
+                                    :class="row.status.includes('⚠️') ? 'text-red-600' : 'text-green-600'">
+                                    {{ row.status }}
+                                </td>
+                                <td class="border border-gray-300 px-2 py-1 align-middle"
+                                    :class="{ 'bg-yellow-100 text-red-600 font-bold': row.diff_type === 'item' }">
+                                    {{ row.item }}
+                                    <span v-if="row.old_item" class="text-xs text-gray-500">(原 {{ row.old_item }})</span>
+                                </td>
+                                <td class="border border-gray-300 px-2 py-1 align-middle"
+                                    :class="row.diff_type === 'desc' ? 'bg-red-100 text-red-600 font-bold' : ''">
+                                    <span v-if="!row.editing">
+                                        {{ row.po_description || row.buyer_description }}
+                                    </span>
+                                    <input v-else v-model="row.po_description"
+                                        class="border border-gray-300 px-1 py-0.5 w-full rounded focus:outline-none focus:ring focus:ring-blue-200"/>
+                                </td>
+                                <td class="border border-gray-300 px-2 py-1 align-middle">
+                                    <span v-if="!row.editing">{{ row.delivery_date }}</span>
+                                    <input v-else v-model="row.delivery_date"
+                                        class="border border-gray-300 px-1 py-0.5 w-full rounded focus:outline-none focus:ring focus:ring-blue-200"/>
+                                </td>
+                                <td class="border border-gray-300 px-2 py-1 align-middle">
+                                    <span v-if="!row.editing">{{ row.sod_qty }}</span>
+                                    <input v-else v-model="row.sod_qty"
+                                        class="border border-gray-300 px-1 py-0.5 w-full rounded focus:outline-none focus:ring focus:ring-blue-200"/>
+                                </td>
+                                <td class="border border-gray-300 px-2 py-1 text-center align-middle">
+                                    <template v-if="row.status.includes('⚠️')">
+                                        <button v-if="!row.editing"
+                                            class="px-2 py-1 bg-yellow-400 hover:bg-yellow-500 rounded shadow-sm"
+                                            @click="row.editing = true">
+                                            ✏️ 手動修改
+                                        </button>
+                                        <button v-else
+                                            class="px-2 py-1 bg-blue-500 text-white hover:bg-blue-600 rounded shadow-sm"
+                                            @click="row.editing = false">
+                                            ✅ 完成
+                                        </button>
+                                    </template>
+                                    <span v-else class="text-gray-400 italic">✓ 無需修改</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 覆蓋按鈕 -->
+                <div class="mt-4 text-right">
+                    <button
+                        v-if="!isPoGroupOverridden(group.po_no) && !isOverridingAll"
+                        class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
+                        @click="saveOverrideGroup(group)"
+                    >
+                        💾 覆蓋此組
+                    </button>
+                    <span v-else-if="isPoGroupOverridden(group.po_no)" class="text-green-600 font-semibold">
+                        ✅ 已完成覆蓋
+                    </span>
+                    <span v-else-if="isOverridingAll" class="text-blue-600 font-semibold">
+                        ⏳ 等待中...
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 無資料 -->
+    <div v-else class="text-gray-500 text-center mt-4">
+        目前沒有比對結果,請先上傳檔案
+    </div>
+</div>
+
+
+        <!-- 底部工具列 -->
+        <div class="mt-3 flex items-center justify-between gap-3">
+        <input
+            type="file"
+            ref="fileInput"
+            class="hidden"
+            accept=".xlsx,.xls,.csv"
+            @change="handleFileUpload"
+            />
+        <!-- 返回上一頁 -->
+        <button
+            @click="back_Dashboard"
+            class="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 
+                hover:from-blue-600 hover:to-blue-700 text-white font-semibold 
+                px-5 py-2 rounded-full shadow-md hover:shadow-lg 
+                transition-transform transform hover:scale-105"
+        >
+            <span class="text-lg">🔙</span>
+            <span>返回上一頁</span>
+        </button>
+
+        <!-- 提示文字（置中） -->
+        <div class="text-sm text-slate-700 font-medium text-center flex-1">
+            📌 請確認貼上資料在 <span class="text-red-500 font-semibold">10 筆以內</span>，建議使用「上傳檔案」功能。
+        </div>
+
+        <!-- 右側按鈕群 -->
+        <div class="flex gap-3">
+            <!-- 上傳檔案 -->
+            <button
+                v-show="showUploadButton && (totalPoGroups === 0 || allPoGroupsOverridden)"
+                class="flex items-center gap-2 bg-gradient-to-r from-emerald-500 to-emerald-600 
+                        hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold 
+                        px-5 py-2 rounded-full shadow-md hover:shadow-lg 
+                        transition-transform transform hover:scale-105"
+                style="background: linear-gradient(to right, #10b981, #059669); color: #fff;"
+                @click="$refs.fileInput.click()"
+            >
+            <span class="text-lg">📤</span>
+            <span>上傳檔案 (xlsx, csv)</span>
+            </button>
+        </div>
+
+        </div>
+    </div>
+
+    <script src="../static/js/func/eHub.js"></script>
+  </body>
+</html>
