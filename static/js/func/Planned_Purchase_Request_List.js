@@ -35,7 +35,7 @@ const app = Vue.createApp({
                 'ePR No.': 'ePR No.',
                 '已開單日期': '已開單日期',
                 '進度追蹤超連結': '進度追蹤超連結',
-                '總金額': '總金額',
+                '總金額': '總金額（不含 WBS 品項）',   // ✏️ WBS-patch：有 WBS 的品項不佔預算，不計入
                 '備註': '備註',
                 '報告路徑': '報告路徑',
                 '驗收路徑': '驗收路徑',
@@ -121,6 +121,7 @@ const app = Vue.createApp({
                 { key: "交貨驗證", label: "✅ 交貨驗證" },
                 { key: "驗收狀態", label: "✔️ 驗收狀態" }, 
                 { key: "ePR No.", label: "🔢 ePR No." },
+                { key: "WBS", label: "🏷️ WBS" },   // ✏️ WBS-patch：逐品項獨立 WBS（非 WBS 品項留空）
                 { key: "PO No.", label: "📄 PO No." },
                 { key: "Item", label: "📦 項次" },
                 // { key: "品項", label: "🧾 品項(字數: 40字/廠務類字數: 36)" },
@@ -140,6 +141,7 @@ const app = Vue.createApp({
             tableHeaders: [
                 { key: "交貨驗證", label: "✅ 交貨驗證" },
                 { key: "ePR No.", label: "🔢 ePR No." },
+                { key: "WBS", label: "🏷️ WBS" },   // ✏️ WBS-patch：逐品項獨立 WBS（非 WBS 品項留空）
                 { key: "PO No.", label: "📄 PO No." },
                 { key: "Item", label: "📦 項次" },
                 // { key: "品項", label: "🧾 品項(字數: 40字/廠務類字數: 36)" },
@@ -1655,6 +1657,10 @@ const app = Vue.createApp({
             this.venderSearchText = this.editItemData['合作廠商'] || ''
             this.lasteprno = this.editItemData['前購單單號']
 
+            // ✏️ WBS-patch：細項載入後立即依「不含 WBS 品項」規則重算總金額，
+            //   讓歷史資料一打開就顯示正確值（原本要等到動到某一列才會更新）
+            this.recalculateMainTotal();
+
             this.newFolderName = '';
             if (!item['報告路徑']) {
                 this.showUploadButton = false;
@@ -1823,11 +1829,19 @@ const app = Vue.createApp({
                 return;
                 }
 
-                // 確保主表 WBS 與細項 WBS 同步
-                const updatedWbs = this.editItemData["WBS"] || "";
-                this.editTableRows.forEach((row) => {
-                row["WBS"] = updatedWbs;
-                });
+                // ✏️ WBS-patch：細項 WBS 為「逐品項」獨立欄位（同一張 ePR 可能只有其中一個品項是 WBS），
+                //   不再由主表 WBS 往下覆寫；只驗證每列格式並去除前後空白。
+                for (const row of this.editTableRows) {
+                    const rowWbs = String(row["WBS"] || "").trim();
+                    if (rowWbs !== "" && !wbsPattern.test(rowWbs)) {
+                        alert(`細項 Item ${row["Item"] || ""} 的 WBS 格式不正確，請輸入 10 碼英數字（例如：25FT0A0050）`);
+                        return;
+                    }
+                    row["WBS"] = rowWbs;
+                }
+                // ✏️ WBS-patch：WBS 異動會影響總金額（WBS 品項不計入），送出前重算一次
+                this.recalculateMainTotal();
+                updated["總金額"] = this.editItemData["總金額"];
 
                 // 確保主表 需求日 與細項 需求日 同步
                 const updatedDemandDate = this.editItemData["需求日"] || "";
@@ -2071,14 +2085,24 @@ const app = Vue.createApp({
         this.newItem["合作廠商"] = this.selectedVender;
         this.newItem["前購單單號"] = this.lasteprno;
 
-        const wbsVal = String(this.newItem["WBS"] || "").trim();
         const needDate = String(this.newItem["需求日"] || "").replace(/\//g, "");
 
+        // ✏️ WBS-patch：細項 WBS 為「逐品項」獨立欄位，不由主表 WBS 帶入；只驗證每列格式並去除前後空白
+        for (const r of this.yourTableData) {
+            const rowWbs = String(r.WBS || "").trim();
+            if (rowWbs !== "" && !wbsPattern.test(rowWbs)) {
+                alert(`細項 Item ${r.Item || ""} 的 WBS 格式不正確，請輸入 10 碼英數字（例如：25FT0A0050）`);
+                return;
+            }
+        }
         this.yourTableData = this.yourTableData.map((r) => ({
             ...r,
-            WBS: wbsVal !== "" ? wbsVal : r.WBS || "",
+            WBS: String(r.WBS || "").trim(),
             需求日: needDate !== "" ? needDate : r["需求日"] || "",
         }));
+        // ✏️ WBS-patch：WBS 品項不計入總金額，送出前重算一次
+        this.recalculateMainTotalForNewItem();
+        this.newItem["總金額"] = String(this.newItem["總金額"] || "").replace(/[^0-9]/g, "");
 
         const payload = {
             ...this.newItem,
@@ -2615,7 +2639,8 @@ const app = Vue.createApp({
                 總價: '',
                 總數: '',
                 規格: '',
-                開單狀態: 'X'
+                開單狀態: 'X',
+                WBS: ''   // ✏️ WBS-patch：逐品項獨立，新列預設空白（非 WBS 品項）
             });
         },
 
@@ -2667,6 +2692,7 @@ const app = Vue.createApp({
                 總數: '',
                 規格: '',
                 開單狀態: this.editItemData?.['開單狀態'] || '',
+                WBS: '',   // ✏️ WBS-patch：逐品項獨立，新列預設空白（非 WBS 品項）
                 isEditing: true, // ← 加這行
                 backup: {} // ← 用於取消時回復
             });
@@ -2675,6 +2701,8 @@ const app = Vue.createApp({
         recalculateMainTotal() {
             let total = 0;
             this.editTableRows.forEach(row => {
+                // ✏️ WBS-patch：有填 WBS 的品項不佔預算，不計入主表總金額
+                if (String(row['WBS'] || '').trim() !== '') return;
                 const price = parseFloat(String(row['單價']).replace(/,/g, '')) || 0;
                 const qty = parseFloat(String(row['數量']).replace(/,/g, '')) || 0;
                 total += price * qty;
@@ -2684,6 +2712,8 @@ const app = Vue.createApp({
 
         recalculateMainTotalForNewItem() {
             const total = this.yourTableData.reduce((sum, row) => {
+                // ✏️ WBS-patch：有填 WBS 的品項不佔預算，不計入主表總金額
+                if (String(row['WBS'] || '').trim() !== '') return sum;
                 const rawPrice = String(row['總價']).replace(/,/g, '');
                 const price = parseFloat(rawPrice) || 0;
                 return sum + price;
@@ -3225,6 +3255,8 @@ const app = Vue.createApp({
             this.yourTableData = copyeditDetails;
             this.cancelEdit();
             this.showNewItemModal = true;  // 直接打開新增視窗
+            // ✏️ WBS-patch：複製後細項 WBS 已清空，總金額依新規則重算
+            this.recalculateMainTotalForNewItem();
         },
 
         // === 修改現有方法: resetAllFilters ===

@@ -1703,13 +1703,13 @@
                         <thead class="bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 text-sm font-semibold sticky top-0 z-10">
                             <!-- 紅框提示列：白底無框線，精準對齊 品項 + 規格 欄位左右邊界 -->
                             <tr>
-                                <th colspan="5" class="p-0 border-0 bg-white"></th>
+                                <th colspan="6" class="p-0 border-0 bg-white"></th><!-- ✏️ WBS-patch：5 → 6（WBS 插在 ePR No. 後，品項左移） -->
                                 <th colspan="2" class="px-0 py-1 border-0 bg-white">
                                     <div class="border-2 border-red-500 bg-red-50 text-red-600 text-xs font-bold rounded px-2 py-1 text-center whitespace-normal break-words">
                                         機設類：Description超過40字元，接續寫在Supplement Description
                                     </div>
                                 </th>
-                                <th colspan="10" class="p-0 border-0 bg-white"></th>
+                                <th colspan="10" class="p-0 border-0 bg-white"></th><!-- ✏️ WBS-patch：detailTableFields 17 欄 + 操作 = 18 -->
                             </tr>
                             <tr>
                                 <th
@@ -1796,6 +1796,17 @@
                                         class="w-full px-1 py-1 border rounded text-sm resize-y"
                                         style="word-break: break-word; white-space: pre-wrap;"
                                     ></textarea>
+                                    <!-- ✏️ WBS-patch：逐品項獨立 WBS；非 WBS 品項留空即可 -->
+                                    <input
+                                        v-else-if="row.isEditing && field.key === 'WBS'"
+                                        v-model="row['WBS']"
+                                        @input="recalculateMainTotal()"
+                                        maxlength="10"
+                                        placeholder="非 WBS 品項留空"
+                                        title="此品項的 WBS 代碼（10 碼英數字），非 WBS 品項留空"
+                                        class="w-full px-1 py-1 border rounded text-sm"
+                                        style="word-break: break-word; white-space: pre-wrap;"
+                                    />
                                     <input
                                         v-else-if="row.isEditing"
                                         :value="getDisplayValue(row, field.key)"
@@ -2099,13 +2110,13 @@
                         <thead class="bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 text-sm font-semibold sticky top-0 z-10">
                             <!-- 紅框提示列：白底無框線，精準對齊 品項 + 規格 欄位左右邊界 -->
                             <tr>
-                                <th colspan="4" class="p-0 border-0 bg-white"></th>
+                                <th colspan="5" class="p-0 border-0 bg-white"></th><!-- ✏️ WBS-patch：4 → 5（WBS 插在 ePR No. 後，品項左移） -->
                                 <th colspan="2" class="px-0 py-1 border-0 bg-white">
                                     <div class="border-2 border-red-500 bg-red-50 text-red-600 text-xs font-bold rounded px-2 py-1 text-center whitespace-normal break-words">
                                         機設類：Description超過40字元，接續寫在Supplement Description
                                     </div>
                                 </th>
-                                <th colspan="6" class="p-0 border-0 bg-white"></th>
+                                <th colspan="6" class="p-0 border-0 bg-white"></th><!-- ✏️ WBS-patch：tableHeaders 12 欄 + 操作 = 13 -->
                             </tr>
                             <tr>
                                 <th
@@ -2126,6 +2137,17 @@
                             <tr v-for="(row, index) in yourTableData" :key="index" class="hover:bg-gray-50">
                                 <td class="border px-2 py-1"><input v-model="row['交貨驗證']" class="w-full px-1 py-1 border rounded text-sm" /></td>
                                 <td class="border px-2 py-1"><input v-model="row['ePR No.']" class="w-full px-1 py-1 border rounded text-sm" /></td>
+                                <!-- ✏️ WBS-patch：逐品項獨立 WBS；非 WBS 品項留空即可 -->
+                                <td class="border px-2 py-1">
+                                    <input
+                                        v-model="row['WBS']"
+                                        @input="recalculateMainTotalForNewItem()"
+                                        maxlength="10"
+                                        placeholder="非 WBS 品項留空"
+                                        title="此品項的 WBS 代碼（10 碼英數字），非 WBS 品項留空"
+                                        class="w-full px-1 py-1 border rounded text-sm"
+                                    />
+                                </td>
                                 <td class="border px-2 py-1"><input v-model="row['PO No.']" class="w-full px-1 py-1 border rounded text-sm" /></td>
                                 <td class="border px-2 py-1"><input v-model="row.Item" class="w-full px-1 py-1 border rounded text-sm" /></td>
                                 <td class="border px-2 py-1">

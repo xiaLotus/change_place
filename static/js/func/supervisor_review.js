@@ -13,11 +13,11 @@ createApp({
             currentTab: 'pending', // pending, all, approved, rejected
             loading: false,
             username: localStorage.getItem('username') || '',
-            
+
             // ========== 細項展開相關 ==========
             expandedRows: {},       // { [itemId]: true/false }
             buyerDetailsMap: {},    // { [itemId]: [...rows] }
-            
+
             // ========== 下拉篩選相關 ==========
             // 篩選器顯示狀態
             showPersonFilter: false,
@@ -25,18 +25,18 @@ createApp({
             showOrderFilter: false,
             showReasonFilter: false,
             showAmountFilter: false,
-            
+
             // 已勾選的篩選值
             checkedPeople: [],
             checkedItems: [],
             checkedOrders: [],
             checkedReasons: [],
             checkedAmounts: [],
-            
+
             // 模糊搜尋文字
             itemSearchText: '',
             reasonSearchText: '',
-            
+
             // 排序狀態
             directorSortState: 'none',  // 'none', 'asc', 'desc'
             uncleSortState: 'none',     // 'none', 'asc', 'desc'
@@ -45,36 +45,35 @@ createApp({
             dateSortState: 'none',      // 'none', 'asc', 'desc' - 需求日
         };
     },
-    
+
     computed: {
         // ========== 當前 Tab 的原始資料（不套用下拉篩選）==========
         currentTabRawItems() {
             return this.allItems.filter(item => {
                 const reportPath = item['報告路徑'];
-                const wbs = item['WBS'];
                 const directorApproval = item['主任簽核'];
                 const uncleApproval = item['叔叔簽核'];
                 const eprNo = item['ePR No.'];
-                
+
                 // 基本條件：報告路徑和 WBS
                 if (!reportPath || reportPath.trim() === '' || reportPath.trim() === '-') return false;
-                if (wbs && wbs.trim() !== '' && wbs.trim() !== 'V') return false;
-                
+                if (this.isWbsRecord(item)) return false;   // ✏️ WBS：主表 WBS 或 細項全為 WBS 都不進審核
+
                 // 根據當前 Tab 過濾
                 switch(this.currentTab) {
                     case 'pending':
                         if (eprNo && eprNo.trim() !== '') return false;
-                        if ((directorApproval && directorApproval.trim() === 'R') || 
+                        if ((directorApproval && directorApproval.trim() === 'R') ||
                             (uncleApproval && uncleApproval.trim() === 'R')) return false;
                         const directorOk = directorApproval && directorApproval.trim() === 'V';
                         const uncleOk = uncleApproval && uncleApproval.trim() === 'V';
                         if (directorOk && uncleOk) return false;
                         return true;
                     case 'approved':
-                        return (directorApproval && directorApproval.trim() === 'V') && 
+                        return (directorApproval && directorApproval.trim() === 'V') &&
                                (uncleApproval && uncleApproval.trim() === 'V');
                     case 'rejected':
-                        return (directorApproval && directorApproval.trim() === 'R') || 
+                        return (directorApproval && directorApproval.trim() === 'R') ||
                                (uncleApproval && uncleApproval.trim() === 'R');
                     case 'all':
                     default:
@@ -82,7 +81,7 @@ createApp({
                 }
             });
         },
-        
+
         // ========== 基礎資料篩選（套用下拉篩選後的資料）==========
         baseFilteredItems() {
             return this.currentTabRawItems.filter(item => {
@@ -91,52 +90,52 @@ createApp({
                 const matchOrder = this.checkedOrders.length === 0 || this.checkedOrders.includes(String(item['請購順序']).trim());
                 const matchReason = this.checkedReasons.length === 0 || this.checkedReasons.includes(item['需求原因']);
                 const matchAmount = this.checkedAmounts.length === 0 || this.checkedAmounts.includes(String(item['總金額']).trim());
-                
+
                 return matchPerson && matchItem && matchOrder && matchReason && matchAmount;
             });
         },
-        
+
         // displayItems 直接使用 baseFilteredItems（因為 Tab 過濾已經在 currentTabRawItems 中處理）
         displayItems() {
             let items = this.baseFilteredItems;
-            
+
             // 如果沒有任何排序，直接返回
-            if (this.directorSortState === 'none' && 
-                this.uncleSortState === 'none' && 
-                this.orderSortState === 'none' && 
-                this.amountSortState === 'none' && 
+            if (this.directorSortState === 'none' &&
+                this.uncleSortState === 'none' &&
+                this.orderSortState === 'none' &&
+                this.amountSortState === 'none' &&
                 this.dateSortState === 'none') {
                 return items;
             }
-            
+
             // 主任簽核排序
             if (this.directorSortState !== 'none') {
                 return this.sortByDirector(items);
             }
-            
+
             // 叔叔簽核排序
             if (this.uncleSortState !== 'none') {
                 return this.sortByUncle(items);
             }
-            
+
             // 請購順序排序
             if (this.orderSortState !== 'none') {
                 return this.sortByOrder(items);
             }
-            
+
             // 總金額排序
             if (this.amountSortState !== 'none') {
                 return this.sortByAmount(items);
             }
-            
+
             // 需求日排序
             if (this.dateSortState !== 'none') {
                 return this.sortByDate(items);
             }
-            
+
             return items;
         },
-        
+
         // 為了保持計數正確，需要這些 computed（不套用下拉篩選）
         pendingItems() {
             return this.allItems.filter(item => {
@@ -144,73 +143,69 @@ createApp({
                 const uncleApproval = item['叔叔簽核'];
                 const eprNo = item['ePR No.'];
                 const reportPath = item['報告路徑'];
-                const wbs = item['WBS'];
-                
+
                 if (eprNo && eprNo.trim() !== '') return false;
                 if (!reportPath || reportPath.trim() === '' || reportPath.trim() === '-') return false;
-                if (wbs && wbs.trim() !== '' && wbs.trim() !== 'V') return false;
-                if ((directorApproval && directorApproval.trim() === 'R') || 
+                if (this.isWbsRecord(item)) return false;   // ✏️ WBS
+                if ((directorApproval && directorApproval.trim() === 'R') ||
                     (uncleApproval && uncleApproval.trim() === 'R')) return false;
-                
+
                 const directorOk = directorApproval && directorApproval.trim() === 'V';
                 const uncleOk = uncleApproval && uncleApproval.trim() === 'V';
                 if (directorOk && uncleOk) return false;
-                
+
                 return true;
             });
         },
-        
+
         approvedItems() {
             return this.allItems.filter(item => {
                 const reportPath = item['報告路徑'];
-                const wbs = item['WBS'];
-                
+
                 if (!reportPath || reportPath.trim() === '' || reportPath.trim() === '-') return false;
-                if (wbs && wbs.trim() !== '' && wbs.trim() !== 'V') return false;
-                
+                if (this.isWbsRecord(item)) return false;   // ✏️ WBS
+
                 const directorApproval = item['主任簽核'];
                 const uncleApproval = item['叔叔簽核'];
-                
-                return (directorApproval && directorApproval.trim() === 'V') && 
+
+                return (directorApproval && directorApproval.trim() === 'V') &&
                        (uncleApproval && uncleApproval.trim() === 'V');
             });
         },
-        
+
         rejectedItems() {
             return this.allItems.filter(item => {
                 const reportPath = item['報告路徑'];
-                const wbs = item['WBS'];
-                
+
                 if (!reportPath || reportPath.trim() === '' || reportPath.trim() === '-') return false;
-                if (wbs && wbs.trim() !== '' && wbs.trim() !== 'V') return false;
-                
+                if (this.isWbsRecord(item)) return false;   // ✏️ WBS
+
                 const directorApproval = item['主任簽核'];
                 const uncleApproval = item['叔叔簽核'];
-                
-                return (directorApproval && directorApproval.trim() === 'R') || 
+
+                return (directorApproval && directorApproval.trim() === 'R') ||
                        (uncleApproval && uncleApproval.trim() === 'R');
             });
         },
-        
+
         allFilteredItems() {
             return this.allItems.filter(item => {
                 const reportPath = item['報告路徑'];
-                const wbs = item['WBS'];
-                
+
                 if (!reportPath || reportPath.trim() === '' || reportPath.trim() === '-') return false;
-                if (wbs && wbs.trim() !== '' && wbs.trim() !== 'V') return false;
-                
+                if (this.isWbsRecord(item)) return false;   // ✏️ WBS
+
                 return true;
             });
         },
-        
+
         isAllSelected() {
-            const currentPendingIds = this.currentTab === 'pending' ? 
+            const currentPendingIds = this.currentTab === 'pending' ?
                 this.baseFilteredItems.map(i => i.Id) : [];
-            return currentPendingIds.length > 0 && 
+            return currentPendingIds.length > 0 &&
                    this.selectedIds.length === currentPendingIds.length;
         },
-        
+
         // ========== 連動篩選：unique 選項（根據當前 Tab 和其他篩選條件動態計算）==========
         // 需求者選項
         uniquePeople() {
@@ -220,12 +215,12 @@ createApp({
                 const matchOrder = this.checkedOrders.length === 0 || this.checkedOrders.includes(String(item['請購順序']).trim());
                 const matchReason = this.checkedReasons.length === 0 || this.checkedReasons.includes(item['需求原因']);
                 const matchAmount = this.checkedAmounts.length === 0 || this.checkedAmounts.includes(String(item['總金額']).trim());
-                
+
                 return matchItem && matchOrder && matchReason && matchAmount;
             });
             return Array.from(new Set(filtered.map(i => i['需求者']).filter(Boolean))).sort();
         },
-        
+
         // 請購項目選項（套用模糊搜尋）
         uniqueItems() {
             const filtered = this.currentTabRawItems.filter(item => {
@@ -233,20 +228,20 @@ createApp({
                 const matchOrder = this.checkedOrders.length === 0 || this.checkedOrders.includes(String(item['請購順序']).trim());
                 const matchReason = this.checkedReasons.length === 0 || this.checkedReasons.includes(item['需求原因']);
                 const matchAmount = this.checkedAmounts.length === 0 || this.checkedAmounts.includes(String(item['總金額']).trim());
-                
+
                 return matchPerson && matchOrder && matchReason && matchAmount;
             });
-            
+
             let items = Array.from(new Set(filtered.map(i => i['請購項目']).filter(Boolean)));
-            
+
             // 套用模糊搜尋
             if (this.itemSearchText) {
                 items = items.filter(i => i.toLowerCase().includes(this.itemSearchText.toLowerCase()));
             }
-            
+
             return items.sort();
         },
-        
+
         // 請購順序選項
         uniqueOrders() {
             const filtered = this.currentTabRawItems.filter(item => {
@@ -254,12 +249,12 @@ createApp({
                 const matchItem = this.checkedItems.length === 0 || this.checkedItems.includes(item['請購項目']);
                 const matchReason = this.checkedReasons.length === 0 || this.checkedReasons.includes(item['需求原因']);
                 const matchAmount = this.checkedAmounts.length === 0 || this.checkedAmounts.includes(String(item['總金額']).trim());
-                
+
                 return matchPerson && matchItem && matchReason && matchAmount;
             });
             return Array.from(new Set(filtered.map(i => String(i['請購順序']).trim()).filter(Boolean))).sort((a, b) => Number(a) - Number(b));
         },
-        
+
         // 需求原因選項（套用模糊搜尋）
         uniqueReasons() {
             const filtered = this.currentTabRawItems.filter(item => {
@@ -267,20 +262,20 @@ createApp({
                 const matchItem = this.checkedItems.length === 0 || this.checkedItems.includes(item['請購項目']);
                 const matchOrder = this.checkedOrders.length === 0 || this.checkedOrders.includes(String(item['請購順序']).trim());
                 const matchAmount = this.checkedAmounts.length === 0 || this.checkedAmounts.includes(String(item['總金額']).trim());
-                
+
                 return matchPerson && matchItem && matchOrder && matchAmount;
             });
-            
+
             let reasons = Array.from(new Set(filtered.map(i => i['需求原因']).filter(Boolean)));
-            
+
             // 套用模糊搜尋
             if (this.reasonSearchText) {
                 reasons = reasons.filter(r => r.toLowerCase().includes(this.reasonSearchText.toLowerCase()));
             }
-            
+
             return reasons.sort();
         },
-        
+
         // 總金額選項
         uniqueAmounts() {
             const filtered = this.currentTabRawItems.filter(item => {
@@ -288,20 +283,20 @@ createApp({
                 const matchItem = this.checkedItems.length === 0 || this.checkedItems.includes(item['請購項目']);
                 const matchOrder = this.checkedOrders.length === 0 || this.checkedOrders.includes(String(item['請購順序']).trim());
                 const matchReason = this.checkedReasons.length === 0 || this.checkedReasons.includes(item['需求原因']);
-                
+
                 return matchPerson && matchItem && matchOrder && matchReason;
             });
             return Array.from(new Set(filtered.map(i => String(i['總金額']).trim()).filter(Boolean)))
                 .sort((a, b) => Number(a.replace(/,/g, '')) - Number(b.replace(/,/g, '')));
         },
-        
+
         // ========== 篩選狀態指示器 ==========
         isPeopleFiltered() { return this.checkedPeople.length > 0; },
         isItemsFiltered() { return this.checkedItems.length > 0; },
         isOrdersFiltered() { return this.checkedOrders.length > 0; },
         isReasonsFiltered() { return this.checkedReasons.length > 0; },
         isAmountsFiltered() { return this.checkedAmounts.length > 0; },
-        
+
         // 是否有任何篩選生效
         hasAnyFilter() {
             return this.checkedPeople.length > 0 ||
@@ -322,8 +317,25 @@ createApp({
             }
         }
     },
-    
+
     methods: {
+        // ========== ✏️ WBS 判定 ==========
+        // WBS 單一樣要走主任／管裡簽核，所以永遠回 false（不再因為 WBS 而隱藏）。
+        // 舊版規則「主表 WBS 有值就不進審核」已移除；若日後要恢復，改回下面註解的版本即可：
+        //   const wbs = item['WBS'];
+        //   if (wbs && wbs.trim() !== '' && wbs.trim() !== 'V') return true;
+        //   const rows = this.buyerDetailsMap[String(item.Id ?? '').trim()] || [];
+        //   return rows.length > 0 && rows.every(r => String(r['WBS'] ?? '').trim() !== '');
+        isWbsRecord(item) {
+            return false;
+        },
+
+        // 該筆底下有幾個品項是 WBS（用於混合單的提示徽章）
+        wbsDetailCount(item) {
+            const rows = this.buyerDetailsMap[String(item.Id ?? '').trim()] || [];
+            return rows.filter(r => String(r['WBS'] ?? '').trim() !== '').length;
+        },
+
         // ========== 排序方法 ==========
         toggleDirectorSort() {
             // 重置叔叔簽核狀態（同一時間只能有一個排序）
@@ -331,7 +343,7 @@ createApp({
             this.orderSortState = 'none';
             this.amountSortState = 'none';
             this.dateSortState = 'none';
-            
+
             if (this.directorSortState === 'none') {
                 this.directorSortState = 'asc';
             } else if (this.directorSortState === 'asc') {
@@ -340,14 +352,14 @@ createApp({
                 this.directorSortState = 'none';
             }
         },
-        
+
         toggleUncleSort() {
             // 重置主任簽核狀態（同一時間只能有一個排序）
             this.directorSortState = 'none';
             this.orderSortState = 'none';
             this.amountSortState = 'none';
             this.dateSortState = 'none';
-            
+
             if (this.uncleSortState === 'none') {
                 this.uncleSortState = 'asc';
             } else if (this.uncleSortState === 'asc') {
@@ -356,7 +368,7 @@ createApp({
                 this.uncleSortState = 'none';
             }
         },
-        
+
         // 請購順序排序切換
         toggleOrderSort() {
             // 重置其他排序
@@ -364,7 +376,7 @@ createApp({
             this.uncleSortState = 'none';
             this.amountSortState = 'none';
             this.dateSortState = 'none';
-            
+
             if (this.orderSortState === 'none') {
                 this.orderSortState = 'asc';
             } else if (this.orderSortState === 'asc') {
@@ -373,7 +385,7 @@ createApp({
                 this.orderSortState = 'none';
             }
         },
-        
+
         // 總金額排序切換
         toggleAmountSort() {
             // 重置其他排序
@@ -381,7 +393,7 @@ createApp({
             this.uncleSortState = 'none';
             this.orderSortState = 'none';
             this.dateSortState = 'none';
-            
+
             if (this.amountSortState === 'none') {
                 this.amountSortState = 'asc';
             } else if (this.amountSortState === 'asc') {
@@ -390,7 +402,7 @@ createApp({
                 this.amountSortState = 'none';
             }
         },
-        
+
         // 需求日排序切換
         toggleDateSort() {
             // 重置其他排序
@@ -398,7 +410,7 @@ createApp({
             this.uncleSortState = 'none';
             this.orderSortState = 'none';
             this.amountSortState = 'none';
-            
+
             if (this.dateSortState === 'none') {
                 this.dateSortState = 'asc';
             } else if (this.dateSortState === 'asc') {
@@ -407,17 +419,17 @@ createApp({
                 this.dateSortState = 'none';
             }
         },
-        
+
         // 主任簽核排序 function
         sortByDirector(items) {
             const sorted = [...items];
-            
+
             sorted.sort((a, b) => {
                 const aVal = a['主任簽核'] || '';
                 const bVal = b['主任簽核'] || '';
                 const aStatus = (aVal.trim() === 'V') ? 1 : (aVal.trim() === 'R' ? 2 : 0);
                 const bStatus = (bVal.trim() === 'V') ? 1 : (bVal.trim() === 'R' ? 2 : 0);
-                
+
                 if (this.directorSortState === 'asc') {
                     // 未簽核在上: 0 < 1 < 2
                     return aStatus - bStatus;
@@ -427,14 +439,14 @@ createApp({
                     return order[aStatus] - order[bStatus];
                 }
             });
-            
+
             return sorted;
         },
-        
+
         // 叔叔簽核排序 function（按主任簽核狀態排序）
         sortByUncle(items) {
             const sorted = [...items];
-            
+
             sorted.sort((a, b) => {
                 // 取得主任簽核狀態（因為叔叔要等主任簽完）
                 const aVal = a['主任簽核'] || '';
@@ -442,7 +454,7 @@ createApp({
                 // V=已簽(1), 其他=未簽(0)
                 const aStatus = (aVal.trim() === 'V') ? 1 : 0;
                 const bStatus = (bVal.trim() === 'V') ? 1 : 0;
-                
+
                 if (this.uncleSortState === 'asc') {
                     // 箭頭向上：主任簽完的在上 (1 < 0)
                     return bStatus - aStatus;
@@ -451,18 +463,18 @@ createApp({
                     return aStatus - bStatus;
                 }
             });
-            
+
             return sorted;
         },
-        
+
         // 請購順序排序 function
         sortByOrder(items) {
             const sorted = [...items];
-            
+
             sorted.sort((a, b) => {
                 const aOrder = parseInt(a['請購順序']) || 0;
                 const bOrder = parseInt(b['請購順序']) || 0;
-                
+
                 if (this.orderSortState === 'asc') {
                     // 小到大
                     return aOrder - bOrder;
@@ -471,18 +483,18 @@ createApp({
                     return bOrder - aOrder;
                 }
             });
-            
+
             return sorted;
         },
-        
+
         // 總金額排序 function
         sortByAmount(items) {
             const sorted = [...items];
-            
+
             sorted.sort((a, b) => {
                 const aAmount = parseFloat(a['總金額']) || 0;
                 const bAmount = parseFloat(b['總金額']) || 0;
-                
+
                 if (this.amountSortState === 'asc') {
                     // 小到大
                     return aAmount - bAmount;
@@ -491,18 +503,18 @@ createApp({
                     return bAmount - aAmount;
                 }
             });
-            
+
             return sorted;
         },
-        
+
         // 需求日排序 function
         sortByDate(items) {
             const sorted = [...items];
-            
+
             sorted.sort((a, b) => {
                 const aDate = a['需求日'] || '';
                 const bDate = b['需求日'] || '';
-                
+
                 if (this.dateSortState === 'asc') {
                     // 舊到新
                     return aDate.localeCompare(bDate);
@@ -511,16 +523,16 @@ createApp({
                     return bDate.localeCompare(aDate);
                 }
             });
-            
+
             return sorted;
         },
-        
+
         // ========== 下拉篩選相關 ==========
         toggleDropdown(filterName) {
             const wasOpen = this[filterName];
             this.closeAllDropdowns();
             this[filterName] = !wasOpen;
-            
+
             // 下拉選單打開後重新渲染圖標
             if (this[filterName]) {
                 this.$nextTick(() => {
@@ -530,7 +542,7 @@ createApp({
                 });
             }
         },
-        
+
         closeAllDropdowns() {
             this.showPersonFilter = false;
             this.showItemFilter = false;
@@ -538,34 +550,34 @@ createApp({
             this.showReasonFilter = false;
             this.showAmountFilter = false;
         },
-        
+
         clearPersonFilter() {
             this.checkedPeople = [];
             this.showPersonFilter = false;
         },
-        
+
         clearItemFilter() {
             this.checkedItems = [];
             this.itemSearchText = '';
             this.showItemFilter = false;
         },
-        
+
         clearOrderFilter() {
             this.checkedOrders = [];
             this.showOrderFilter = false;
         },
-        
+
         clearReasonFilter() {
             this.checkedReasons = [];
             this.reasonSearchText = '';
             this.showReasonFilter = false;
         },
-        
+
         clearAmountFilter() {
             this.checkedAmounts = [];
             this.showAmountFilter = false;
         },
-        
+
         resetAllFilters() {
             this.checkedPeople = [];
             this.checkedItems = [];
@@ -581,14 +593,14 @@ createApp({
             this.dateSortState = 'none';
             this.closeAllDropdowns();
         },
-        
+
         // ========== 資料載入 ==========
         async loadData() {
             this.loading = true;
             try {
                 const response = await fetch(`http://127.0.0.1:5000/api/get-all-items-with-approval?${siteQuery()}`);
                 const data = await response.json();
-                
+
                 if (data.status === 'success') {
                     this.allItems = data.items;
                     console.log('✅ 資料載入成功，共', data.items.length, '筆');
@@ -606,7 +618,7 @@ createApp({
                 });
             }
         },
-        
+
         // ========== 載入 Buyer_detail 細項資料 ==========
         async loadBuyerDetails() {
             try {
@@ -634,7 +646,7 @@ createApp({
                 console.error('❌ Buyer_detail 網路錯誤:', error);
             }
         },
-        
+
         // ========== 展開 / 收合細項列 ==========
         toggleRow(itemId) {
             const id = String(itemId);
@@ -643,16 +655,16 @@ createApp({
                 [id]: !this.expandedRows[id]
             };
         },
-        
+
         isRowExpanded(itemId) {
             return !!this.expandedRows[String(itemId)];
         },
-        
+
         // 取得某筆的 Buyer_detail 細項（依 Id 對應）
         getBuyerDetails(itemId) {
             return this.buyerDetailsMap[String(itemId)] || [];
         },
-        
+
         // 驗收狀態 badge class
         getAcceptanceStatusClass(status) {
             const s = (status || '').trim();
@@ -661,7 +673,7 @@ createApp({
             if (s === 'X' || s === '未驗收') return 'bg-gray-100 text-gray-600';
             return 'bg-gray-100 text-gray-600';
         },
-        
+
         // 開單狀態 badge class
         getOrderStatusClass(status) {
             const s = (status || '').trim();
@@ -669,7 +681,7 @@ createApp({
             if (s === 'X') return 'bg-gray-100 text-gray-500';
             return 'bg-gray-100 text-gray-500';
         },
-        
+
         // ========== 複製報告路徑 ==========
         async copyPath(path) {
             try {
@@ -695,7 +707,7 @@ createApp({
                 position: 'top-end'
             });
         },
-        
+
         // ========== 選擇相關 ==========
         selectAll() {
             // 只在待審核 Tab 時選取當前顯示的項目
@@ -703,11 +715,11 @@ createApp({
                 this.selectedIds = this.displayItems.map(item => item.Id);
             }
         },
-        
+
         clearSelection() {
             this.selectedIds = [];
         },
-        
+
         toggleSelectAll(event) {
             if (event.target.checked) {
                 this.selectAll();
@@ -715,12 +727,12 @@ createApp({
                 this.clearSelection();
             }
         },
-        
+
         // ========== 狀態顯示 ==========
         getOverallStatusClass(item) {
             const director = item['主任簽核'];
             const uncle = item['叔叔簽核'];
-            
+
             if ((director && director.trim() === 'R') || (uncle && uncle.trim() === 'R')) {
                 return 'status-badge status-rejected';
             }
@@ -729,11 +741,11 @@ createApp({
             }
             return 'status-badge status-pending';
         },
-        
+
         getOverallStatusText(item) {
             const director = item['主任簽核'];
             const uncle = item['叔叔簽核'];
-            
+
             if ((director && director.trim() === 'R') || (uncle && uncle.trim() === 'R')) {
                 return '已退回';
             }
@@ -742,21 +754,21 @@ createApp({
             }
             return '待審核';
         },
-        
+
         getApprovalStatusClass(status) {
             const s = status ? status.trim() : '';
             if (s === 'V') return 'bg-green-100 text-green-800';
             if (s === 'R') return 'bg-red-100 text-red-800';
             return 'bg-yellow-100 text-yellow-800';
         },
-        
+
         getApprovalStatusText(status) {
             const s = status ? status.trim() : '';
             if (s === 'V') return '✓';
             if (s === 'R') return '✗';
             return '待審';
         },
-        
+
         // ========== 格式化 ==========
         formatDate(dateStr) {
             if (!dateStr) return '-';
@@ -766,14 +778,14 @@ createApp({
             }
             return d;
         },
-        
+
         formatMoney(value) {
             if (!value) return '-';
             const num = Number(String(value).replace(/,/g, ''));
             if (isNaN(num)) return value;
             return num.toLocaleString();
         },
-        
+
         // ========== 主任簽核 ==========
         async approveDirector(itemId) {
             try {
@@ -786,7 +798,7 @@ createApp({
                         approve_uncle: false
                     })
                 });
-                
+
                 const data = await response.json();
                 if (data.status === 'success') {
                     await this.loadData();
@@ -797,7 +809,7 @@ createApp({
                 Swal.fire({ icon: 'error', title: '操作失敗', text: error.message });
             }
         },
-        
+
         async rejectDirector(itemId) {
             const { value: reason } = await Swal.fire({
                 title: '主任退回原因',
@@ -811,7 +823,7 @@ createApp({
                     if (!value || !value.trim()) return '請輸入退回原因！';
                 }
             });
-            
+
             if (reason) {
                 try {
                     const response = await fetch(`http://127.0.0.1:5000/api/reject-items?${siteQuery()}`, {
@@ -823,7 +835,7 @@ createApp({
                             reject_stage: 'director'
                         })
                     });
-                    
+
                     const data = await response.json();
                     if (data.status === 'success') {
                         await this.loadData();
@@ -835,7 +847,7 @@ createApp({
                 }
             }
         },
-        
+
         // ========== 叔叔簽核 ==========
         async approveUncle(itemId) {
             try {
@@ -848,7 +860,7 @@ createApp({
                         approve_uncle: true
                     })
                 });
-                
+
                 const data = await response.json();
                 if (data.status === 'success') {
                     await this.loadData();
@@ -859,7 +871,7 @@ createApp({
                 Swal.fire({ icon: 'error', title: '操作失敗', text: error.message });
             }
         },
-        
+
         async rejectUncle(itemId) {
             const { value: reason } = await Swal.fire({
                 title: '叔叔退回原因',
@@ -873,7 +885,7 @@ createApp({
                     if (!value || !value.trim()) return '請輸入退回原因！';
                 }
             });
-            
+
             if (reason) {
                 try {
                     const response = await fetch(`http://127.0.0.1:5000/api/reject-items?${siteQuery()}`, {
@@ -885,7 +897,7 @@ createApp({
                             reject_stage: 'uncle'
                         })
                     });
-                    
+
                     const data = await response.json();
                     if (data.status === 'success') {
                         await this.loadData();
@@ -897,11 +909,11 @@ createApp({
                 }
             }
         },
-        
+
         // ========== 批次操作 ==========
         async approveSelected() {
             if (this.selectedIds.length === 0) return;
-            
+
             const { value: stage } = await Swal.fire({
                 title: '批次簽核確認',
                 html: `
@@ -923,7 +935,7 @@ createApp({
                     if (!value) return '請選擇簽核階段！';
                 }
             });
-            
+
             if (stage) {
                 try {
                     const response = await fetch(`http://127.0.0.1:5000/api/approve-items?${siteQuery()}`, {
@@ -935,7 +947,7 @@ createApp({
                             approve_uncle: stage === 'uncle' || stage === 'both'
                         })
                     });
-                    
+
                     const data = await response.json();
                     if (data.status === 'success') {
                         Swal.fire({ icon: 'success', title: '批次確認成功', text: data.message, timer: 2000, showConfirmButton: false });
@@ -948,10 +960,10 @@ createApp({
                 }
             }
         },
-        
+
         async rejectSelected() {
             if (this.selectedIds.length === 0) return;
-            
+
             const { value: formValues } = await Swal.fire({
                 title: '批次退回',
                 html: `
@@ -982,7 +994,7 @@ createApp({
                     return { stage, reason };
                 }
             });
-            
+
             if (formValues) {
                 try {
                     const response = await fetch(`http://127.0.0.1:5000/api/reject-items?${siteQuery()}`, {
@@ -994,7 +1006,7 @@ createApp({
                             reject_stage: formValues.stage
                         })
                     });
-                    
+
                     const data = await response.json();
                     if (data.status === 'success') {
                         Swal.fire({ icon: 'success', title: '退回成功', text: data.message, timer: 2000, showConfirmButton: false });
@@ -1007,7 +1019,7 @@ createApp({
                 }
             }
         },
-        
+
         // ========== 已確認頁面的退回功能 ==========
         async rejectFromApproved(itemId) {
             const item = this.allItems.find(i => String(i.Id).trim() === String(itemId).trim());
@@ -1015,7 +1027,7 @@ createApp({
                 Swal.fire({ icon: 'error', title: '找不到資料', text: `找不到 ID 為 ${itemId} 的資料` });
                 return;
             }
-            
+
             const formValues = await Swal.fire({
                 icon: 'warning',
                 title: '退回確認',
@@ -1024,7 +1036,7 @@ createApp({
                         <p class="mb-3 text-sm text-gray-600">確定要退回此筆已確認的申請嗎？</p>
                         <div class="mb-3">
                             <label class="block text-sm font-medium text-gray-700 mb-1">退回原因 <span class="text-red-500">*</span></label>
-                            <textarea id="swal-reject-reason" class="w-full border border-gray-300 rounded px-3 py-2 text-sm" 
+                            <textarea id="swal-reject-reason" class="w-full border border-gray-300 rounded px-3 py-2 text-sm"
                                       rows="3" placeholder="請輸入退回原因..."></textarea>
                         </div>
                     </div>
@@ -1043,7 +1055,7 @@ createApp({
                     return { reason };
                 }
             });
-            
+
             if (formValues.isConfirmed) {
                 try {
                     const response = await fetch(`http://127.0.0.1:5000/api/reject-approved-to-pending?${siteQuery()}`, {
@@ -1054,7 +1066,7 @@ createApp({
                             reject_reason: formValues.value.reason
                         })
                     });
-                    
+
                     const data = await response.json();
                     if (data.status === 'success') {
                         Swal.fire({ icon: 'success', title: '退回成功', text: '已退回至待簽核', timer: 2000, showConfirmButton: false });
@@ -1068,7 +1080,7 @@ createApp({
                 }
             }
         },
-        
+
         // ========== 處理退回資料 ==========
         async clearRemarkAndApprove(itemId) {
             const item = this.allItems.find(i => String(i.Id).trim() === String(itemId).trim());
@@ -1076,13 +1088,13 @@ createApp({
                 Swal.fire({ icon: 'error', title: '找不到資料', text: `找不到 ID 為 ${itemId} 的資料` });
                 return;
             }
-            
+
             const directorStatus = item['主任簽核'] ? item['主任簽核'].trim() : 'X';
             const uncleStatus = item['叔叔簽核'] ? item['叔叔簽核'].trim() : 'X';
-            
+
             let rejectStage = '';
             let confirmHtml = '';
-            
+
             if (directorStatus === 'R') {
                 rejectStage = 'director';
                 confirmHtml = `
@@ -1114,7 +1126,7 @@ createApp({
                     <p class="text-sm text-gray-600">將會清除退回原因（保留原本備註）</p>
                 `;
             }
-            
+
             const result = await Swal.fire({
                 icon: 'question',
                 title: '處理完成確認',
@@ -1125,7 +1137,7 @@ createApp({
                 confirmButtonColor: '#8b5cf6',
                 cancelButtonColor: '#6b7280'
             });
-            
+
             if (result.isConfirmed) {
                 try {
                     const response = await fetch(`http://127.0.0.1:5000/api/clear-remark-and-approve?${siteQuery()}`, {
@@ -1133,7 +1145,7 @@ createApp({
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ item_id: itemId, reject_stage: rejectStage })
                     });
-                    
+
                     const data = await response.json();
                     if (data.status === 'success') {
                         Swal.fire({ icon: 'success', title: '處理成功', text: data.message, timer: 2000, showConfirmButton: false });
@@ -1145,33 +1157,33 @@ createApp({
                 }
             }
         },
-        
+
         // ========== 導航 ==========
         goBackToPurchaseHome() {
             window.location.href = 'Procurement_Dynamic_360_Dashboard.html';
         },
-        
+
         // ========== 簽核權限檢查 ==========
         canApprove(item, stage) {
             const status = item[stage === 'director' ? '主任簽核' : '叔叔簽核'];
             const isNotApproved = !status || status.trim() === 'X' || status.trim() === '';
-            
+
             if (stage === 'uncle') {
                 const directorStatus = item['主任簽核'];
                 const directorApproved = directorStatus && directorStatus.trim() === 'V';
                 return isNotApproved && directorApproved;
             }
-            
+
             return isNotApproved;
         },
-        
+
         isWaitingForDirector(item) {
             const directorStatus = item['主任簽核'];
             const uncleStatus = item['叔叔簽核'];
-            
+
             const directorNotApproved = !directorStatus || directorStatus.trim() === 'X' || directorStatus.trim() === '';
             const uncleNotApproved = !uncleStatus || uncleStatus.trim() === 'X' || uncleStatus.trim() === '';
-            
+
             return directorNotApproved && uncleNotApproved;
         }
     },
@@ -1181,14 +1193,14 @@ createApp({
             // 切換 Tab 時清除選擇和篩選
             this.selectedIds = [];
             this.resetAllFilters();
-            
+
             this.$nextTick(() => {
                 if (typeof lucide !== 'undefined') {
                     lucide.createIcons();
                 }
             });
         },
-        
+
         // 當篩選狀態變化時，重新渲染圖標（特別是「清除篩選」按鈕的圖標）
         hasAnyFilter() {
             this.$nextTick(() => {
@@ -1198,24 +1210,25 @@ createApp({
             });
         }
     },
-    
+
     mounted() {
         this.loadData();
         this.loadBuyerDetails();
-        
+
         this.$nextTick(() => {
             if (typeof lucide !== 'undefined') {
                 lucide.createIcons();
             }
         });
-        
-        // 每30秒自動重新整理
+
+        // 每30秒自動重新整理（✏️ WBS：細項一起刷新，WBS 判定才會跟著更新）
         setInterval(() => {
             if (!this.loading) {
                 this.loadData();
+                this.loadBuyerDetails();
             }
         }, 30000);
-        
+
         // 點擊其他地方關閉下拉選單
         document.addEventListener('click', (e) => {
             const isDropdownClick = e.target.closest('.filter-dropdown-wrapper');

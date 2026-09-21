@@ -601,10 +601,59 @@ def monthly_expense_analysis():
         if len(df_filtered) == 0:
             return jsonify({'success': False, 'message': f'{start_month} 到 {end_month} 沒有數據'})
         
-        # 分離正常和WBS
-        df_normal = df_filtered[df_filtered['WBS'].isna()].copy()
-        df_wbs = df_filtered[df_filtered['WBS'].notna()].copy()
-        
+        # ✏️ WBS-patch ⑥：改為「品項層級」判定 WBS
+        #   舊邏輯：以主表 WBS 欄位分成 正常 / WBS 兩群，再各自加總主表「總金額」。
+        #   新規則：同一張 ePR 可能只有部分品項是 WBS，且主表「總金額」已改為「不含 WBS 品項」，
+        #           所以 WBS 金額必須從 Buyer_detail 的品項列（WBS 欄非空）加總。
+        #   規則：
+        #     - wbs_amount    = Σ 該 ePR 底下 WBS 欄非空的品項「總價」（缺總價時用 單價×數量）
+        #     - normal_amount = 若該 ePR 有 WBS 品項 → Σ WBS 欄為空的品項「總價」（品項層級）
+        #                       若該 ePR 沒有任何 WBS 品項 → 沿用主表「總金額」（與舊版數字完全一致）
+        #     - 相容舊資料：主表 WBS 有值但底下品項都沒填 WBS → 整張視為 WBS（舊版行為）
+        detail_df = pd.read_csv(BUYER_FILE, encoding='utf-8-sig', dtype='str')
+        if 'WBS' not in detail_df.columns:      # 其他廠別 CSV 尚無 WBS 欄時補空，避免 KeyError
+            detail_df['WBS'] = ''
+
+        def _to_num(series):
+            return pd.to_numeric(
+                series.astype(str).str.replace(',', '').str.replace('$', '').str.strip(),
+                errors='coerce'
+            )
+
+        _d = detail_df.copy()
+        _d['_wbs_flag'] = _d['WBS'].fillna('').astype(str).str.strip() != ''
+        _d['_amt'] = _to_num(_d['總價']) if '總價' in _d.columns else float('nan')
+        _fallback = _to_num(_d['單價']) * _to_num(_d['數量'])
+        _d['_amt'] = _d['_amt'].fillna(_fallback).fillna(0)
+
+        _wbs_rows_sum    = _d[_d['_wbs_flag']].groupby('Id')['_amt'].sum()
+        _normal_rows_sum = _d[~_d['_wbs_flag']].groupby('Id')['_amt'].sum()
+
+        df_calc = df_filtered.copy()
+        df_calc['_main_total'] = _to_num(df_calc['總金額']).fillna(0)
+        df_calc['_main_wbs']   = df_calc['WBS'].fillna('').astype(str).str.strip() != ''
+        df_calc['_row_wbs']    = df_calc['Id'].map(_wbs_rows_sum).fillna(0)
+        df_calc['_row_normal'] = df_calc['Id'].map(_normal_rows_sum).fillna(0)
+
+        def _split(r):
+            if r['_row_wbs'] > 0:
+                # 品項層級有 WBS（混合單 / 新規則存檔的 WBS 單 / 舊版整張 WBS 單）
+                return pd.Series({'_wbs_amount': r['_row_wbs'], '_normal_amount': r['_row_normal']})
+            if r['_main_wbs']:
+                # 舊資料：只有主表標了 WBS、品項未填 → 整張視為 WBS
+                return pd.Series({'_wbs_amount': r['_main_total'], '_normal_amount': 0.0})
+            return pd.Series({'_wbs_amount': 0.0, '_normal_amount': r['_main_total']})
+
+        if len(df_calc) > 0:
+            df_calc[['_wbs_amount', '_normal_amount']] = df_calc.apply(_split, axis=1)
+        else:
+            df_calc['_wbs_amount'] = 0.0
+            df_calc['_normal_amount'] = 0.0
+
+        # 統計用子集合：normal = 有正常花費的單；wbs = 有 WBS 品項的單（混合單兩邊都算）
+        df_normal = df_calc[(df_calc['_normal_amount'] > 0) | (~df_calc['_main_wbs'] & (df_calc['_row_wbs'] == 0))].copy()
+        df_wbs    = df_calc[df_calc['_wbs_amount'] > 0].copy()
+
         # 生成所有月份列表
         all_months = []
         current = start_month_num
@@ -614,33 +663,28 @@ def monthly_expense_analysis():
             month = month + 1 if month < 12 else 1
             year = year + 1 if month == 1 else year
             current = f"{year}{month:02d}"
-        
-        # 正常花費趨勢
-        normal_trend = []
-        if len(df_normal) > 0:
-            normal_monthly = df_normal.groupby('年月')['總金額'].apply(
-                lambda x: int(x.astype(float).sum())
-            ).to_dict()
-            for month in all_months:
-                month_key = month.replace('-', '')
-                normal_trend.append({'month': month, 'amount': normal_monthly.get(month_key, 0)})
-        else:
-            normal_trend = [{'month': m, 'amount': 0} for m in all_months]
-        
-        # WBS花費趨勢
-        wbs_trend = []
-        if len(df_wbs) > 0:
-            wbs_monthly = df_wbs.groupby('年月')['總金額'].apply(
-                lambda x: int(x.astype(float).sum())
-            ).to_dict()
-            for month in all_months:
-                month_key = month.replace('-', '')
-                wbs_trend.append({'month': month, 'amount': wbs_monthly.get(month_key, 0)})
-        else:
-            wbs_trend = [{'month': m, 'amount': 0} for m in all_months]
 
-        # ✅ 新增：讀取 Buyer_detail.csv 計算每月實際入帳 (同 get_monthly_actual_accounting 邏輯)
-        buyer_df = pd.read_csv(BUYER_FILE, encoding='utf-8-sig', dtype='str')
+        # 正常花費趨勢（不含 WBS 品項）
+        normal_monthly = df_calc.groupby('年月')['_normal_amount'].sum().to_dict()
+        normal_trend = [
+            {'month': m, 'amount': int(normal_monthly.get(m.replace('-', ''), 0))}
+            for m in all_months
+        ]
+
+        # WBS 花費趨勢（品項層級）
+        wbs_monthly = df_calc.groupby('年月')['_wbs_amount'].sum().to_dict()
+        wbs_trend = [
+            {'month': m, 'amount': int(wbs_monthly.get(m.replace('-', ''), 0))}
+            for m in all_months
+        ]
+
+        normal_total = int(df_calc['_normal_amount'].sum())
+        wbs_total    = int(df_calc['_wbs_amount'].sum())
+        normal_count = len(df_normal)
+        wbs_count    = len(df_wbs)
+
+        # ✅ 讀取 Buyer_detail.csv 計算每月實際入帳 (同 get_monthly_actual_accounting 邏輯)
+        buyer_df = detail_df.copy()   # ✏️ WBS-patch ⑥：上面已讀過，直接重用
         
         buyer_df = buyer_df[
             buyer_df['ePR No.'].notna() & buyer_df['PO No.'].notna() &
@@ -669,16 +713,16 @@ def monthly_expense_analysis():
         return jsonify({
                     'success': True,
                     'data': {
-                        'normal': {
-                            'total': int(df_normal['總金額'].astype(float).sum()) if len(df_normal) > 0 else 0,
-                            'average': int(df_normal['總金額'].astype(float).mean()) if len(df_normal) > 0 else 0,
-                            'count': len(df_normal),
+                        'normal': {   # ✏️ WBS-patch ⑥：改用品項層級計算結果
+                            'total': normal_total,
+                            'average': int(normal_total / normal_count) if normal_count > 0 else 0,
+                            'count': normal_count,
                             'trend': normal_trend
                         },
-                        'wbs': {
-                            'total': int(df_wbs['總金額'].astype(float).sum()) if len(df_wbs) > 0 else 0,
-                            'average': int(df_wbs['總金額'].astype(float).mean()) if len(df_wbs) > 0 else 0,
-                            'count': len(df_wbs),
+                        'wbs': {      # ✏️ WBS-patch ⑥：改用品項層級計算結果
+                            'total': wbs_total,
+                            'average': int(wbs_total / wbs_count) if wbs_count > 0 else 0,
+                            'count': wbs_count,
                             'trend': wbs_trend
                         },
                         'rt': {                          # ✅ 新增
@@ -931,10 +975,14 @@ def add_new_item():
         ]
 
         # 處理後的資料列（每筆 row 補上主資料 ID，欄位順序統一）
+        # ✏️ WBS-patch ④：原本用 detail_columns[1:-2] 切片，尾端加欄位時會位移，改為顯式排除
+        SKIP_COLS = {"Id", "isEditing", "backup"}
         cleaned_rows = []
         for row in table_rows:
             cleaned_row = {"Id": new_row["Id"]}  # 主表 Id
-            for col in detail_columns[1:-2]:  # 不含 isEditing, backup，這兩個手動補
+            for col in detail_columns:
+                if col in SKIP_COLS:
+                    continue
                 cleaned_row[col] = row.get(col, "")
             cleaned_row["isEditing"] = "False"
             cleaned_row["backup"] = "{}"
@@ -1027,8 +1075,23 @@ def update_data():
             new_rows["Id"] = target_id  # 加入對應主表 Id
             df_detail = pd.concat([df_detail, new_rows], ignore_index=True)
 
+        # ✏️ WBS-patch ⑤：與 /api/add、/api/update-buyer-items 對齊，收斂欄位與順序
+        detail_final_columns = [
+            'Id', '開單狀態', '交貨驗證', 'User', 'ePR No.', 'PO No.', 'Item', '品項', '規格',
+            '數量', '總數', '單價', '總價', '備註', '字數', 'isEditing', 'backup', '_alertedItemLimit',
+            'Delivery Date 廠商承諾交期', 'SOD Qty 廠商承諾數量', '驗收數量', '拒收數量',
+            '發票月份', 'WBS', '需求日', 'RT金額', 'RT總金額', '驗收狀態'
+        ]
+        for col in detail_final_columns:
+            if col not in df_detail.columns:
+                df_detail[col] = ""
+        _dropped = [c for c in df_detail.columns if c not in detail_final_columns]
+        if _dropped:
+            logger.warning(f"⚠️ /update 收到非預期欄位，已忽略：{_dropped}")
+        df_detail = df_detail[detail_final_columns]
+
         # 儲存
-        df_detail.to_csv(detail_file, index=False, encoding="utf-8-sig")
+        df_detail.to_csv(detail_file, index=False, encoding="utf-8-sig", na_rep="")
         
         return jsonify({"message": "更新成功"}), 200
 
@@ -3500,16 +3563,20 @@ def upload_buyer_detail():
         # 檢查 buyer_df 是否有必要的欄位
         if not all(col in buyer_df.columns for col in required_buyer_cols):
             missing_cols = [col for col in required_buyer_cols if col not in buyer_df.columns]
-            logger.info(f"錯誤: {BUYER_FILE} 缺少必要的欄位: {', '.join(missing_cols)}")
             logger.error(f"{BUYER_FILE} 缺少必要的欄位: {', '.join(missing_cols)}")
-            exit()
+            return jsonify({
+                "status": "fail",
+                "message": f"Buyer_detail.csv 缺少欄位：{', '.join(missing_cols)}"
+            }), 400   # ✏️ WBS-patch ①：原本是 exit()，會終止 worker
 
         # 檢查 output_df 是否有必要的欄位
         if not all(col in output_df.columns for col in required_output_cols):
             missing_cols = [col for col in required_output_cols if col not in output_df.columns]
-            logger.info(f"錯誤: delivery_receipt.csv 缺少必要的欄位: {', '.join(missing_cols)}")
-            logger.error(f"delivery_receipt.csv 缺少必要的欄位: {', '.join(missing_cols)}")
-            exit()
+            logger.error(f"上傳檔缺少必要的欄位: {', '.join(missing_cols)}")
+            return jsonify({
+                "status": "fail",
+                "message": f"上傳的 Excel 缺少欄位：{', '.join(missing_cols)}"
+            }), 400   # ✏️ WBS-patch ①：原本是 exit()，會終止 worker
 
         # === 資料清理與預處理 ===
         # 清理 output_df 的 PONO 和 品名
@@ -3536,7 +3603,13 @@ def upload_buyer_detail():
             "拒收數量_from_output",
             "發票月份_from_output"
         ]
-        output_subset = output_df[output_cols_to_merge].copy()
+        # ✏️ WBS-patch ③：同 PO+品名若有多列會造成 left join 放大列數，先去重（保留最後一筆）
+        _before = len(output_df)
+        output_subset = output_df[output_cols_to_merge].drop_duplicates(
+            subset=["PONO_clean", "品名_clean"], keep="last"
+        ).copy()
+        if len(output_subset) != _before:
+            logger.warning(f"⚠️ 上傳檔有重複的 PO+品名，已去重：{_before} → {len(output_subset)} 筆")
 
         # === 合併資料 ===
         merged = pd.merge(
@@ -3599,6 +3672,12 @@ def upload_buyer_detail():
         # === 最終輸出欄位清單 ===
         final_columns = ['Id', '開單狀態', '交貨驗證', 'User', 'ePR No.', 'PO No.', 'Item', '品項', '規格', '數量', '總數', '單價', '總價', '備註', '字數', 'isEditing', 'backup', '_alertedItemLimit', 
                          'Delivery Date 廠商承諾交期', 'SOD Qty 廠商承諾數量', '驗收數量', '拒收數量', '發票月份', "WBS", "需求日", "RT金額", "RT總金額", "驗收狀態"]
+
+        # ✏️ WBS-patch ②：缺少的欄位先補空，避免其他廠別 CSV 尚無該欄時 KeyError
+        for col in final_columns:
+            if col not in merged.columns:
+                merged[col] = ""
+                logger.warning(f"⚠️ {BUYER_FILE} 原本缺少欄位 {col}，已自動補空欄")
 
         # 確保只保留需要的欄位
         final_df = merged[final_columns].copy()
