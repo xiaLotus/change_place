@@ -174,6 +174,11 @@
                       style="margin-top: 10px; padding: 8px 16px; background: #ffc107; color: #000; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
                   📝 調整分批
               </button>
+              <!-- 🆕 取消分批提示 -->
+              <button @click="cancelBatchGroup(group)"
+                      style="margin-top: 10px; margin-left: 8px; padding: 8px 16px; background: #6c757d; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                  🚫 取消分批 (略過此 PO)
+              </button>
           </div>
 
             <!-- 🆕 新增:顯示合併項目 -->
@@ -200,6 +205,11 @@
                 <button @click="goToMergeConfirmation(group)" 
                         style="margin-top: 10px; padding: 8px 16px; background: #0d6efd; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
                     ✅ 確認合併
+                </button>
+                <!-- 🆕 取消合併提示 -->
+                <button @click="cancelBatchGroup(group)"
+                        style="margin-top: 10px; margin-left: 8px; padding: 8px 16px; background: #6c757d; color: #fff; border: none; border-radius: 5px; cursor: pointer; font-weight: bold;">
+                    🚫 取消合併 (略過此 PO)
                 </button>
             </div>
 
@@ -279,6 +289,14 @@
 
                 <!-- 覆蓋按鈕 -->
                 <div class="mt-4 text-right">
+                    <!-- 🆕 忽略此組 PO -->
+                    <button
+                        v-if="!isPoGroupOverridden(group.po_no) && !isOverridingAll"
+                        class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 mr-2"
+                        @click="ignoreGroup(group)"
+                    >
+                        🚫 忽略此組 PO
+                    </button>
                     <button
                         v-if="!isPoGroupOverridden(group.po_no) && !isOverridingAll"
                         class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"

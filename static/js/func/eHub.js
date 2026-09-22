@@ -596,6 +596,7 @@ const siteQuery = () => `site=${encodeURIComponent(SITE)}&username=${encodeURICo
             localStorage.setItem('current_batch_items', JSON.stringify(group.items));
             
             // 跳轉
+            sessionStorage.setItem('ehub_pending_return', '1');   // 🆕 標記：返回時需還原比對結果
             window.location.href = 'batch_adjustment.html';
         },
 
@@ -718,13 +719,14 @@ const siteQuery = () => `site=${encodeURIComponent(SITE)}&username=${encodeURICo
             const reader = new FileReader();
             reader.onload = (e) => {
                 const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
+                // 🆕 cellDates + raw:false：手動編輯過的 XLS 日期格會是數字序號(45945)，改讀成格式化文字
+                const workbook = XLSX.read(data, { type: 'array', cellDates: true });
 
                 // 讀取第一個工作表
                 const sheetName = workbook.SheetNames[0];
                 const sheet = workbook.Sheets[sheetName];
 
-                let rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                let rows = XLSX.utils.sheet_to_json(sheet, { header: 1, raw: false, dateNF: 'yyyy/mm/dd' });
 
                 // 過濾空白行
                 rows = rows.filter(r => Array.isArray(r) && r.some(cell => cell !== undefined && cell !== null && String(cell).trim() !== ""));
@@ -928,7 +930,7 @@ const siteQuery = () => `site=${encodeURIComponent(SITE)}&username=${encodeURICo
             tableHtml += `
                 <div>
                     <p style="color: #dc3545; font-weight: bold; margin-bottom: 10px;">
-                        ⚠️ 以下 ${editableItems.length} 筆需要您確認（品名相似但Item不同）
+                        ⚠️ 以下 ${editableItems.length} 筆需要您確認（Item 不同 / 反向分批 / 分批數量變更 / 總量通知 / 新增）
                     </p>
                     <table style="width: 100%; border-collapse: collapse; font-size: 14px;" id="confirmTable">
                         <thead style="position: sticky; top: 0; background: #f8d7da;">
@@ -969,6 +971,9 @@ const siteQuery = () => `site=${encodeURIComponent(SITE)}&username=${encodeURICo
                         </td>
                         <td style="border: 1px solid #ccc; padding: 8px;">
                             ${item.old_desc}
+                            ${['split_remaining','batch_qty_change','batch_total_notice','split_invalid','add_new'].includes(item.action_type)
+                                ? `<div style="margin-top:6px; padding:6px 8px; background:#fff3cd; color:#856404; font-size:12px; border-radius:4px;">${({split_remaining:'🔀', batch_total_notice:'📦', split_invalid:'⛔', add_new:'➕'})[item.action_type] || '⚠️'} ${item.reason || ''}</div>`
+                                : ''}
                         </td>
                         <td style="border: 1px solid #ccc; padding: 8px; color: #007bff;">
                             <span class="new-desc-display" data-idx="${idx}">${item.new_desc}</span>
@@ -1286,13 +1291,114 @@ const siteQuery = () => `site=${encodeURIComponent(SITE)}&username=${encodeURICo
         localStorage.setItem('current_merge_items', JSON.stringify(group.items));
         
         // 跳轉到合併確認頁面
+        sessionStorage.setItem('ehub_pending_return', '1');   // 🆕 標記：返回時需還原比對結果
         window.location.href = 'merge_confirmation.html';
     },
 
 
+    // 🆕 清空上次比對的快取與畫面狀態
+    clearComparisonCache() {
+        ['processed_batch_items', 'quantity_mismatch_data', 'merge_items_data',
+         'last_comparison_data', 'current_merge_po', 'current_merge_items'
+        ].forEach(k => localStorage.removeItem(k));
+        this.allGroups = [];
+        this.tableData = [];
+        this.totalPoGroups = 0;
+        this.overriddenPoGroups = 0;
+        this.overriddenPoSet.clear();
+        this.lastUploadedFileName = '';
+    },
+
     // 🆕 記錄已覆蓋的正常項目 (簡化版,使用通用方法)
     recordProcessedNormalItem(po_no) {
         this.recordProcessedItem(po_no, null, 'normal');
+
+        // 🆕 同一 PO 已整組覆蓋 → 順帶關閉該 PO 的分批 / 合併提示，避免殘留
+        this.allGroups
+            .filter(g => g.po_no === po_no && (g.type === 'batch' || g.type === 'merge'))
+            .forEach(g => this.dismissGroup(g, { silent: true }));
+    },
+
+    // 🆕 略過（取消）分批 / 合併提示：記錄為已處理並從畫面移除，重新整理也不會再出現
+    dismissGroup(group, { silent = false } = {}) {
+        (group.items || []).forEach(it =>
+            this.recordProcessedItem(group.po_no, it.item, group.type)
+        );
+        this.allGroups = this.allGroups.filter(g => g !== group);
+
+        if (!silent) {
+            Swal.fire({
+                icon: 'success',
+                title: '已略過',
+                text: `PO ${group.po_no} 的${group.type === 'merge' ? '合併' : '分批'}提示已移除`,
+                timer: 1800,
+                showConfirmButton: false
+            });
+        }
+        this.checkIfAllNormalItemsCompleted();
+    },
+
+    // 🆕 「忽略此組 PO」：正常卡片用，不寫入任何資料，直接視為已處理
+    async ignoreGroup(group) {
+        const result = await Swal.fire({
+            icon: 'question',
+            title: `忽略 PO ${group.po_no}？`,
+            html: `
+                <div style="text-align: left;">
+                    <p>此 PO 的 <strong>${group.rows.length}</strong> 筆比對結果將從畫面移除，<strong>不會</strong>更動 Buyer_detail 任何資料。</p>
+                    <p style="color:#6c757d; font-size:13px; margin-top:8px;">
+                        適用情境：資料為人工維護、暫不處理，或本次通知與此 PO 無關。
+                    </p>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: '確定忽略',
+            cancelButtonText: '返回',
+            confirmButtonColor: '#6c757d'
+        });
+        if (!result.isConfirmed) return;
+
+        if (group.type === 'normal') {
+            if (!this.overriddenPoSet.has(group.po_no)) {
+                this.overriddenPoSet.add(group.po_no);
+                this.overriddenPoGroups++;
+            }
+            this.recordProcessedNormalItem(group.po_no);   // 同 PO 的分批 / 合併卡片一併關閉
+            this.allGroups = this.allGroups.filter(g => g !== group);
+
+            Swal.fire({
+                icon: 'info',
+                title: '已忽略',
+                text: `PO ${group.po_no} 本次不處理`,
+                timer: 1800,
+                showConfirmButton: false
+            });
+            this.checkIfAllNormalItemsCompleted();
+        } else {
+            this.dismissGroup(group);
+        }
+    },
+
+    // 🆕 「取消分批 / 合併」按鈕
+    async cancelBatchGroup(group) {
+        const label = group.type === 'merge' ? '合併' : '分批';
+        const result = await Swal.fire({
+            icon: 'question',
+            title: `取消${label}提示？`,
+            html: `
+                <div style="text-align: left;">
+                    <p>PO <strong>${group.po_no}</strong> 的${label}提示將從畫面移除，<strong>不會</strong>更動 Buyer_detail 任何資料。</p>
+                    <p style="color:#6c757d; font-size:13px; margin-top:8px;">
+                        適用情境：該 PO 已用「覆蓋此組」處理完成，或分批中有已驗收結案的批次。
+                    </p>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: '確定略過',
+            cancelButtonText: '返回',
+            confirmButtonColor: '#6c757d'
+        });
+        if (result.isConfirmed) this.dismissGroup(group);
     },
 
     // 📝 新增:通用的處理項目記錄方法
@@ -1628,6 +1734,17 @@ const siteQuery = () => `site=${encodeURIComponent(SITE)}&username=${encodeURICo
         const username = localStorage.getItem('username');
         this.username = username;
         console.log("👤 使用者名稱:", this.username);
+
+        // 🆕 只有從「調整分批 / 確認合併」子頁面回來時才還原上次比對結果；
+        //    一般刷新或從其他頁面進來一律清空，避免看到舊的處理內容
+        const pendingReturn = sessionStorage.getItem('ehub_pending_return') === '1';
+        sessionStorage.removeItem('ehub_pending_return');
+
+        if (!pendingReturn) {
+            console.log("🧹 非子頁面返回，清空上次比對資料");
+            this.clearComparisonCache();
+            return;
+        }
         
         // 🔴🔴🔴 關鍵修改:先檢查是否需要重新載入資料
         const processedItems = localStorage.getItem('processed_batch_items');
