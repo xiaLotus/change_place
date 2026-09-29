@@ -4326,14 +4326,1157 @@ def confirm_merge():
 #             "auto_updated": auto_updated_items  # 🆕 也在成功時回傳
 #         }))
 
+# @app.route("/api/save_override_all", methods=["POST"])
+# def save_override_all():
+#     """
+#     Version 44 - 品名優先比對邏輯（分批列辨識強化 + 反向分批）
+#     改進：優先以品名相似度為主要比對依據，Item 作為次要參考
+#     優先順序：同 PO 內的品名高度相似 > Item 相同 > 品名中度相似 > 新增
+
+#     V44（2026/09/22）：
+#       - 候選列記錄 is_closed（驗收狀態 V，或驗收數量 ≥ 數量；部分驗收仍算未結案）與
+#         qty_match（SOD 與 XLS 數量相同）；相似度相同時依「數量相符 > 未結案 > Item 相同」決定覆蓋哪一列
+#       - Item 相同 + 品名 ≥ 80% + （數量相同 或 品名為註記變體如「-Q2」）的列優先鎖定，
+#         不被品名更像但 Item 不同的列搶走（SOD 尚未填入時也適用）
+#       - 原品項含「分批」標記、或原品項 = XLS 品名 + 人工註記後綴（-Q2、(8 Set) 等）時不更動品名，只更新交期 / 數量 / Item
+#       - 反向分批（split_remaining）：品名 ≥ 80% 且 XLS 數量 < PO「數量」欄 且 原列未分批 且
+#         XLS 數量 ≠ 目前 SOD → 在相似度分支之前判斷（不受 Item 是否相同影響），先跳確認；
+#         確認後原列改為「-分批1」(剩餘量 = 數量 - XLS，保留原 Item/交期)，新增「-分批2」(本次
+#         Item/交期/數量) 於檔尾。判斷以「數量」為基準而非 SOD（SOD 可能已被改成第一批的量）
+#         情境：數量 96、SOD 18（第一批已驗收）、XLS 78 → 分批1 = 18、分批2 = 78
+#       - 確認視窗：新品名顯示「…-分批2」，黃色說明列出分批1 / 分批2 的 Item、數量、交期；
+#         反向分批接手時移除同列 auto_updated 紀錄；備註已含「分批1/2」不重複附加
+#       - XLS 交期空白或數量 ≤ 0 的列不寫入（列入 failed）；數量正規化（"12.0"→"12"）
+#       - 去掉分批後綴後品名一致的分批列，相似度以 100 計（否則「-分批」比「-分批2」更像會搶走目標）
+#       - PO 欄已含該 PO（<br /> 多 PO 格式）時不覆寫 PO 欄；反向分批單價空白時總價留空
+#       - PO 全部作廢（df_active 無此 PO）時不再 KeyError 500：所有 apply 篩選加 .astype(bool)
+#       - 反向分批只在前置判斷（品名 ≥ 80%）通過時才允許執行；確認階段不會對其他比對路徑的目標列拆分
+#       - 反向分批的驗收防呆：原列驗收數量 > 拆分後剩餘量 → 跳「分批數量異常」(split_invalid，critical)，
+#         確認後也不寫入，列入 failed
+#       - 品名 60–79% 且 Item 不同 → 視為新 Item，走「無相似項目，建議新增」確認，不再覆蓋既有列
+#       - 分批列再拆（反向分批 2→3）：分批2 78 → XLS 50 → 分批2 留 28（名稱不變），新增「-分批3」50，
+#         同組備註「分批N/M」的 M 一併更新
+#       - 整張 PO 總量通知（batch_total_notice）：目標是分批列、XLS 數量 == 全部批次加總、且已有結案批次
+#         → 只更新未結案批次的交期，SOD 不變（先跳確認）
+#       - 分批列數量變更（batch_qty_change）：目標列品項含「分批」且 XLS 數量 ≠ 該批 SOD、又不符合上面兩種
+#         → 不自動更新，先跳確認（防止上傳較舊的通知檔時把整張 PO 的量寫到某一批）
+
+#     確認視窗（confirm_needed）觸發規則 — 由「品名相似度 × Item 是否相同」決定：
+#       ┌──────────┬──────────────────────────┬──────────────────────────────┐
+#       │ 品名相似度 │ Item 相同                │ Item 不同                    │
+#       ├──────────┼──────────────────────────┼──────────────────────────────┤
+#       │ ≥ 95%    │ 自動更新，不跳            │ 跳（品名相同但 Item 不同）    │
+#       │ 80–94%   │ 自動更新，不跳            │ 跳（品名高度相似但 Item 不同）│
+#       │ 60–79%   │ 跳（Item 相同但品名差異大）│ 跳（無相似項目，建議新增）    │
+#       │ < 60%    │ 跳（品名完全不同，critical）│ 跳（無相似項目，建議新增）    │
+#       └──────────┴──────────────────────────┴──────────────────────────────┘
+#       → 只有「Item 相同 且 相似度 ≥ 80%」直接寫入（auto_updated），其餘一律先跳視窗確認。
+#       → 反向分批條件成立時優先於上表，一律跳視窗（split_remaining）。
+#       相似度 = difflib.SequenceMatcher(品名去換行/空白後小寫).ratio() × 100
+#       例：「…烤箱」vs「…烤箱-分批2」= 93.5%
+#     """
+#     # 備份
+#     # backup_files()
+#     data = request.get_json()
+#     rows = data.get("rows", [])
+#     confirm_override = data.get("confirm_override", False)  # 是否已確認覆蓋
+
+#     if not rows:
+#         return jsonify({"status": "error", "msg": "❌ 沒有收到任何資料"}), 400
+
+#     def clean_text(x):
+#         """清理文字：移除換行和空白"""
+#         return str(x).replace("\n", "").replace("\r", "").strip()
+    
+#     def calculate_similarity(text1, text2):
+#         """計算兩個字串的相似度 (0-100)"""
+#         text1_clean = clean_text(text1).lower()
+#         text2_clean = clean_text(text2).lower()
+#         return SequenceMatcher(None, text1_clean, text2_clean).ratio() * 100
+
+#     def _to_num(v):
+#         """字串轉數字，失敗回 None（處理千分位逗號）"""
+#         try:
+#             return float(str(v).replace(",", "").strip())
+#         except (ValueError, TypeError):
+#             return None
+
+#     def _fmt_num(n):
+#         """整數不帶 .0，其餘保留小數"""
+#         return str(int(n)) if float(n).is_integer() else str(n)
+
+#     def _base_name(desc):
+#         """去掉分批 / 尾批 / (N Set) 等後綴，取得品項基底名稱"""
+#         d = str(desc)
+#         d = re.sub(r"[-\s]*\(?分批[^)\s]*\)?", "", d)
+#         d = re.sub(r"[-\s]*尾批", "", d)
+#         d = re.sub(r"\s*\(\d+\s*Set\)", "", d)
+#         return d.strip()
+
+#     def _siblings(idx, po):
+#         """同 PO、狀態 V、品項基底相同的所有列（含自己），依 index 排序"""
+#         base = _base_name(df_buyer.at[idx, "品項"])
+#         m = (df_buyer["開單狀態"] == "V") & df_buyer["PO No."].apply(lambda x: is_po_in_record(x, po)).astype(bool) \
+#             & df_buyer["品項"].apply(lambda x: _base_name(x) == base).astype(bool)
+#         return df_buyer[m.astype(bool)]
+
+#     def _is_closed_row(r):
+#         acc = _to_num(r.get("驗收數量", "")) or 0.0
+#         qty = _to_num(r.get("數量", ""))
+#         return str(r.get("驗收狀態", "")).strip().upper() == "V" or (qty is not None and qty > 0 and acc >= qty)
+
+#     def _split_plan(idx, new_qty_str):
+#         """反向分批判斷：回傳 (該列數量, 新數量, 剩餘數量)，不符合則回 None
+#         以「數量」欄為基準，不用 SOD：SOD 可能已被先前通知改成第一批的量
+#           例：數量 96、SOD 18（第一批已驗收）、XLS 78 → 96 - 78 = 18 = 分批1，78 = 分批2
+#         V40 起分批列也可再拆（分批2 78 → XLS 50：分批2 留 28，新增分批3 50）
+#         條件：0 < XLS 數量 < 該列數量，且 XLS 數量 ≠ 目前 SOD（同批重複通知不拆）"""
+#         po_qty = _to_num(df_buyer.at[idx, "數量"])
+#         sod_qty = _to_num(df_buyer.at[idx, "SOD Qty 廠商承諾數量"])
+#         new_q = _to_num(new_qty_str)
+#         base = po_qty if po_qty is not None else sod_qty
+#         if base is None or new_q is None or not (0 < new_q < base):
+#             return None
+#         if sod_qty is not None and abs(sod_qty - new_q) < 0.01:
+#             return None
+#         remain = base - new_q
+#         if sod_qty is not None and abs(sod_qty - remain) > 0.01:
+#             logger.warning(f"     ⚠️ 反向分批：SOD {_fmt_num(sod_qty)} 與剩餘量 {_fmt_num(remain)} 不一致（數量 {_fmt_num(base)} - XLS {_fmt_num(new_q)}），以剩餘量為準")
+#         return base, new_q, remain
+    
+#     # 處理 pandas int64 轉換問題
+#     def convert_to_json_serializable(obj):
+#         """將 pandas 的特殊類型轉換為可序列化的類型"""
+#         if isinstance(obj, dict):
+#             return {k: convert_to_json_serializable(v) for k, v in obj.items()}
+#         elif isinstance(obj, list):
+#             return [convert_to_json_serializable(item) for item in obj]
+#         elif hasattr(obj, 'item'):  # numpy/pandas 數值類型
+#             return obj.item()
+#         elif pd.isna(obj):  # NaN 值
+#             return None
+#         else:
+#             return obj
+
+#     # 🔒 使用檔案鎖保護讀取操作
+#     try:
+#         with buyer_file_lock:
+#             # 讀取並處理資料
+#             df_buyer = pd.read_csv(BUYER_FILE, encoding="utf-8-sig", dtype=str, on_bad_lines="skip").fillna("")
+#             df_buyer["PO No."] = df_buyer["PO No."].str.strip()
+#             df_buyer["Item"] = (
+#                 df_buyer["Item"]
+#                 .str.replace(r"\.0$", "", regex=True)
+#                 .str.strip()
+#                 .apply(lambda x: x.zfill(4) if x.isdigit() else x)
+#             )
+            
+#             # 🔴 重要：建立一個只包含狀態為 V 的資料索引
+#             df_active = df_buyer[df_buyer["開單狀態"] == "V"].copy()
+#             logger.info(f"總資料筆數: {len(df_buyer)}, 有效資料(狀態=V): {len(df_active)}")
+
+#     except Timeout:
+#         logger.error("❌ 無法取得檔案鎖,請稍後再試")
+#         return jsonify({"status": "error", "msg": "系統忙碌中,請稍後再試"}), 503
+#     except Exception as e:
+#         logger.error(f"❌ 讀取 Buyer_detail.csv 時發生錯誤: {str(e)}")
+#         return jsonify({"status": "error", "msg": f"讀取檔案失敗: {str(e)}"}), 500
+
+
+#     # ✅ 🆕 **在這裡添加初始化 all_group_results**
+#     all_group_results = []  # 用來收集所有 PO 的比對結果
+
+#     updated_count = 0
+#     inserted_count = 0
+#     failed = []
+#     need_confirm_items = []  # 需要確認的項目
+#     auto_updated_items = []  # 🆕 自動更新的項目
+#     matching_output = []  # 比對結果輸出
+
+#     new_item = ''
+#     epr_no = 0
+#     po_no_new = ''
+    
+#     # 輸出開始訊息
+#     logger.info("\n" + "="*80)
+#     logger.info("開始處理資料比對 (Version 44 - 品名優先 + 反向分批)")
+#     logger.info("="*80)
+
+#     for row_num, row in enumerate(rows, 1):
+#         split_allowed = False          # 🆕 V41：只有前置判斷（品名 ≥ 80%）通過的列才允許反向分批
+#         id_ = row.get("id", "").strip()
+#         po_no_new = row.get("po_no", "").strip()
+#         item_new = row.get("item", "").strip()
+        
+#         # 確保 item 格式一致（4位數）
+#         if item_new.isdigit():
+#             item_new = item_new.zfill(4)
+            
+#         new_delivery = row.get("delivery_date", "").strip()
+#         new_qty = row.get("sod_qty", "").strip()
+#         # 🆕 V43：數量正規化（"12.0" → "12"、"1,200" → "1200"）；交期空白或數量 ≤ 0 的列不處理
+#         _nq_chk = _to_num(new_qty)
+#         if _nq_chk is not None:
+#             new_qty = _fmt_num(_nq_chk)
+#         if not new_delivery or _nq_chk is None or _nq_chk <= 0:
+#             logger.warning(f"  ⛔ 第 {row_num} 筆 XLS 交期空白或數量無效（交期='{new_delivery}', 數量='{new_qty}'），略過")
+#             failed.append({"row": row_num, "po_no": row.get("po_no", ""), "item": row.get("item", ""),
+#                            "reason": "XLS 交期空白或數量為 0，未處理"})
+#             matching_output.append({"row": row_num, "po": row.get("po_no", ""), "item": row.get("item", ""),
+#                                     "match": "資料無效", "action": "略過", "note": "交期空白/數量0"})
+#             continue
+#         new_desc = row.get("po_description", "").strip()
+#         new_desc_clean = clean_text(new_desc)
+
+#         target_idx = None
+#         match_reason = ""
+        
+#         # 輸出當前處理項目
+#         logger.info(f"\n[第 {row_num} 筆]")
+#         logger.info(f"  新資料 => PO: {po_no_new}, Item: {item_new}")
+#         logger.info(f"  品名: {new_desc[:50]}{'...' if len(new_desc) > 50 else ''}")
+        
+#         # 🔍 Version 31 核心改變：先找品名相似度，再考慮 Item
+#         # 步驟1：先在同 PO 內找資料（只找狀態為 V 的）
+#         po_group = df_active[df_active["PO No."].apply(lambda x: is_po_in_record(x, po_no_new)).astype(bool)]
+        
+#         if not po_group.empty:
+#             logger.info(f"     在 PO {po_no_new} 找到 {len(po_group)} 筆資料")
+            
+#             # 🔥 Version 31：計算所有項目的品名相似度
+#             new_qty_num = _to_num(new_qty)
+
+#             similarity_scores = []
+#             for idx, row_data in po_group.iterrows():
+#                 existing_desc = row_data["品項"]
+#                 existing_item = row_data["Item"]
+#                 similarity = calculate_similarity(new_desc, existing_desc)
+
+#                 # 🆕 已驗收結案：驗收狀態 V，或 驗收數量 ≥ 數量（部分驗收仍視為未結案）
+#                 _acc = _to_num(row_data.get("驗收數量", "")) or 0.0
+#                 _qty = _to_num(row_data.get("數量", ""))
+#                 is_closed = (
+#                     str(row_data.get("驗收狀態", "")).strip().upper() == "V"
+#                     or (_qty is not None and _qty > 0 and _acc >= _qty)
+#                 )
+#                 # 🆕 廠商承諾數量是否與本次 XLS 相同（分批時的關鍵辨識）
+#                 row_qty = _to_num(row_data.get("SOD Qty 廠商承諾數量", ""))
+#                 qty_match = (new_qty_num is not None and row_qty == new_qty_num)
+
+#                 # 🆕 V43：去掉分批後綴後品名一致 → 視為同一品項（相似度以 100 計），讓「未結案 / 數量相符」決定選哪一批
+#                 same_base = (_base_name(existing_desc) == _base_name(new_desc)) and ("分批" in str(existing_desc) or "尾批" in str(existing_desc))
+#                 if same_base and similarity < 100:
+#                     similarity = 100.0
+
+#                 similarity_scores.append({
+#                     'index': idx,
+#                     'item': existing_item,
+#                     'desc': existing_desc,
+#                     'similarity': similarity,
+#                     'item_match': (existing_item == item_new),  # 記錄 Item 是否相同
+#                     'delivery_date': row_data.get("Delivery Date 廠商承諾交期", ""),  # 加入交期資訊
+#                     'is_closed': is_closed,                      # 🆕 是否已驗收結案
+#                     'qty_match': qty_match,                      # 🆕 數量是否相符
+#                 })
+            
+#             # 🔴🔴🔴 這裡是修改的重點 🔴🔴🔴
+#             # Version 31 改進：處理相同 Item 的多筆資料
+#             # 如果有多筆完全相同的 Item，優先考慮品名相似度，再考慮交期
+#             item_matches = [s for s in similarity_scores if s['item_match']]
+#             if len(item_matches) > 1:
+#                 logger.info(f"     發現 {len(item_matches)} 筆相同的 Item {item_new}")
+                
+#                 # 🆕 計算每筆的品名相似度
+#                 for match in item_matches:
+#                     match['name_similarity'] = calculate_similarity(new_desc, match['desc'])
+                    
+#                     # 處理交期
+#                     try:
+#                         date_str = match['delivery_date'].strip()
+#                         if date_str:
+#                             date_str = date_str.split(' ')[0]
+#                             date_str = date_str.replace('/', '-')
+#                             match['parsed_date'] = date_str
+#                         else:
+#                             match['parsed_date'] = '1900-01-01'
+#                     except:
+#                         match['parsed_date'] = '1900-01-01'
+                    
+#                     logger.info(f"       - Index {match['index']}: 品名相似度 {match['name_similarity']:.1f}%, 交期 {match['delivery_date']}")
+                
+#                 # 🆕 改進的選擇邏輯
+#                 # 1. 先找品名完全相同或高度相似的（≥95%）
+#                 exact_matches = [m for m in item_matches if m['name_similarity'] >= 95]
+                
+#                 if exact_matches:
+#                     # 如果有品名幾乎相同的，從中選擇交期最新的
+#                     exact_matches.sort(
+#                         key=lambda x: (x['qty_match'], not x['is_closed'], x.get('parsed_date', '1900-01-01')),
+#                         reverse=True
+#                     )
+#                     newest_match = exact_matches[0]
+#                     logger.info(f"     => ✅ 選擇品名相同且交期最新的資料")
+#                     logger.info(f"        Index {newest_match['index']}")
+#                     logger.info(f"        品名相似度: {newest_match['name_similarity']:.1f}%")
+#                     logger.info(f"        交期: {newest_match['delivery_date']}")
+#                 else:
+#                     # 如果沒有品名相同的，選擇品名最相似的（但要警告）
+#                     item_matches.sort(
+#                         key=lambda x: (x['qty_match'], not x['is_closed'],
+#                                        x['name_similarity'], x.get('parsed_date', '1900-01-01')),
+#                         reverse=True
+#                     )
+#                     newest_match = item_matches[0]
+                    
+#                     if newest_match['name_similarity'] < 60:
+#                         logger.info(f"     => ⚠️⚠️ 警告：相同 Item 但品名差異很大！")
+#                         logger.info(f"        Index {newest_match['index']}")
+#                         logger.info(f"        品名相似度僅: {newest_match['name_similarity']:.1f}%")
+#                         logger.info(f"        原品名: {newest_match['desc'][:50]}...")
+#                         logger.info(f"        新品名: {new_desc[:50]}...")
+#                         logger.info(f"        建議手動檢查！")
+#                     else:
+#                         logger.info(f"     => ⚠️ 選擇品名最相似的資料")
+#                         logger.info(f"        Index {newest_match['index']}")
+#                         logger.info(f"        品名相似度: {newest_match['name_similarity']:.1f}%")
+                
+#                 # 將選中的資料移到 similarity_scores 的最前面
+#                 similarity_scores = [s for s in similarity_scores if not s['item_match']]
+#                 similarity_scores.insert(0, newest_match)
+#             else:
+#                 # 排序：相似度 → 數量相符 → 未結案 → Item 相同
+#                 # （分批1/分批2 品名相似度完全相同時，靠數量與驗收狀態決定落到哪一列）
+#                 similarity_scores.sort(
+#                     key=lambda x: (round(x['similarity'], 1), x['qty_match'],
+#                                    not x['is_closed'], x['item_match']),
+#                     reverse=True
+#                 )
+#             # 🔴🔴🔴 修改結束 🔴🔴🔴
+            
+#             # 輸出相似度排名（除錯用）
+#             logger.info(f"     品名相似度排名：")
+#             for i, score in enumerate(similarity_scores[:3], 1):  # 顯示前3名
+#                 item_marker = " [Item相同]" if score['item_match'] else ""
+#                 logger.info(f"       {i}. Item {score['item']}: {score['similarity']:.1f}%{item_marker} - {score['desc'][:30]}...")
+            
+#             # 取得最高相似度的項目
+#             # 🆕 V38：Item 相同 + 數量相同 + 品名 ≥ 80% 的列 = 同一批次的重複通知，優先鎖定它
+#             #    （避免品名 100% 但 Item 不同的未結案列，把已結案批次的通知搶走）
+#             def _annot_variant(desc):
+#                 """既有品項 = XLS 品名 + 人工註記後綴（-Q2、(8 Set)…），或反過來"""
+#                 a, b = clean_text(desc).lower(), new_desc_clean.lower()
+#                 return bool(a) and bool(b) and (a.startswith(b) or b.startswith(a))
+#             # V44：SOD 空白（尚未收過通知）時 qty_match 不可能成立，改以「品名為註記變體」作為鎖定條件
+#             _exact = [x for x in similarity_scores
+#                       if x['item_match'] and x['similarity'] >= 80 and (x['qty_match'] or _annot_variant(x['desc']))]
+#             if _exact:
+#                 _exact.sort(key=lambda x: (not x['is_closed'], x['similarity']), reverse=True)
+#                 similarity_scores = [_exact[0]] + [x for x in similarity_scores if x is not _exact[0]]
+#                 logger.info(f"     🎯 Item+數量相同 → 鎖定 Index {_exact[0]['index']}（{_exact[0]['desc'][:30]}）")
+
+#             best_match = similarity_scores[0]
+#             best_similarity = best_match['similarity']
+#             best_idx = best_match['index']
+#             best_item = best_match['item']
+#             best_desc = best_match['desc']
+            
+#             # 🆕 V35：反向分批優先判斷（品名 ≥ 80% 視為同一品項），
+#             #    不再被下方「Item 不同」的確認分支攔截，視窗直接顯示分批1 / 分批2
+#             # 🆕 V40：整張 PO 的總量通知 — 目標是分批列、XLS 數量 == 所有批次數量加總、且已有結案批次
+#             #    → 不是分批量變更，只把未結案批次的交期更新，SOD 不動
+#             if "分批" in str(best_desc) and best_similarity >= 80:
+#                 _sib = _siblings(best_idx, po_no_new)
+#                 _sib_total = sum((_to_num(r.get("數量", "")) or 0) for _, r in _sib.iterrows())
+#                 _open_sib = [i for i, r in _sib.iterrows() if not _is_closed_row(r)]
+#                 _nq_total = _to_num(new_qty)
+#                 if (len(_sib) >= 2 and len(_open_sib) < len(_sib) and _open_sib
+#                         and _nq_total is not None and abs(_nq_total - _sib_total) < 0.01):
+#                     if not confirm_override:
+#                         auto_updated_items[:] = [a for a in auto_updated_items if a.get("row") != row_num]
+#                         need_confirm_items.append({
+#                             "row": row_num, "po_no": po_no_new,
+#                             "new_item": item_new, "old_item": best_item,
+#                             "new_desc": new_desc, "old_desc": best_desc,
+#                             "similarity": round(best_similarity, 1),
+#                             "new_delivery": new_delivery, "new_qty": new_qty,
+#                             "target_index": int(best_idx),
+#                             "reason": (f"整張 PO 總量通知：XLS {_fmt_num(_nq_total)} 件 = 全部批次加總，"
+#                                        f"其中 {len(_sib) - len(_open_sib)} 批已結案。確認後只更新未結案 {len(_open_sib)} 批的交期為 {new_delivery}，SOD 不變"),
+#                             "action_type": "batch_total_notice", "warning": True
+#                         })
+#                         matching_output.append({"row": row_num, "po": po_no_new, "item": item_new,
+#                                                 "match": "整張PO總量通知", "action": "待確認", "note": f"更新 {len(_open_sib)} 批交期"})
+#                         continue
+#                     for _i in _open_sib:
+#                         logger.info(f"     交期更新（總量通知）Index {_i}: {df_buyer.at[_i, 'Delivery Date 廠商承諾交期']} → {new_delivery}")
+#                         df_buyer.at[_i, "Delivery Date 廠商承諾交期"] = new_delivery
+#                     updated_count += len(_open_sib)
+#                     matching_output.append({"row": row_num, "po": po_no_new, "item": item_new,
+#                                             "match": "整張PO總量通知", "action": "已更新", "note": f"更新 {len(_open_sib)} 批交期"})
+#                     continue
+
+#             _plan = _split_plan(best_idx, new_qty) if best_similarity >= 80 else None
+#             if _plan:
+#                 split_allowed = True
+#                 # 🆕 V41：已驗收數量不可大於拆分後留在原列的剩餘量
+#                 _acc_now = _to_num(df_buyer.at[best_idx, "驗收數量"]) or 0.0
+#                 if _acc_now > _plan[2] + 0.01:
+#                     logger.warning(f"  ⛔ 反向分批不成立：原列已驗收 {_fmt_num(_acc_now)} 件 > 剩餘 {_fmt_num(_plan[2])} 件")
+#                     if not confirm_override:
+#                         auto_updated_items[:] = [a for a in auto_updated_items if a.get("row") != row_num]
+#                         need_confirm_items.append({
+#                             "row": row_num, "po_no": po_no_new,
+#                             "new_item": item_new, "old_item": best_item,
+#                             "new_desc": new_desc, "old_desc": best_desc,
+#                             "similarity": round(best_similarity, 1),
+#                             "new_delivery": new_delivery, "new_qty": new_qty,
+#                             "target_index": int(best_idx),
+#                             "reason": (f"⛔ 分批數量異常：原列 {_fmt_num(_plan[0])} 件已驗收 {_fmt_num(_acc_now)} 件，"
+#                                        f"但依 XLS {_fmt_num(_plan[1])} 件拆分後原列只剩 {_fmt_num(_plan[2])} 件。"
+#                                        f"此筆確認後也不會寫入，請先核對驗收紀錄或 XLS 數量"),
+#                             "action_type": "split_invalid", "warning": True, "critical": True
+#                         })
+#                         matching_output.append({"row": row_num, "po": po_no_new, "item": f"{best_item}→{item_new}",
+#                                                 "match": "反向分批(驗收不符)", "action": "待確認", "note": "驗收 > 剩餘"})
+#                     else:
+#                         failed.append({"row": row_num, "po_no": po_no_new, "item": item_new,
+#                                        "reason": f"驗收數量 {_fmt_num(_acc_now)} > 拆分剩餘 {_fmt_num(_plan[2])}，未處理"})
+#                         matching_output.append({"row": row_num, "po": po_no_new, "item": f"{best_item}→{item_new}",
+#                                                 "match": "反向分批(驗收不符)", "action": "略過", "note": "驗收 > 剩餘"})
+#                     continue
+#             if _plan and not confirm_override:
+#                 _oq, _nq, _rq = _plan
+#                 _old_delivery = str(df_buyer.at[best_idx, "Delivery Date 廠商承諾交期"]).strip() or "無"
+#                 if "分批" in str(best_desc):      # 分批列再拆：原列名稱不變，新列接續編號
+#                     _n_sib = len(_siblings(best_idx, po_no_new))
+#                     _name1, _name2 = best_desc, f"{_base_name(best_desc)}-分批{_n_sib + 1}"
+#                 else:
+#                     _name1, _name2 = f"{best_desc}-分批1", f"{best_desc}-分批2"
+#                 logger.info(f"  🔀 數量 {_fmt_num(_oq)} → {_fmt_num(_nq)}，建議反向分批（需確認）")
+#                 auto_updated_items[:] = [a for a in auto_updated_items if a.get("row") != row_num]
+#                 need_confirm_items.append({
+#                     "row": row_num,
+#                     "po_no": po_no_new,
+#                     "new_item": item_new,
+#                     "old_item": best_item,
+#                     "new_desc": _name2,
+#                     "old_desc": best_desc,
+#                     "similarity": round(best_similarity, 1),
+#                     "new_delivery": new_delivery,
+#                     "new_qty": new_qty,
+#                     "target_index": int(best_idx),
+#                     "reason": (f"反向分批：原 {_fmt_num(_oq)} 件 → "
+#                                f"原列改為「{_name1}」保留 {_fmt_num(_rq)} 件（Item {best_item}、交期 {_old_delivery}）、"
+#                                f"新增「{_name2}」{_fmt_num(_nq)} 件（Item {item_new}、交期 {new_delivery}）"),
+#                     "action_type": "split_remaining",
+#                     "warning": True
+#                 })
+#                 matching_output.append({
+#                     "row": row_num,
+#                     "po": po_no_new,
+#                     "item": f"{best_item}→{item_new}",
+#                     "match": f"反向分批({best_similarity:.0f}%)",
+#                     "action": "待確認",
+#                     "note": f"分批1 {_fmt_num(_rq)} / 分批2 {_fmt_num(_nq)}"
+#                 })
+#                 continue
+
+#             # 🆕 V37：目標列是分批列，且 XLS 數量 ≠ 該批 SOD → 不自動更新，先確認
+#             #    （避免上傳較舊的通知檔時，把整張 PO 的量靜悄悄寫到某一批上）
+#             if (not confirm_override and "分批" in str(best_desc)
+#                     and best_similarity >= 80):
+#                 _row_sod = _to_num(df_buyer.at[best_idx, "SOD Qty 廠商承諾數量"])
+#                 _nq = _to_num(new_qty)
+#                 if _row_sod is not None and _nq is not None and abs(_row_sod - _nq) > 0.01:
+#                     logger.info(f"  ⚠️ 分批列數量變更 {_fmt_num(_row_sod)} → {_fmt_num(_nq)}，需確認")
+#                     auto_updated_items[:] = [a for a in auto_updated_items if a.get("row") != row_num]
+#                     need_confirm_items.append({
+#                         "row": row_num,
+#                         "po_no": po_no_new,
+#                         "new_item": item_new,
+#                         "old_item": best_item,
+#                         "new_desc": new_desc,
+#                         "old_desc": best_desc,
+#                         "similarity": round(best_similarity, 1),
+#                         "new_delivery": new_delivery,
+#                         "new_qty": new_qty,
+#                         "target_index": int(best_idx),
+#                         "reason": (f"分批列數量變更：「{best_desc}」目前 SOD {_fmt_num(_row_sod)} 件，"
+#                                    f"XLS 為 {_fmt_num(_nq)} 件。若是上傳較舊的通知檔請取消"),
+#                         "action_type": "batch_qty_change",
+#                         "warning": True
+#                     })
+#                     matching_output.append({
+#                         "row": row_num,
+#                         "po": po_no_new,
+#                         "item": f"{best_item}→{item_new}",
+#                         "match": f"分批列數量變更({best_similarity:.0f}%)",
+#                         "action": "待確認",
+#                         "note": f"SOD {_fmt_num(_row_sod)}→{_fmt_num(_nq)}"
+#                     })
+#                     continue
+
+#             # 🎯 根據相似度和 Item 是否相同來決定處理方式
+#             if best_similarity >= 95:  # 品名幾乎完全相同
+#                 target_idx = best_idx
+#                 if best_item == item_new:
+#                     match_reason = "品名完全相同+Item相同"
+#                     logger.info(f"  ✅ 品名完全相同且 Item 相同（相似度 {best_similarity:.1f}%） => 直接更新")
+                    
+#                     # 🆕 加入自動更新清單
+#                     auto_updated_items.append({
+#                         "row": row_num,
+#                         "po_no": po_no_new,
+#                         "new_item": item_new,
+#                         "old_item": best_item,
+#                         "new_desc": new_desc,
+#                         "old_desc": best_desc,
+#                         "similarity": round(best_similarity, 1),
+#                         "new_delivery": new_delivery,
+#                         "new_qty": new_qty,
+#                         "target_index": int(best_idx),
+#                         "reason": "品名與Item完全相同",
+#                         "action_type": "auto_updated"
+#                     })
+#                 else:
+#                     match_reason = f"品名完全相同(Item:{best_item}→{item_new})"
+#                     logger.info(f"  ⚠️ 品名完全相同但 Item 不同（{best_item} → {item_new}）")
+#                     logger.info(f"     品名相似度: {best_similarity:.1f}%")
+                    
+#                     if not confirm_override:
+#                         logger.info(f"     需要確認是否要更新 Item")
+                        
+#                         need_confirm_items.append({
+#                             "row": row_num,
+#                             "po_no": po_no_new,
+#                             "new_item": item_new,
+#                             "new_desc": new_desc,
+#                             "old_item": best_item,
+#                             "old_desc": best_desc,
+#                             "similarity": round(best_similarity, 1),
+#                             "new_delivery": new_delivery,
+#                             "new_qty": new_qty,
+#                             "target_index": int(best_idx),
+#                             "reason": "品名相同但Item不同",
+#                             "action_type": "update_item_change"
+#                         })
+                        
+#                         matching_output.append({
+#                             "row": row_num,
+#                             "po": po_no_new,
+#                             "item": f"{best_item}→{item_new}",
+#                             "match": match_reason,
+#                             "action": "待確認",
+#                             "note": f"品名相同但Item不同"
+#                         })
+#                         continue
+#                     else:
+#                         logger.info(f"     => 已確認，將更新 Item")
+                        
+#             elif best_similarity >= 80:  # 品名高度相似
+#                 target_idx = best_idx
+#                 if best_item == item_new:
+#                     match_reason = f"品名高度相似+Item相同({best_similarity:.0f}%)"
+#                     logger.info(f"  ✅ 品名高度相似且 Item 相同（{best_similarity:.1f}%） => 直接更新")
+                    
+#                     # 🆕 加入自動更新清單
+#                     auto_updated_items.append({
+#                         "row": row_num,
+#                         "po_no": po_no_new,
+#                         "new_item": item_new,
+#                         "old_item": best_item,
+#                         "new_desc": new_desc,
+#                         "old_desc": best_desc,
+#                         "similarity": round(best_similarity, 1),
+#                         "new_delivery": new_delivery,
+#                         "new_qty": new_qty,
+#                         "target_index": int(best_idx),
+#                         "reason": f"品名高度相似({best_similarity:.0f}%)且Item相同",
+#                         "action_type": "auto_updated"
+#                     })
+#                 else:
+#                     match_reason = f"品名高度相似(Item:{best_item}→{item_new})"
+#                     logger.info(f"  ⚠️ 品名高度相似但 Item 不同（{best_item} → {item_new}）")
+#                     logger.info(f"     品名相似度: {best_similarity:.1f}%")
+#                     logger.info(f"     原品名: {best_desc[:40]}...")
+#                     logger.info(f"     新品名: {new_desc[:40]}...")
+                    
+#                     if not confirm_override:
+#                         logger.info(f"     需要確認是否要更新")
+                        
+#                         need_confirm_items.append({
+#                             "row": row_num,
+#                             "po_no": po_no_new,
+#                             "new_item": item_new,
+#                             "new_desc": new_desc,
+#                             "old_item": best_item,
+#                             "old_desc": best_desc,
+#                             "similarity": round(best_similarity, 1),
+#                             "new_delivery": new_delivery,
+#                             "new_qty": new_qty,
+#                             "target_index": int(best_idx),
+#                             "reason": "品名高度相似但Item不同",
+#                             "action_type": "update_high_similarity"
+#                         })
+                        
+#                         matching_output.append({
+#                             "row": row_num,
+#                             "po": po_no_new,
+#                             "item": f"{best_item}→{item_new}",
+#                             "match": match_reason,
+#                             "action": "待確認",
+#                             "note": f"品名相似{best_similarity:.0f}%"
+#                         })
+#                         continue
+#                     else:
+#                         logger.info(f"     => 已確認，將更新")
+                        
+#             elif best_similarity >= 60:  # 品名中度相似
+#                 # 檢查是否有 Item 相同的項目
+#                 item_match = next((s for s in similarity_scores if s['item_match']), None)
+                
+#                 if item_match and item_match['similarity'] >= 40:
+#                     # 如果有 Item 相同且相似度不是太低，優先選擇 Item 相同的
+#                     target_idx = item_match['index']
+#                     match_reason = f"Item相同+品名相似({item_match['similarity']:.0f}%)"
+#                     logger.info(f"  ⚠️ 找到 Item 相同的項目，品名相似度 {item_match['similarity']:.1f}%")
+#                     logger.info(f"     原品名: {item_match['desc'][:40]}...")
+#                     logger.info(f"     新品名: {new_desc[:40]}...")
+                    
+#                     if not confirm_override:
+#                         logger.info(f"     需要確認是否要更新")
+                        
+#                         need_confirm_items.append({
+#                             "row": row_num,
+#                             "po_no": po_no_new,
+#                             "new_item": item_new,
+#                             "new_desc": new_desc,
+#                             "old_item": item_new,
+#                             "old_desc": item_match['desc'],
+#                             "similarity": round(item_match['similarity'], 1),
+#                             "new_delivery": new_delivery,
+#                             "new_qty": new_qty,
+#                             "target_index": int(item_match['index']),
+#                             "reason": "Item相同但品名差異較大",
+#                             "action_type": "update_medium_similarity"
+#                         })
+                        
+#                         matching_output.append({
+#                             "row": row_num,
+#                             "po": po_no_new,
+#                             "item": item_new,
+#                             "match": match_reason,
+#                             "action": "待確認",
+#                             "note": f"品名差異{item_match['similarity']:.0f}%"
+#                         })
+#                         continue
+#                     else:
+#                         logger.info(f"     => 已確認，將更新")
+#                 else:
+#                     # 🆕 V41：品名只有中度相似、Item 又不同 → 視為新的 Item，走「新增」確認，不覆蓋既有列
+#                     #    （例：同 PO 新開一項「另一品項 ABC-2000 K11-3F 感測器」，與「測試品項 XYZ-1000 K11-3F 模組」只是字面相近）
+#                     target_idx = None
+#                     logger.info(f"  ➕ 品名中度相似（{best_similarity:.1f}%）但 Item 不同（{best_item} → {item_new}）→ 視為新 Item，建議新增")
+                        
+#             else:  # 相似度 < 60%
+#                 # 檢查是否有 Item 完全相同的
+#                 item_match = next((s for s in similarity_scores if s['item_match']), None)
+                
+#                 if item_match:
+#                     # Item 相同但品名相似度低
+#                     logger.info(f"  ⚠️ 找到 Item 相同但品名差異很大（相似度 {item_match['similarity']:.1f}%）")
+#                     logger.info(f"     原品名: {item_match['desc'][:40]}...")
+#                     logger.info(f"     新品名: {new_desc[:40]}...")
+                    
+#                     if not confirm_override:
+#                         logger.info(f"     ⚠️⚠️ 品名差異很大！需要確認")
+                        
+#                         need_confirm_items.append({
+#                             "row": row_num,
+#                             "po_no": po_no_new,
+#                             "new_item": item_new,
+#                             "new_desc": new_desc,
+#                             "old_item": item_new,
+#                             "old_desc": item_match['desc'],
+#                             "similarity": round(item_match['similarity'], 1),
+#                             "new_delivery": new_delivery,
+#                             "new_qty": new_qty,
+#                             "target_index": int(item_match['index']),
+#                             "reason": "Item相同但品名完全不同",
+#                             "action_type": "update_low_similarity",
+#                             "warning": True,
+#                             "critical": True
+#                         })
+                        
+#                         matching_output.append({
+#                             "row": row_num,
+#                             "po": po_no_new,
+#                             "item": item_new,
+#                             "match": f"Item相同(相似度{item_match['similarity']:.0f}%)",
+#                             "action": "待確認",
+#                             "note": f"❌品名差異極大"
+#                         })
+#                         continue
+#                     else:
+#                         target_idx = item_match['index']
+#                         match_reason = f"Item相同(品名差異大)"
+#                         logger.info(f"     => 已確認，將強制更新")
+#                 else:
+#                     # 沒有任何匹配，建議新增
+#                     target_idx = None
+        
+#         # 步驟2：如果在同 PO 內找不到匹配，詢問是否新增
+#         if target_idx is None and not po_group.empty:
+#             logger.info(f"  ⚠️  在 PO {po_no_new} 內找不到相似的品名或相同的 Item")
+#             logger.info(f"     新Item: {item_new}, 新品名: {new_desc[:40]}...")
+            
+#             if not confirm_override:
+#                 logger.info(f"     需要確認是否要新增為新項目")
+                
+#                 # 列出現有的項目供參考
+#                 existing_items = []
+#                 for score in similarity_scores[:5]:  # 顯示前5個相似度最高的
+#                     existing_items.append({
+#                         "item": score['item'],
+#                         "desc": score['desc'][:50],
+#                         "similarity": round(score['similarity'], 1)
+#                     })
+                
+#                 need_confirm_items.append({
+#                     "row": row_num,
+#                     "po_no": po_no_new,
+#                     "new_item": item_new,
+#                     "new_desc": new_desc,
+#                     "old_item": "—",
+#                     "old_desc": "（Buyer_detail 無此項目，將新增一列）",
+#                     "similarity": round(similarity_scores[0]['similarity'], 1) if similarity_scores else 0,
+#                     "existing_items": existing_items,
+#                     "new_delivery": new_delivery,
+#                     "new_qty": new_qty,
+#                     "reason": "無相似項目",
+#                     "action_type": "add_new"
+#                 })
+                
+#                 matching_output.append({
+#                     "row": row_num,
+#                     "po": po_no_new,
+#                     "item": item_new,
+#                     "match": "無匹配",
+#                     "action": "待確認",
+#                     "note": "建議新增"
+#                 })
+#                 continue
+#             else:
+#                 logger.info(f"     => 已確認，將新增為新項目")
+        
+#         # 步驟3：其他比對方式（ID、模糊比對等）- 只找狀態為 V 的
+#         if target_idx is None and id_:
+#             candidates = df_active[df_active["Id"] == id_].copy()
+            
+#             if len(candidates) > 1:
+#                 candidates["品項_clean"] = candidates["品項"].apply(clean_text)
+#                 exact_match = candidates[candidates["品項_clean"] == new_desc_clean]
+#                 if len(exact_match) == 1:
+#                     target_idx = exact_match.index[0]
+#                     match_reason = "ID+品項匹配"
+#                     logger.info(f"  ✅ ID+品項匹配 => 更新資料 (狀態=V)")
+#             elif len(candidates) == 1:
+#                 target_idx = candidates.index[0]
+#                 match_reason = "ID匹配"
+#                 logger.info(f"  ✅ ID匹配 => 更新資料 (狀態=V)")
+
+#         # 步驟4：PO + 品項模糊比對 - 只找狀態為 V 的
+#         if target_idx is None:
+#             # 🆕 V42：df_active 為空（該 PO 全部作廢）時 apply 會回傳空 object Series，直接拿來索引會變成「選欄位」而 KeyError
+#             po_match = df_active[df_active["PO No."].apply(lambda x: is_po_in_record(x, po_no_new)).astype(bool)]
+#             if not po_match.empty:
+#                 po_match = po_match[po_match["品項"].apply(lambda x: fuzzy_in(x, new_desc_clean)).astype(bool)]
+
+#             if not po_match.empty:
+#                 target_idx = po_match.index[0]
+#                 match_reason = "PO+品項模糊匹配"
+#                 logger.info(f"  ✅ PO+品項模糊匹配 => 更新資料 (狀態=V)")
+
+#         # 🔍 如果找到匹配項目，執行更新
+#         if target_idx is not None:
+#             # 記錄原始值（用於輸出）
+#             old_values = {
+#                 "po": df_buyer.at[target_idx, "PO No."],
+#                 "item": df_buyer.at[target_idx, "Item"],
+#                 "delivery": df_buyer.at[target_idx, "Delivery Date 廠商承諾交期"],
+#                 "qty": df_buyer.at[target_idx, "SOD Qty 廠商承諾數量"],
+#                 "desc": df_buyer.at[target_idx, "品項"]
+#             }
+            
+#             # 🆕 反向分批：XLS 數量 < 原列數量，且原列尚未分批 → 拆成 分批1(剩餘) / 分批2(本次)
+#             #    情境：原 PO 96 件，廠商先出 18 件未通知，後續 SAP 另開 Item 0020 通知剩餘 78 件
+#             _plan = _split_plan(target_idx, new_qty) if split_allowed else None
+
+#             if _plan:
+#                 _old_qty_num, _new_qty_num, remain_qty = _plan
+
+#                 if not confirm_override:
+#                     logger.info(f"  🔀 數量 {_fmt_num(_old_qty_num)} → {_fmt_num(_new_qty_num)}，建議反向分批（需確認）")
+#                     # 🆕 V34：同一列若已被列入「自動更新」(綠色)，改由反向分批接手，避免視窗同時出現綠、紅兩列
+#                     auto_updated_items[:] = [a for a in auto_updated_items if a.get("row") != row_num]
+#                     need_confirm_items.append({
+#                         "row": row_num,
+#                         "po_no": po_no_new,
+#                         "new_item": item_new,
+#                         "old_item": old_values["item"],
+#                         "new_desc": new_desc,
+#                         "old_desc": old_values["desc"],
+#                         "similarity": round(calculate_similarity(new_desc, old_values["desc"]), 1),
+#                         "new_delivery": new_delivery,
+#                         "new_qty": new_qty,
+#                         "target_index": int(target_idx),
+#                         "reason": (f"反向分批：原 {_fmt_num(_old_qty_num)} 件 → "
+#                                    f"分批1 保留 {_fmt_num(remain_qty)} 件（原交期 {old_values['delivery'] or '無'}）、"
+#                                    f"分批2 新增 {_fmt_num(_new_qty_num)} 件（交期 {new_delivery}）"),
+#                         "action_type": "split_remaining",
+#                         "warning": True
+#                     })
+#                     matching_output.append({
+#                         "row": row_num,
+#                         "po": po_no_new,
+#                         "item": f"{old_values['item']}→{item_new}",
+#                         "match": match_reason,
+#                         "action": "待確認",
+#                         "note": f"反向分批 {_fmt_num(remain_qty)}+{_fmt_num(_new_qty_num)}"
+#                     })
+#                     continue
+
+#                 # ── 已確認 → 執行反向分批 ──
+#                 logger.info(f"  🔀 執行反向分批：{_fmt_num(_old_qty_num)} → 分批1 {_fmt_num(remain_qty)} / 分批2 {_fmt_num(_new_qty_num)}")
+#                 unit_price = _to_num(df_buyer.at[target_idx, "單價"])
+#                 base_desc = old_values["desc"]
+#                 def _total(q):      # 單價空白時總價留空，不寫 0
+#                     return _fmt_num(unit_price * q) if unit_price is not None else ""
+#                 old_note = str(df_buyer.at[target_idx, "備註"]).strip()
+
+#                 # 命名：原列已是分批列 → 名稱不變、新列接續編號；否則 分批1 / 分批2
+#                 _already_batch = "分批" in base_desc
+#                 if _already_batch:
+#                     _sib_now = _siblings(target_idx, po_no_new)
+#                     _seq = len(_sib_now) + 1
+#                     _name1, _name2 = base_desc, f"{_base_name(base_desc)}-分批{_seq}"
+#                     # 同組其他列的備註「分批N/M」→ M 更新為新總數
+#                     for _i in _sib_now.index:
+#                         df_buyer.at[_i, "備註"] = re.sub(r"分批(\d+)/\d+", lambda m: f"分批{m.group(1)}/{_seq}", str(df_buyer.at[_i, "備註"]))
+#                     _tag1, _tag2 = None, f"分批{_seq}/{_seq}"
+#                 else:
+#                     _name1, _name2 = f"{base_desc}-分批1", f"{base_desc}-分批2"
+#                     _tag1, _tag2 = "分批1/2", "分批2/2"
+
+#                 # 原列 → 保留原 Item / 交期，數量改為剩餘
+#                 df_buyer.at[target_idx, "品項"] = _name1
+#                 df_buyer.at[target_idx, "數量"] = _fmt_num(remain_qty)
+#                 df_buyer.at[target_idx, "總數"] = _fmt_num(remain_qty)
+#                 df_buyer.at[target_idx, "總價"] = _total(remain_qty)
+#                 df_buyer.at[target_idx, "SOD Qty 廠商承諾數量"] = _fmt_num(remain_qty)
+#                 if _tag1 and _tag1 not in old_note:   # 避免重複附加
+#                     df_buyer.at[target_idx, "備註"] = (old_note + "；" if old_note else "") + _tag1
+
+#                 # 新列 → 分批2：本次 XLS 的 Item / 交期 / 數量，其餘欄位複製原列
+#                 split_row = df_buyer.loc[target_idx].copy()
+#                 split_row["Item"] = item_new
+#                 split_row["品項"] = _name2
+#                 split_row["數量"] = _fmt_num(_new_qty_num)
+#                 split_row["總數"] = _fmt_num(_new_qty_num)
+#                 split_row["總價"] = _total(_new_qty_num)
+#                 split_row["SOD Qty 廠商承諾數量"] = _fmt_num(_new_qty_num)
+#                 split_row["Delivery Date 廠商承諾交期"] = new_delivery
+#                 split_row["備註"] = _tag2
+#                 for _col in ("交貨驗證", "驗收數量", "拒收數量", "發票月份", "RT金額", "RT總金額", "_alertedItemLimit"):
+#                     split_row[_col] = ""
+#                 split_row["驗收狀態"] = "X"
+#                 split_row["isEditing"] = "False"
+#                 split_row["backup"] = "{}"
+
+#                 # 加到最後（與 confirm_quantity_update 一致；不動既有 index，後續列的 target_idx 仍有效）
+#                 df_buyer = pd.concat([df_buyer, pd.DataFrame([split_row])], ignore_index=True)
+#                 updated_count += 1
+#                 inserted_count += 1
+
+#                 matching_output.append({
+#                     "row": row_num,
+#                     "po": po_no_new,
+#                     "item": f"{old_values['item']}→{item_new}",
+#                     "match": match_reason,
+#                     "action": "反向分批",
+#                     "note": f"分批1 {_fmt_num(remain_qty)} / 分批2 {_fmt_num(_new_qty_num)}"
+#                 })
+#                 continue
+
+#             # 執行更新（🆕 V43：PO 欄已含此 PO（含 <br /> 多 PO 格式）就不覆寫，避免把多 PO 格子洗成單一 PO）
+#             if not is_po_in_record(df_buyer.at[target_idx, "PO No."], po_no_new):
+#                 df_buyer.at[target_idx, "PO No."] = po_no_new
+#             df_buyer.at[target_idx, "Item"] = item_new
+#             df_buyer.at[target_idx, "Delivery Date 廠商承諾交期"] = new_delivery
+#             df_buyer.at[target_idx, "SOD Qty 廠商承諾數量"] = new_qty
+#             if new_desc:
+#                 # 🆕 原品項含「分批」標記，或原品項 = XLS 品名 + 人工註記後綴（如「-Q2」「(8 Set)」）→ 不更動品名
+#                 _old_clean = clean_text(old_values["desc"])
+#                 if "分批" in old_values["desc"] or (_old_clean.startswith(new_desc_clean) and _old_clean != new_desc_clean):
+#                     logger.info(f"     品項含分批標記或人工註記，保留原品名: {old_values['desc']}")
+#                 else:
+#                     df_buyer.at[target_idx, "品項"] = new_desc
+#             updated_count += 1
+            
+#             # 輸出變更詳情
+#             if old_values["po"] != po_no_new:
+#                 logger.info(f"     PO變更: {old_values['po']} → {po_no_new}")
+#             if old_values["item"] != item_new:
+#                 logger.info(f"     Item變更: {old_values['item']} → {item_new}")
+#             if old_values["delivery"] != new_delivery:
+#                 logger.info(f"     交期變更: {old_values['delivery']} → {new_delivery}")
+#             if old_values["qty"] != new_qty:
+#                 logger.info(f"     數量變更: {old_values['qty']} → {new_qty}")
+            
+#             matching_output.append({
+#                 "row": row_num,
+#                 "po": po_no_new,
+#                 "item": item_new if old_values["item"] == item_new else f"{old_values['item']}→{item_new}",
+#                 "match": match_reason,
+#                 "action": "已更新",
+#                 "note": "品名已變更" if old_values["desc"] != df_buyer.at[target_idx, "品項"] else ""
+#             })
+#             continue
+
+#         # 🆕 如果都找不到 → 新增資料（但要檢查 PO 是否存在於狀態 V 的資料中）
+#         po_matches = df_active[df_active["PO No."].apply(lambda x: is_po_in_record(x, po_no_new)).astype(bool)]
+#         if po_matches.empty:
+#             # 再檢查是否有狀態為 X 的相同 PO
+#             po_cancelled = df_buyer[
+#                 (df_buyer["開單狀態"] == "X") & 
+#                 (df_buyer["PO No."].apply(lambda x: is_po_in_record(x, po_no_new)).astype(bool))
+#             ]
+            
+#             if not po_cancelled.empty:
+#                 logger.info(f"  ⚠️  找到 PO {po_no_new} 但狀態為 X（已取消），無法更新")
+#                 failed.append({
+#                     "row": row_num,
+#                     "po_no": po_no_new,
+#                     "item": item_new,
+#                     "reason": f"PO {po_no_new} 狀態為 X（已取消）"
+#                 })
+                
+#                 matching_output.append({
+#                     "row": row_num,
+#                     "po": po_no_new,
+#                     "item": item_new,
+#                     "match": "PO已取消",
+#                     "action": "失敗",
+#                     "note": "狀態為X"
+#                 })
+#                 continue
+#             else:
+#                 # 🔴 Version 31：PO 完全不存在的情況
+#                 logger.info(f"  ❌ 360表單無此項目：PO {po_no_new}")
+                
+#                 failed.append({
+#                     "row": row_num,
+#                     "po_no": po_no_new,
+#                     "item": item_new,
+#                     "reason": "360表單無此項目"
+#                 })
+                
+#                 matching_output.append({
+#                     "row": row_num,
+#                     "po": po_no_new,
+#                     "item": item_new,
+#                     "match": "無PO",
+#                     "action": "失敗",
+#                     "note": "360表單無此項目"
+#                 })
+#                 continue
+        
+#         # 🆓 推測 Id（取首筆）
+#         possible_ids = po_matches["Id"].dropna().unique().tolist()
+#         id_ = possible_ids[0] if possible_ids else row.get("id") or row.get("Id", "")
+#         id_ = str(id_).strip()
+
+#         # 👤 取同組第一筆的資訊
+#         user = po_matches["User"].iloc[0] if not po_matches.empty else ""
+#         epr_no = po_matches["ePR No."].iloc[0] if not po_matches.empty else ""
+#         wbs_no = po_matches["WBS"].iloc[0] if not po_matches.empty else ""
+#         need_day_no = po_matches["需求日"].iloc[0] if not po_matches.empty else ""
+
+#         logger.info(f"  🆕 找不到匹配項目 => 新增資料")
+#         logger.info(f"     新增到 ePR No.: {epr_no}")
+
+#         # ➕ 新增新的一筆資料
+#         new_row = {
+#             "Id": id_,
+#             "開單狀態": "V",
+#             "交貨驗證": "",
+#             "User": user,
+#             "ePR No.": epr_no,
+#             "PO No.": po_no_new,
+#             "Item": item_new,
+#             "品項": new_desc,
+#             "規格": "",
+#             "數量": new_qty,
+#             "總數": new_qty,
+#             "單價": "",
+#             "總價": "",
+#             "備註": "",
+#             "字數": "",
+#             "isEditing": "False",
+#             "backup": "{}",
+#             "_alertedItemLimit": "",
+#             "Delivery Date 廠商承諾交期": new_delivery,
+#             "SOD Qty 廠商承諾數量": new_qty,
+#             "驗收數量": "",
+#             "拒收數量": "",
+#             "發票月份": "",
+#             "WBS": wbs_no,
+#             "需求日": need_day_no,
+#             "RT金額": '',
+#             "RT總金額": '',
+#             "驗收狀態": "X" 
+#         }
+
+#         # 📌 找這個 id 的最後一筆位置
+#         same_id_idx = df_buyer[df_buyer["Id"] == id_].index
+#         insert_pos = same_id_idx[-1] + 1 if len(same_id_idx) > 0 else len(df_buyer)
+
+#         # ✨ 插入到原 df_buyer 中指定位置
+#         df_buyer = pd.concat([
+#             df_buyer.iloc[:insert_pos],
+#             pd.DataFrame([new_row]),
+#             df_buyer.iloc[insert_pos:]
+#         ], ignore_index=True)
+        
+#         new_item = '新增物件'
+#         inserted_count += 1
+        
+#         matching_output.append({
+#             "row": row_num,
+#             "po": po_no_new,
+#             "item": item_new,
+#             "match": "無匹配",
+#             "action": "已新增",
+#             "note": f"ePR:{epr_no}"
+#         })
+
+#     # 輸出比對結果摘要
+#     logger.info("\n" + "="*80)
+#     logger.info("比對結果摘要 (Version 44 - 品名優先 + 反向分批)")
+#     logger.info("="*80)
+#     logger.info(f"總處理筆數: {len(rows)}")
+#     logger.info(f"更新筆數: {updated_count}")
+#     logger.info(f"新增筆數: {inserted_count}")
+#     logger.info(f"失敗筆數: {len(failed)}")
+#     logger.info(f"待確認筆數: {len(need_confirm_items)}")
+#     logger.info(f"自動更新筆數: {len(auto_updated_items)}")  # 
+    
+#     # 輸出詳細比對表格
+#     if matching_output:
+#         logger.info("\n詳細比對結果:")
+#         logger.info("-"*80)
+#         logger.info(f"{'筆數':<5} {'PO No.':<15} {'Item':<10} {'比對方式':<20} {'處理':<8} {'備註'}")
+#         logger.info("-"*80)
+#         for item in matching_output:
+#             logger.info(f"{item['row']:<5} {item['po']:<15} {item['item']:<10} {item['match']:<20} {item['action']:<8} {item['note']}")
+    
+#     logger.info("="*80 + "\n")
+
+#     # 如果有需要確認的項目，回傳給前端
+#     if need_confirm_items and not confirm_override:
+#         # 檢查是否有關鍵確認項（品名完全不同）
+#         critical_items = [item for item in need_confirm_items if item.get("critical", False)]
+#         warning_items = [item for item in need_confirm_items if item.get("warning", False)]
+        
+#         # 根據不同的確認原因和動作類型，產生不同的訊息
+#         action_types = set(item.get("action_type", "") for item in need_confirm_items)
+        
+#         if critical_items:
+#             msg = f"⚠️ 發現 {len(critical_items)} 個品名完全不同的項目需要特別確認"
+#         elif "update_low_similarity" in action_types:
+#             msg = f"❌ 發現 {len(need_confirm_items)} 個品名相似度極低的項目需要確認"
+#         elif "update_item_change" in action_types:
+#             msg = f"發現 {len(need_confirm_items)} 個品名相同但Item不同的項目需要確認"
+#         elif "split_remaining" in action_types:
+#             msg = f"發現 {len(need_confirm_items)} 個項目數量減少，建議反向分批"
+#         elif "split_invalid" in action_types:
+#             msg = f"⛔ 發現 {len(need_confirm_items)} 個項目的驗收數量與拆分不符，需先核對"
+#         elif "batch_total_notice" in action_types:
+#             msg = f"發現 {len(need_confirm_items)} 個整張 PO 總量通知，將更新未結案批次交期"
+#         elif "batch_qty_change" in action_types:
+#             msg = f"發現 {len(need_confirm_items)} 個分批列的數量與通知不符，需確認"
+#         elif "add_new" in action_types:
+#             msg = f"發現 {len(need_confirm_items)} 個項目可能需要新增"
+#         else:
+#             msg = f"發現 {len(need_confirm_items)} 個需要確認的項目"
+        
+#         return jsonify(convert_to_json_serializable({
+#             "status": "confirm_needed",
+#             "msg": msg,
+#             "items": need_confirm_items,
+#             "auto_updated": auto_updated_items,  # 🆕 新增自動更新的項目
+#             "updated": updated_count,
+#             "inserted": inserted_count,
+#             "matching_output": matching_output,
+#             "has_critical": len(critical_items) > 0,
+#             "has_warning": len(warning_items) > 0
+#         }))
+
+#     # 🔒 使用檔案鎖保護儲存操作
+#     try:
+#         with buyer_file_lock:
+#             # 儲存回檔案
+#             df_buyer.to_csv(BUYER_FILE, index=False, encoding="utf-8-sig")
+#     except Timeout:
+#         logger.error("❌ 無法取得檔案鎖進行儲存,請稍後再試")
+#         return jsonify({"status": "error", "msg": "系統忙碌中,無法儲存,請稍後再試"}), 503
+#     except Exception as e:
+#         logger.error(f"❌ 儲存 Buyer_detail.csv 時發生錯誤: {str(e)}")
+#         return jsonify({"status": "error", "msg": f"儲存檔案失敗: {str(e)}"}), 500
+    
+#     # 刪除暫存檔案
+#     if po_no_new:
+#         temp_file = os.path.join(UPLOAD_DIR, f"{po_no_new}.csv")
+#         if os.path.exists(temp_file):
+#             os.remove(temp_file)
+    
+#     # 🔴 檢查是否所有項目都失敗且原因都是「360表單無此項目」
+#     if failed and len(failed) == len(rows):
+#         all_not_found = all(f.get("reason") == "360表單無此項目" for f in failed)
+#         if all_not_found:
+#             return jsonify(convert_to_json_serializable({
+#                 "status": "not_found",
+#                 "msg": "❌ 360表單無此項目",
+#                 "failed": failed,
+#                 "matching_output": matching_output
+#             }))
+    
+#     # 回傳結果
+#     if new_item == '新增物件':
+#         return jsonify(convert_to_json_serializable({
+#             "status": "ok",
+#             "msg": f"有新增的物件(item)需要維護，ePR No. 單號為 {epr_no}。更新 {updated_count} 筆，新增 {inserted_count} 筆",
+#             "failed": failed,
+#             "matching_output": matching_output,
+#             "auto_updated": auto_updated_items  # 🆕 也在成功時回傳
+#         }))
+#     else:
+#         return jsonify(convert_to_json_serializable({
+#             "status": "ok",
+#             "msg": f"✅ 更新 {updated_count} 筆，新增 {inserted_count} 筆",
+#             "failed": failed,
+#             "matching_output": matching_output,
+#             "auto_updated": auto_updated_items  # 🆕 也在成功時回傳
+#         }))
+
 @app.route("/api/save_override_all", methods=["POST"])
 def save_override_all():
     """
-    Version 44 - 品名優先比對邏輯（分批列辨識強化 + 反向分批）
+    Version 45 - 品名優先比對邏輯（分批列辨識強化 + 反向分批）
     改進：優先以品名相似度為主要比對依據，Item 作為次要參考
     優先順序：同 PO 內的品名高度相似 > Item 相同 > 品名中度相似 > 新增
 
-    V44（2026/09/22）：
+    V45（2026/09/29）：
       - 候選列記錄 is_closed（驗收狀態 V，或驗收數量 ≥ 數量；部分驗收仍算未結案）與
         qty_match（SOD 與 XLS 數量相同）；相似度相同時依「數量相符 > 未結案 > Item 相同」決定覆蓋哪一列
       - Item 相同 + 品名 ≥ 80% + （數量相同 或 品名為註記變體如「-Q2」）的列優先鎖定，
@@ -4349,6 +5492,7 @@ def save_override_all():
       - XLS 交期空白或數量 ≤ 0 的列不寫入（列入 failed）；數量正規化（"12.0"→"12"）
       - 去掉分批後綴後品名一致的分批列，相似度以 100 計（否則「-分批」比「-分批2」更像會搶走目標）
       - PO 欄已含該 PO（<br /> 多 PO 格式）時不覆寫 PO 欄；反向分批單價空白時總價留空
+      - 回傳增加 updated / inserted 欄位，msg 顯示略過筆數（前端據此判斷「這組其實沒寫入任何資料」）
       - PO 全部作廢（df_active 無此 PO）時不再 KeyError 500：所有 apply 篩選加 .astype(bool)
       - 反向分批只在前置判斷（品名 ≥ 80%）通過時才允許執行；確認階段不會對其他比對路徑的目標列拆分
       - 反向分批的驗收防呆：原列驗收數量 > 拆分後剩餘量 → 跳「分批數量異常」(split_invalid，critical)，
@@ -4499,7 +5643,7 @@ def save_override_all():
     
     # 輸出開始訊息
     logger.info("\n" + "="*80)
-    logger.info("開始處理資料比對 (Version 44 - 品名優先 + 反向分批)")
+    logger.info("開始處理資料比對 (Version 45 - 品名優先 + 反向分批)")
     logger.info("="*80)
 
     for row_num, row in enumerate(rows, 1):
@@ -5362,7 +6506,7 @@ def save_override_all():
 
     # 輸出比對結果摘要
     logger.info("\n" + "="*80)
-    logger.info("比對結果摘要 (Version 44 - 品名優先 + 反向分批)")
+    logger.info("比對結果摘要 (Version 45 - 品名優先 + 反向分批)")
     logger.info("="*80)
     logger.info(f"總處理筆數: {len(rows)}")
     logger.info(f"更新筆數: {updated_count}")
@@ -5455,7 +6599,9 @@ def save_override_all():
     if new_item == '新增物件':
         return jsonify(convert_to_json_serializable({
             "status": "ok",
-            "msg": f"有新增的物件(item)需要維護，ePR No. 單號為 {epr_no}。更新 {updated_count} 筆，新增 {inserted_count} 筆",
+            "msg": f"有新增的物件(item)需要維護，ePR No. 單號為 {epr_no}。更新 {updated_count} 筆，新增 {inserted_count} 筆" + (f"，略過 {len(failed)} 筆" if failed else ""),
+            "updated": updated_count,
+            "inserted": inserted_count,
             "failed": failed,
             "matching_output": matching_output,
             "auto_updated": auto_updated_items  # 🆕 也在成功時回傳
@@ -5463,11 +6609,15 @@ def save_override_all():
     else:
         return jsonify(convert_to_json_serializable({
             "status": "ok",
-            "msg": f"✅ 更新 {updated_count} 筆，新增 {inserted_count} 筆",
+            "msg": f"✅ 更新 {updated_count} 筆，新增 {inserted_count} 筆" + (f"，略過 {len(failed)} 筆" if failed else ""),
+            "updated": updated_count,
+            "inserted": inserted_count,
             "failed": failed,
             "matching_output": matching_output,
             "auto_updated": auto_updated_items  # 🆕 也在成功時回傳
         }))
+
+
 
 
 # eRT 驗收表單

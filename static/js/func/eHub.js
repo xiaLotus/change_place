@@ -41,6 +41,8 @@ const siteQuery = () => `site=${encodeURIComponent(SITE)}&username=${encodeURICo
             overriddenPoSet: new Set(), // 已覆蓋的 PO 編號集合
             // 新增：一鍵覆蓋控制
             isOverridingAll: false,  // 是否正在執行一鍵覆蓋
+            batchTotal: 0,           // 🆕 本次一鍵覆蓋要處理的組數
+            batchDone: 0,            // 🆕 本次一鍵覆蓋已完成的組數
             lastUploadedFileName: '',
         }
     },
@@ -809,7 +811,8 @@ const siteQuery = () => `site=${encodeURIComponent(SITE)}&username=${encodeURICo
                 );
                 
                 if (confirmResult) {
-                    // 使用者確認，重新發送請求
+                    // 使用者確認，重新發送請求（🆕 先把視窗裡的編輯同步回 rows）
+                    this.applyDialogEdits(group.rows, data.items, data.auto_updated || []);
                     payload.confirm_override = true;  // 👈 標記為已確認
                     
                     const confirmResponse = await fetch(`http://127.0.0.1:5000/api/save_override_all?${siteQuery()}`, {
@@ -821,8 +824,9 @@ const siteQuery = () => `site=${encodeURIComponent(SITE)}&username=${encodeURICo
                     const confirmData = await confirmResponse.json();
                     this.handleOverrideResponse(confirmData, group);
                 } else {
-                    // 使用者取消
+                    // 使用者取消 → 明確告知整組未寫入
                     console.log("使用者取消覆蓋");
+                    this.notifyCancelled(group.po_no);
                 }
             } else {
                 // 👇 一般處理（沒有衝突或已確認）
@@ -864,7 +868,7 @@ const siteQuery = () => `site=${encodeURIComponent(SITE)}&username=${encodeURICo
             tableHtml += `
                 <div style="margin-bottom: 20px;">
                     <p style="color: #28a745; font-weight: bold; margin-bottom: 10px;">
-                        ✅ 以下 ${editableAutoItems.length} 筆已自動更新（品名與Item完全相同）
+                        ✅ 以下 ${editableAutoItems.length} 筆將自動更新（品名與 Item 相符；按下方「確認」後才會寫入）
                     </p>
                     <table style="width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 20px;" id="autoTable">
                         <thead style="position: sticky; top: 0; background: #d4edda;">
@@ -1296,6 +1300,28 @@ const siteQuery = () => `site=${encodeURIComponent(SITE)}&username=${encodeURICo
     },
 
 
+    // 🆕 把確認視窗裡「✏️ 編輯」過的值寫回 group.rows（第二次送出用的是 group.rows，之前編輯完不會生效）
+    applyDialogEdits(rows, items = [], autoItems = []) {
+        [...items, ...autoItems].forEach(it => {
+            const r = rows[(it.row || 0) - 1];
+            if (!r) return;
+            if (it.new_item !== undefined) r.item = String(it.new_item).trim();
+            if (it.new_desc !== undefined && it.action_type !== 'split_remaining') r.po_description = String(it.new_desc).trim();
+            if (it.new_delivery !== undefined) r.delivery_date = String(it.new_delivery).trim();
+            if (it.new_qty !== undefined) r.sod_qty = String(it.new_qty).trim();
+        });
+    },
+
+    // 🆕 取消確認視窗時提醒：整組（含綠色自動更新項）都還沒寫入
+    notifyCancelled(po_no) {
+        Swal.fire({
+            icon: 'info',
+            title: '已取消，未寫入',
+            html: `PO <strong>${po_no}</strong> 這一組<strong>沒有任何資料被寫入</strong>（包含綠色「將自動更新」的項目）。<br>卡片保留，之後可再按「覆蓋此組」。`,
+            confirmButtonText: '知道了'
+        });
+    },
+
     // 🆕 清空上次比對的快取與畫面狀態
     clearComparisonCache() {
         ['processed_batch_items', 'quantity_mismatch_data', 'merge_items_data',
@@ -1472,6 +1498,26 @@ const siteQuery = () => `site=${encodeURIComponent(SITE)}&username=${encodeURICo
         
         // 原本的處理邏輯
         if (data.status === "ok") {
+            // 🆕 後端回 ok 但一筆都沒寫（全部被略過）→ 不算完成、卡片保留、列出原因
+            const written = (data.updated || 0) + (data.inserted || 0);
+            const failedList = data.failed || [];
+            if (written === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '此組沒有寫入任何資料',
+                    html: `
+                        <div style="text-align:left;">
+                            <p>PO <strong>${group.po_no}</strong>：${data.msg}</p>
+                            ${failedList.length ? `<ul style="margin-top:8px; padding-left:20px; font-size:13px; color:#856404;">
+                                ${failedList.map(f => `<li>Item ${f.item || '-'}：${f.reason}</li>`).join('')}
+                            </ul>` : ''}
+                            <p style="margin-top:10px; color:#6c757d; font-size:13px;">卡片保留，請修正後再覆蓋，或按「忽略此組 PO」。</p>
+                        </div>`,
+                    confirmButtonText: '知道了',
+                    width: '650px'
+                });
+                return;
+            }
             // 🔴 只針對 normal 類型更新計數
             if (group.type === 'normal' && !this.overriddenPoSet.has(group.po_no)) {
                 this.overriddenPoSet.add(group.po_no);
@@ -1485,14 +1531,30 @@ const siteQuery = () => `site=${encodeURIComponent(SITE)}&username=${encodeURICo
             // 從畫面移除已處理的組
             this.allGroups = this.allGroups.filter(g => g.po_no !== group.po_no);
 
-            // 顯示成功訊息
-            Swal.fire({
-                icon: 'success',
-                title: '覆蓋成功',
-                text: data.msg,
-                timer: 2000,
-                showConfirmButton: false
-            });
+            // 顯示成功訊息（🆕 有略過的筆數時改成需要按掉的警告，列出原因）
+            if (failedList.length) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '覆蓋完成，但有部分略過',
+                    html: `
+                        <div style="text-align:left;">
+                            <p>${data.msg}</p>
+                            <ul style="margin-top:8px; padding-left:20px; font-size:13px; color:#856404;">
+                                ${failedList.map(f => `<li>Item ${f.item || '-'}：${f.reason}</li>`).join('')}
+                            </ul>
+                        </div>`,
+                    confirmButtonText: '知道了',
+                    width: '650px'
+                });
+            } else {
+                Swal.fire({
+                    icon: 'success',
+                    title: '覆蓋成功',
+                    text: data.msg,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
 
             // 🔴 關鍵修改:檢查是否所有正常項目都處理完畢
             this.checkIfAllNormalItemsCompleted();
@@ -1602,11 +1664,15 @@ const siteQuery = () => `site=${encodeURIComponent(SITE)}&username=${encodeURICo
             const groupsToOverride = this.allGroups.filter(
                 group => group.type === 'normal' && !this.overriddenPoSet.has(group.po_no)
             );
+            // 🆕 本次一鍵覆蓋的進度只算這一批（先前單獨覆蓋過的不計入），顯示 1/7、2/7…
+            this.batchTotal = groupsToOverride.length;
+            this.batchDone = 0;
             
             console.log(`🚀 開始一鍵覆蓋 ${groupsToOverride.length} 組 PO`);
             
             for (let i = 0; i < groupsToOverride.length; i++) {
                 const group = groupsToOverride[i];
+                this.batchDone = i;
                 console.log(`正在處理第 ${i + 1}/${groupsToOverride.length} 組: ${group.po_no}`);
                 
                 try {
@@ -1661,6 +1727,7 @@ const siteQuery = () => `site=${encodeURIComponent(SITE)}&username=${encodeURICo
                         );
                         
                         if (confirmResult) {
+                            this.applyDialogEdits(group.rows, data.items, data.auto_updated || []);   // 🆕
                             const confirmResponse = await fetch(`http://127.0.0.1:5000/api/save_override_all?${siteQuery()}`, {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json" },
